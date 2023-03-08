@@ -1,0 +1,45 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Project ###
+/security/src/test/
+/insight-api-sdk/src/test/
+/gateway/src/test/
+/facade/src/test/
+/facade/src/main/resources/application-dev.yaml
+/facade/src/main/resources/application-prod.yaml
+/gateway/src/main/resources/application-dev.yaml
+/gateway/src/main/resources/application-prod.yaml
+/security/src/main/resources/application-dev.yaml
+/security/src/main/resources/application-prod.yaml

@@ -1,0 +1,29 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: security_route
+          uri: lb://security
+          predicates:
+            - Path=/gateway/security/**
+          filters:
+            - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
+        - id: facade_route
+          uri: lb://facade
+          predicates:
+            - Path=/gateway/facade/**
+          filters:
+            - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
+    nacos:
+      discovery:
+        server-addr:
+        username:
+        password:
+logging:
+  level:
+    org.springframework.cloud.gateway: info

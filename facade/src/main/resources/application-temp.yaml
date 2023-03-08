@@ -1,0 +1,19 @@
+server:
+  port: 8123
+  servlet:
+    context-path: /facade
+api:
+  client:
+    access-key: default
+    secret-key: default
+
+
+spring:
+  application:
+    name: facade
+  cloud:
+    nacos:
+      discovery:
+        server-addr:
+        username:
+        password:
