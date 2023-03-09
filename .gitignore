@@ -33,13 +33,17 @@ build/
 .vscode/
 
 ### Project ###
-/security/src/test/
-/insight-api-sdk/src/test/
-/gateway/src/test/
-/facade/src/test/
-/facade/src/main/resources/application-dev.yaml
-/facade/src/main/resources/application-prod.yaml
-/gateway/src/main/resources/application-dev.yaml
-/gateway/src/main/resources/application-prod.yaml
-/security/src/main/resources/application-dev.yaml
-/security/src/main/resources/application-prod.yaml
+/api-client/src/test/
+/api-common/src/test/
+/api-facade/src/test/
+/api-gateway/src/test/
+/api-provider/src/test/
+/api-security/src/test/
+/api-facade/src/main/resources/application-dev.yaml
+/api-facade/src/main/resources/application-prod.yaml
+/api-gateway/src/main/resources/application-dev.yaml
+/api-gateway/src/main/resources/application-prod.yaml
+/api-provider/src/main/resources/application-dev.yaml
+/api-provider/src/main/resources/application-prod.yaml
+/api-security/src/main/resources/application-dev.yaml
+/api-security/src/main/resources/application-prod.yaml

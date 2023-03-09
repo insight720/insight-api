@@ -24,10 +24,11 @@
 
     <!-- 子模块 -->
     <modules>
-        <module>security</module>
-        <module>facade</module>
-        <module>insight-api-sdk</module>
-        <module>gateway</module>
+        <module>api-client</module>
+        <module>api-facade</module>
+        <module>api-gateway</module>
+        <module>api-provider</module>
+        <module>api-security</module>
     </modules>
 
     <!-- 依赖管理 -->
