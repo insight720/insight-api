@@ -7,6 +7,7 @@ package pers.project.api.gateway.common;
  */
 public class ResultUtils {
 // TODO: 2023/2/25 ok 不能改
+
     /**
      * 成功
      *

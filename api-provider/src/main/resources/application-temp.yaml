@@ -1,2 +1,14 @@
 server:
   port: 9372
+  servlet:
+    context-path: /provider
+
+spring:
+  application:
+    name: provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr:
+        username:
+        password:

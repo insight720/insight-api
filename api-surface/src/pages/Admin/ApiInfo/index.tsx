@@ -11,7 +11,7 @@ import {
     offlineApiInfo,
     onlineApiInfo,
     updateApiInfo
-} from "@/services/insight-api/apiInfoController";
+} from "@/services/api-facade/apiInfoController";
 import CreateModal from "@/pages/Admin/ApiInfo/components/CreateModal";
 import UpdateModal from "@/pages/Admin//ApiInfo/components/UpdateModal";
 
@@ -725,7 +725,7 @@ const ApiInfoList: React.FC = () => {
                 >
                     <Button
                         onClick={async () => {
-                            await handleRemove(selectedRowsState);
+                            // await handleRemove(selectedRowsState);
                             setSelectedRows([]);
                             actionRef.current?.reloadAndRest?.();
                         }}

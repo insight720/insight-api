@@ -1,8 +1,8 @@
 package pers.project.api.security.model.dto.user;
 
-import pers.project.api.security.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import pers.project.api.security.common.PageRequest;
 
 import java.io.Serializable;
 import java.util.Date;

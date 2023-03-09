@@ -32,14 +32,13 @@ public class TestClient {
 
     public static final String GATEWAY_HOST = "http://localhost:80/gateway";
 
-
     public TestClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
 
     public String get(String test) {
-        return HttpRequest.get(GATEWAY_HOST + "/facade/test/get?test=" + test)
+        return HttpRequest.get(GATEWAY_HOST + "/provider/test/get?test=" + test)
                 .header(getHeaders(null))
                 .execute()
                 .body();
@@ -48,7 +47,7 @@ public class TestClient {
     @SneakyThrows
     public String post(Test test) {
         String json = getJson(test);
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/facade/test/post")
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/provider/test/post")
                 .header(getHeaders(json))
                 .body(json)
                 .execute();

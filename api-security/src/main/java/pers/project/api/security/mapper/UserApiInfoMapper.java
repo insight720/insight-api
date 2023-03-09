@@ -1,9 +1,9 @@
 package pers.project.api.security.mapper;
 
-import org.apache.ibatis.annotations.Param;
-import pers.project.api.security.model.entity.UserApiInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import pers.project.api.security.model.entity.UserApiInfo;
 
 import java.util.List;
 

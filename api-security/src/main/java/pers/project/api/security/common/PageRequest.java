@@ -1,7 +1,7 @@
 package pers.project.api.security.common;
 
-import pers.project.api.security.constant.CommonConstant;
 import lombok.Data;
+import pers.project.api.security.constant.CommonConstant;
 
 /**
  * 分页请求

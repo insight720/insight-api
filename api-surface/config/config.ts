@@ -149,13 +149,20 @@ export default defineConfig({
       projectName: 'swagger',
     },
 */
-    // 运行 openapi
-    // {
-    //   requestLibPath: "import { request } from '@umijs/max'",
-    //   schemaPath: "http://localhost:7529/api/v3/api-docs",
-    //   mock: false,
-    //   projectName: 'insight-api',
-    // },
+    {
+      requestLibPath: "import { request } from '@umijs/max'",
+      schemaPath: "http://localhost:8123/facade/v3/api-docs",
+      mock: false,
+      projectName: 'api-facade',
+      apiPrefix: "'/facade'",
+    },
+    {
+      requestLibPath: "import { request } from '@umijs/max'",
+      schemaPath: "http://localhost:7529/security/v3/api-docs",
+      mock: false,
+      projectName: 'api-security',
+      apiPrefix: "'/security'",
+    },
   ],
   mfsu: {
     strategy: 'normal',

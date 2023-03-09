@@ -8,13 +8,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import pers.project.api.common.model.entity.User;
 import pers.project.api.security.common.BaseResponse;
 import pers.project.api.security.common.DeleteRequest;
 import pers.project.api.security.common.ErrorCode;
 import pers.project.api.security.common.ResultUtils;
 import pers.project.api.security.exception.BusinessException;
 import pers.project.api.security.model.dto.user.*;
-import pers.project.api.common.model.entity.User;
 import pers.project.api.security.model.vo.UserVO;
 import pers.project.api.security.service.UserService;
 

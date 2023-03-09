@@ -1,8 +1,8 @@
 import {PageContainer} from '@ant-design/pro-components';
 import React, {useEffect, useState} from 'react';
 import {List, message} from 'antd';
-import {listUserApiInfoByPage} from "@/services/insight-api/userApiInfoController";
-import {listApiInfoByPage} from "@/services/insight-api/apiInfoController";
+import {listUserApiInfoByPage} from "@/services/api-security/userApiInfoController";
+import {listApiInfoByPage} from "@/services/api-facade/apiInfoController";
 
 
 /**

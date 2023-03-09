@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pers.project.api.common.model.entity.ApiInfo;
 import pers.project.api.security.annotation.AuthCheck;
 import pers.project.api.security.common.BaseResponse;
 import pers.project.api.security.common.ErrorCode;
@@ -15,7 +16,6 @@ import pers.project.api.security.common.ResultUtils;
 import pers.project.api.security.exception.BusinessException;
 import pers.project.api.security.mapper.ApiInfoMapper;
 import pers.project.api.security.mapper.UserApiInfoMapper;
-import pers.project.api.security.model.entity.ApiInfo;
 import pers.project.api.security.model.entity.UserApiInfo;
 import pers.project.api.security.model.vo.ApiInfoVO;
 

@@ -21,6 +21,7 @@ import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
+import pers.project.api.gateway.feign.FacadeFeignService;
 import pers.project.api.gateway.feign.SecurityFeignService;
 import pers.project.api.gateway.model.ApiInfo;
 import pers.project.api.gateway.model.User;
@@ -48,18 +49,23 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     @Resource
     private SecurityFeignService securityFeignService;
 
+    @Lazy
+    @Resource
+    private FacadeFeignService facadeFeignService;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         MultiValueMap<String, HttpCookie> cookies = request.getCookies();
         String uri = request.getURI().toString();
         String path = request.getPath().toString();
-        if (path.startsWith("/gateway/security")) {
+        if (path.startsWith("/gateway/security")
+                || path.startsWith("/gateway/facade")) {
             // 放行 security 服务
-            log.warn("放行 security 服务 URI: {}", uri);
+            log.warn("放行服务 {}: {}", path, uri);
             return chain.filter(exchange);
         }
-        log.warn("请求转发到 facade 服务 URI: {}", uri);
+        log.warn("请求转发到 {} 服务 URI: {}", path, uri);
         // 1. 请求日志
         return facade(exchange, chain);
     }
@@ -119,7 +125,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         ApiInfo apiInfo;
         CompletableFuture<ApiInfo> future2 = null;
         try {
-            future2 = CompletableFuture.supplyAsync(() -> securityFeignService.getApiInfo(path, method).getData());
+            future2 = CompletableFuture.supplyAsync(() -> facadeFeignService.getApiInfo(path, method).getData());
         } catch (Exception e) {
             log.error("getInterfaceInfo error", e);
         }
@@ -160,14 +166,14 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                             return super.writeWith(
                                     fluxBody.map(dataBuffer -> {
                                         // 7. 调用成功，接口调用次数 + 1 invokeCount
-                                            try {
-                                                CompletableFuture.runAsync(() -> securityFeignService.invokeCount(apiInfoId, userId));
-                                            } catch (Exception e) {
-                                                log.error("invokeCount error", e);
-                                            }
-                                            byte[] content = new byte[dataBuffer.readableByteCount()];
-                                            dataBuffer.read(content);
-                                            DataBufferUtils.release(dataBuffer);//释放掉内存
+                                        try {
+                                            CompletableFuture.runAsync(() -> securityFeignService.invokeCount(apiInfoId, userId));
+                                        } catch (Exception e) {
+                                            log.error("invokeCount error", e);
+                                        }
+                                        byte[] content = new byte[dataBuffer.readableByteCount()];
+                                        dataBuffer.read(content);
+                                        DataBufferUtils.release(dataBuffer);//释放掉内存
                                         // 构建日志
                                         StringBuilder sb2 = new StringBuilder(200);
                                         List<Object> rspArgs = new ArrayList<>();

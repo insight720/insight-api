@@ -2,7 +2,7 @@ package pers.project.api.security.model.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import pers.project.api.security.model.entity.ApiInfo;
+import pers.project.api.common.model.entity.ApiInfo;
 
 /**
  * 接口信息封装视图

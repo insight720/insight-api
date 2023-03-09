@@ -2,12 +2,10 @@ package pers.project.api.security.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import pers.project.api.security.common.ErrorCode;
 import pers.project.api.security.exception.BusinessException;
 import pers.project.api.security.mapper.UserApiInfoMapper;
-import pers.project.api.common.model.entity.User;
 import pers.project.api.security.model.entity.UserApiInfo;
 import pers.project.api.security.service.UserApiInfoService;
 

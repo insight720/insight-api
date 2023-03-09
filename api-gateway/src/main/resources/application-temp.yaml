@@ -19,6 +19,12 @@ spring:
             - Path=/gateway/facade/**
           filters:
             - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
+        - id: provider_route
+          uri: lb://provider
+          predicates:
+            - Path=/gateway/provider/**
+          filters:
+            - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
     nacos:
       discovery:
         server-addr:

@@ -25,6 +25,7 @@
     <!-- 子模块 -->
     <modules>
         <module>api-client</module>
+        <module>api-common</module>
         <module>api-facade</module>
         <module>api-gateway</module>
         <module>api-provider</module>

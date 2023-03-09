@@ -1,7 +1,6 @@
 package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import pers.project.api.common.model.entity.User;
 import pers.project.api.security.model.entity.UserApiInfo;
 
 /**
@@ -18,6 +17,7 @@ public interface UserApiInfoService extends IService<UserApiInfo> {
 
     /**
      * 调用接口统计
+     *
      * @param apiInfoId
      * @param userId
      * @return

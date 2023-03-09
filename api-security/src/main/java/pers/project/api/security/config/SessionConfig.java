@@ -17,6 +17,7 @@ public class SessionConfig {
     @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
+        // 默认情况 server.servlet.context-path
         defaultCookieSerializer.setCookiePath("/");
         return defaultCookieSerializer;
     }

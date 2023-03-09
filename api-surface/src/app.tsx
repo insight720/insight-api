@@ -9,7 +9,7 @@ import defaultSettings from '../config/defaultSettings';
 import {requestConfig} from '../config/requestConfig';
 import React from 'react';
 import {AvatarDropdown, AvatarName} from './components/RightContent/AvatarDropdown';
-import {getLoginUser} from "@/services/insight-api/userController";
+import {getLoginUser} from "@/services/api-security/userController";
 import {InitialState} from "@/typings";
 
 const isDev = process.env.NODE_ENV === 'development';

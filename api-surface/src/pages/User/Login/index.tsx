@@ -16,7 +16,7 @@ import {Alert, message, Tabs} from 'antd';
 import Settings from '../../../../config/defaultSettings';
 import React, {useState} from 'react';
 import {flushSync} from 'react-dom';
-import {userLogin} from "@/services/insight-api/userController";
+import {userLogin} from "@/services/api-security/userController";
 
 const ActionIcons = () => {
     const langClassName = useEmotionCss(({token}) => {

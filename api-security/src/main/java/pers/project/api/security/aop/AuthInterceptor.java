@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import pers.project.api.common.model.entity.User;
 import pers.project.api.security.annotation.AuthCheck;
 import pers.project.api.security.common.ErrorCode;
 import pers.project.api.security.exception.BusinessException;
-import pers.project.api.common.model.entity.User;
 import pers.project.api.security.service.UserService;
 
 import java.util.Arrays;

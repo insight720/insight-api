@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {Button, Card, Descriptions, Divider, Form, Input, message} from 'antd';
 
 import {useParams} from '@@/exports';
-import {getApiInfoById, invokeApiInfo} from "@/services/insight-api/apiInfoController";
+import {getApiInfoById, invokeApiInfo} from "@/services/api-facade/apiInfoController";
 
 /**
  * 主页

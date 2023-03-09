@@ -12,7 +12,7 @@ interface BaseResponse {
 // 请求配置
 export const requestConfig: RequestConfig = {
     // 后端地址
-    baseURL: 'http://localhost:80/gateway/security',
+    baseURL: 'http://localhost:80/gateway',
     // 请求带上 Cookie
     withCredentials: true,
 
