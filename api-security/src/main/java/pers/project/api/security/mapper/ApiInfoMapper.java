@@ -1,8 +1,9 @@
 package pers.project.api.security.mapper;
 
-import pers.project.api.security.model.entity.ApiInfo;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import pers.project.api.common.model.entity.ApiInfo;
 
 /**
  * 针对表【api_info (接口信息) 】的数据库操作 Mapper

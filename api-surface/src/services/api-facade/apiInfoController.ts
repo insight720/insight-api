@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import { request } from '@umijs/max';
+import {request} from '@umijs/max';
 
 /** 此处后端没有提供注释 POST /add */
 export async function addApiInfo(body: API.ApiInfoAddRequest, options?: { [key: string]: any }) {
@@ -41,21 +41,6 @@ export async function getApiInfoById(
   });
 }
 
-/** 此处后端没有提供注释 GET /getApiInfo */
-export async function getApiInfo(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getApiInfoParams,
-  options?: { [key: string]: any },
-) {
-  return request<API.BaseResponseApiInfo>(`/facade/getApiInfo`, {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
 /** 此处后端没有提供注释 POST /invoke */
 export async function invokeApiInfo(
   body: API.ApiInfoInvokeRequest,
@@ -67,23 +52,6 @@ export async function invokeApiInfo(
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
-  });
-}
-
-/** 此处后端没有提供注释 GET /list */
-export async function listApiInfo(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.listApiInfoParams,
-  options?: { [key: string]: any },
-) {
-  return request<API.BaseResponseListApiInfo>(`/facade/list`, {
-    method: 'GET',
-    params: {
-      ...params,
-      apiInfoQueryRequest: undefined,
-      ...params['apiInfoQueryRequest'],
-    },
     ...(options || {}),
   });
 }

@@ -7,24 +7,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.*;
-import pers.project.api.common.model.entity.User;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.security.annotation.AuthCheck;
 import pers.project.api.security.common.BaseResponse;
-import pers.project.api.security.common.DeleteRequest;
 import pers.project.api.security.common.ErrorCode;
 import pers.project.api.security.common.ResultUtils;
 import pers.project.api.security.constant.CommonConstant;
 import pers.project.api.security.constant.UserConstant;
 import pers.project.api.security.exception.BusinessException;
-import pers.project.api.security.model.dto.userapiinfo.UserApiInfoAddRequest;
 import pers.project.api.security.model.dto.userapiinfo.UserApiInfoQueryRequest;
-import pers.project.api.security.model.dto.userapiinfo.UserApiInfoUpdateRequest;
 import pers.project.api.security.model.entity.UserApiInfo;
 import pers.project.api.security.service.UserApiInfoService;
-import pers.project.api.security.service.UserService;
-
-import java.util.List;
 
 /**
  * 帖子接口
@@ -38,133 +34,6 @@ public class UserApiInfoController {
 
     @Resource
     private UserApiInfoService userApiInfoService;
-
-    @Resource
-    private UserService userService;
-
-    // region 增删改查
-
-    /**
-     * 创建
-     *
-     * @param userApiInfoAddRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Long> addUserApiInfo(@RequestBody UserApiInfoAddRequest userApiInfoAddRequest, HttpServletRequest request) {
-        if (userApiInfoAddRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        UserApiInfo userApiInfo = new UserApiInfo();
-        BeanUtils.copyProperties(userApiInfoAddRequest, userApiInfo);
-        // 校验
-        userApiInfoService.validUserApiInfo(userApiInfo, true);
-        User loginUser = userService.getLoginUser(request);
-        userApiInfo.setUserId(loginUser.getId());
-        boolean result = userApiInfoService.save(userApiInfo);
-        if (!result) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR);
-        }
-        long newUserApiInfoId = userApiInfo.getId();
-        return ResultUtils.success(newUserApiInfoId);
-    }
-
-    /**
-     * 删除
-     *
-     * @param deleteRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUserApiInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
-        if (deleteRequest == null || deleteRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        User user = userService.getLoginUser(request);
-        long id = deleteRequest.getId();
-        // 判断是否存在
-        UserApiInfo oldUserApiInfo = userApiInfoService.getById(id);
-        if (oldUserApiInfo == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        // 仅本人或管理员可删除
-        if (!oldUserApiInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        boolean result = userApiInfoService.removeById(id);
-        return ResultUtils.success(result);
-    }
-
-    /**
-     * 更新
-     *
-     * @param userApiInfoUpdateRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateUserApiInfo(@RequestBody UserApiInfoUpdateRequest userApiInfoUpdateRequest,
-                                                   HttpServletRequest request) {
-        if (userApiInfoUpdateRequest == null || userApiInfoUpdateRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        UserApiInfo userApiInfo = new UserApiInfo();
-        BeanUtils.copyProperties(userApiInfoUpdateRequest, userApiInfo);
-        // 参数校验
-        userApiInfoService.validUserApiInfo(userApiInfo, false);
-        User user = userService.getLoginUser(request);
-        long id = userApiInfoUpdateRequest.getId();
-        // 判断是否存在
-        UserApiInfo oldUserApiInfo = userApiInfoService.getById(id);
-        if (oldUserApiInfo == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        // 仅本人或管理员可修改
-        if (!oldUserApiInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        boolean result = userApiInfoService.updateById(userApiInfo);
-        return ResultUtils.success(result);
-    }
-
-    /**
-     * 根据 id 获取
-     *
-     * @param id
-     * @return
-     */
-    @GetMapping("/get")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<UserApiInfo> getUserApiInfoById(long id) {
-        if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        UserApiInfo userApiInfo = userApiInfoService.getById(id);
-        return ResultUtils.success(userApiInfo);
-    }
-
-    /**
-     * 获取列表（仅管理员可使用）
-     *
-     * @param userApiInfoQueryRequest
-     * @return
-     */
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    @GetMapping("/list")
-    public BaseResponse<List<UserApiInfo>> listUserApiInfo(UserApiInfoQueryRequest userApiInfoQueryRequest) {
-        UserApiInfo userApiInfoQuery = new UserApiInfo();
-        if (userApiInfoQueryRequest != null) {
-            BeanUtils.copyProperties(userApiInfoQueryRequest, userApiInfoQuery);
-        }
-        QueryWrapper<UserApiInfo> queryWrapper = new QueryWrapper<>(userApiInfoQuery);
-        List<UserApiInfo> userApiInfoList = userApiInfoService.list(queryWrapper);
-        return ResultUtils.success(userApiInfoList);
-    }
 
     /**
      * 分页获取列表
