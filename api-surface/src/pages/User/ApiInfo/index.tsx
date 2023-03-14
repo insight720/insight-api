@@ -1,7 +1,6 @@
 import {PageContainer} from '@ant-design/pro-components';
 import React, {useEffect, useState} from 'react';
 import {List, message} from 'antd';
-import {listUserApiInfoByPage} from "@/services/api-security/userApiInfoController";
 import {listApiInfoByPage} from "@/services/api-facade/apiInfoController";
 
 

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="pers.project.api.security.mapper.ApiInfoMapper">
+<mapper namespace="pers.project.api.facade.mapper.ApiInfoMapper">
 
     <resultMap id="BaseResultMap" type="pers.project.api.common.model.entity.ApiInfo">
         <id property="id" column="id" jdbcType="BIGINT"/>

@@ -132,13 +132,13 @@ VALUES ('吕峻熙', '沈鹏飞', 'www.shari-reichel.org', '郭鸿煊', '覃烨�
 -- 用户调用接口关系表
 CREATE TABLE IF NOT EXISTS `api`.`user_api_info`
 (
-    `id`                BIGINT                 NOT NULL AUTO_INCREMENT COMMENT '主键' PRIMARY KEY,
-    `user_id`           BIGINT                 NOT NULL COMMENT '调用用户 id',
+    `id`          BIGINT                 NOT NULL AUTO_INCREMENT COMMENT '主键' PRIMARY KEY,
+    `user_id`     BIGINT                 NOT NULL COMMENT '调用用户 id',
     `api_info_id` BIGINT                 NOT NULL COMMENT '接口 id',
-    `total_num`         INT      DEFAULT 0     NOT NULL COMMENT '总调用次数',
-    `left_num`          INT      DEFAULT 0     NOT NULL COMMENT '剩余调用次数',
-    `status`            INT      DEFAULT 0     NOT NULL COMMENT '状态(0-正常，1-禁用)',
-    `create_time`       DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
-    `update_time`       DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间',
-    `is_delete`         TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除(0-未删, 1-已删)'
+    `total_num`   INT      DEFAULT 0     NOT NULL COMMENT '总调用次数',
+    `left_num`    INT      DEFAULT 0     NOT NULL COMMENT '剩余调用次数',
+    `status`      INT      DEFAULT 0     NOT NULL COMMENT '状态(0-正常，1-禁用)',
+    `create_time` DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间',
+    `is_delete`   TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除(0-未删, 1-已删)'
 ) COMMENT '用户调用接口关系';

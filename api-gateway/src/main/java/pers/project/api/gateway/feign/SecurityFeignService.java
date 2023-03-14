@@ -3,8 +3,9 @@ package pers.project.api.gateway.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pers.project.api.gateway.common.BaseResponse;
-import pers.project.api.gateway.model.User;
+import pers.project.api.common.model.dto.response.BaseResponse;
+import pers.project.api.common.model.entity.User;
+
 
 /**
  * Security 远程服务

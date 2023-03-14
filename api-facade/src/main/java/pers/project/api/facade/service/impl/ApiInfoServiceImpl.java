@@ -4,8 +4,8 @@ import com.alibaba.nacos.common.utils.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.common.ErrorCode;
-import pers.project.api.common.exception.BusinessException;
+import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.exception.ServiceException;
 import pers.project.api.common.model.entity.ApiInfo;
 import pers.project.api.facade.mapper.ApiInfoMapper;
 import pers.project.api.facade.service.ApiInfoService;
@@ -28,7 +28,7 @@ public class ApiInfoServiceImpl extends ServiceImpl<ApiInfoMapper, ApiInfo> impl
     @Override
     public ApiInfo getApiInfo(String url, String method) {
         if (StringUtils.isAnyBlank(url, method)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
         }
         QueryWrapper<ApiInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("url", url);

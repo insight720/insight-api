@@ -1,12 +1,10 @@
 package pers.project.api.common.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -15,9 +13,10 @@ import java.time.LocalDateTime;
  * @author Luo Fei
  * @date 2023-02-22
  */
-@TableName(value = "api_info")
 @Data
-public class ApiInfo implements Serializable {
+@TableName(value = "api_info")
+public class ApiInfo {
+
     /**
      * 主键
      */
@@ -55,7 +54,7 @@ public class ApiInfo implements Serializable {
     private String responseHeader;
 
     /**
-     * 接口状态(0-关闭，1-开启)
+     * 接口状态 (0-关闭，1-开启)
      */
     private Integer status;
 
@@ -80,10 +79,8 @@ public class ApiInfo implements Serializable {
     private LocalDateTime updateTime;
 
     /**
-     * 是否删除(0-未删, 1-已删)
+     * 是否删除 (0-未删, 1-已删)
      */
     private Integer isDelete;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

@@ -1,13 +1,16 @@
 package pers.project.api.gateway.config;
 
+import com.alibaba.fastjson2.support.spring6.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebSessionIdResolverAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisWebSession;
@@ -32,6 +35,12 @@ import java.util.List;
 @Configuration
 @EnableRedisWebSession
 public class WebFluxConfig implements WebFluxConfigurer {
+
+    @Bean
+    @Qualifier("springSessionDefaultRedisSerializer")
+    public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
+        return new GenericFastJsonRedisSerializer();
+    }
 
     /**
      * 解决 WebFlux 应用中缺少 {@code HttpMessageConverters} 的问题。
@@ -89,6 +98,7 @@ public class WebFluxConfig implements WebFluxConfigurer {
                 return null;
             }
         }
+
     }
 
 }

@@ -109,12 +109,12 @@ export default [
                 hideInMenu: true
             },
         ],
-        },
-        {
-            path: '/admin',
-            name: 'admin',
-            icon: 'crown',
-            access: 'canAdmin',
+    },
+    {
+        path: '/admin',
+        name: 'admin',
+        icon: 'crown',
+        access: 'canAdmin',
         routes: [
             {
                 path: '/admin',

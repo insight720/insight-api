@@ -1,11 +1,12 @@
 package pers.project.api.gateway.filter.factory;
 
 import jakarta.annotation.Resource;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.stereotype.Component;
-import pers.project.api.gateway.filter.ProviderGatewayFilter;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -31,8 +32,18 @@ public class ProviderGatewayFilterFactory extends AbstractGatewayFilterFactory<P
      * <p>
      * 注意：如果有多个字段，请按字段名的字典顺序排列。
      */
+    @Getter
+    @Setter
     @Component
     public static class Config {
+
+    }
+
+    @Resource
+    private GatewayFilter providerGatewayFilter;
+
+    public ProviderGatewayFilterFactory() {
+        super(Config.class);
     }
 
     @Override
@@ -41,13 +52,6 @@ public class ProviderGatewayFilterFactory extends AbstractGatewayFilterFactory<P
                 .map(Field::getName)
                 .sorted(Comparator.naturalOrder())
                 .collect(Collectors.toList());
-    }
-
-    @Resource
-    private ProviderGatewayFilter providerGatewayFilter;
-
-    public ProviderGatewayFilterFactory() {
-        super(Config.class);
     }
 
     @Override

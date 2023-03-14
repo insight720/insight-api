@@ -25,6 +25,10 @@ spring:
             - Path=/gateway/provider/**
           filters:
             - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
+      default-filters:
+        - name: CacheRequestBody
+          args:
+            bodyClass: java.lang.String
     nacos:
       discovery:
         server-addr:

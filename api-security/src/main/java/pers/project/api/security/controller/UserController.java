@@ -5,13 +5,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.exception.ServiceException;
+import pers.project.api.common.model.dto.response.BaseResponse;
 import pers.project.api.common.model.entity.User;
-import pers.project.api.security.common.BaseResponse;
-import pers.project.api.security.common.ErrorCode;
-import pers.project.api.security.common.ResultUtils;
-import pers.project.api.security.exception.BusinessException;
-import pers.project.api.security.model.dto.user.UserLoginRequest;
-import pers.project.api.security.model.dto.user.UserRegisterRequest;
+import pers.project.api.common.util.ResultUtils;
+import pers.project.api.security.model.dto.request.UserLoginRequest;
+import pers.project.api.security.model.dto.request.UserRegisterRequest;
 import pers.project.api.security.model.vo.UserVO;
 import pers.project.api.security.service.UserService;
 
@@ -38,7 +38,7 @@ public class UserController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
@@ -60,12 +60,12 @@ public class UserController {
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
         }
         User user = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(user);
@@ -80,7 +80,7 @@ public class UserController {
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
         }
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);

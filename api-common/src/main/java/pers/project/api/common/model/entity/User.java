@@ -1,13 +1,10 @@
 package pers.project.api.common.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -16,11 +13,12 @@ import java.time.LocalDateTime;
  * @author Luo Fei
  * @date 2023-02-25
  */
-@TableName(value = "user")
 @Data
-public class User implements Serializable {
+@TableName(value = "user")
+public class User {
+
     /**
-     * id
+     * 主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -46,7 +44,7 @@ public class User implements Serializable {
     private Integer gender;
 
     /**
-     * 用户角色(user/admin)
+     * 用户角色 (user/admin)
      */
     private String userRole;
 
@@ -76,11 +74,8 @@ public class User implements Serializable {
     private LocalDateTime updateTime;
 
     /**
-     * 是否删除(0-未删, 1-已删)
+     * 是否删除 (0-未删, 1-已删)
      */
     private Integer isDelete;
 
-    @Serial
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

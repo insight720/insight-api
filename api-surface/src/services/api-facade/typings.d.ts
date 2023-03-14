@@ -59,6 +59,23 @@ declare namespace API {
         method?: string;
     };
 
+    type ApiInfoVO = {
+        id?: number;
+        name?: string;
+        description?: string;
+        url?: string;
+        requestParams?: string;
+        requestHeader?: string;
+        responseHeader?: string;
+        status?: number;
+        method?: string;
+        userId?: number;
+        createTime?: string;
+        updateTime?: string;
+        isDelete?: number;
+        totalNum?: number;
+    };
+
     type BaseResponseApiInfo = {
         code?: number;
         data?: ApiInfo;
@@ -68,6 +85,18 @@ declare namespace API {
     type BaseResponseBoolean = {
         code?: number;
         data?: boolean;
+        message?: string;
+    };
+
+    type BaseResponseListApiInfo = {
+        code?: number;
+        data?: ApiInfo[];
+        message?: string;
+    };
+
+    type BaseResponseListApiInfoVO = {
+        code?: number;
+        data?: ApiInfoVO[];
         message?: string;
     };
 
@@ -97,11 +126,25 @@ declare namespace API {
         id: number;
     };
 
+    type getApiInfoParams = {
+        url: string;
+        method: string;
+    };
+
     type IdRequest = {
         id?: number;
     };
 
+    type invokeCountParams = {
+        apiInfoId: number;
+        userId: number;
+    };
+
     type listApiInfoByPageParams = {
+        apiInfoQueryRequest: ApiInfoQueryRequest;
+    };
+
+    type listApiInfoParams = {
         apiInfoQueryRequest: ApiInfoQueryRequest;
     };
 

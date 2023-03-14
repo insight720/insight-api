@@ -64,7 +64,6 @@
 
     <!--  这里的依赖会被子模块继承  -->
     <dependencies>
-
     </dependencies>
 
     <build>

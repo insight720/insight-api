@@ -34,7 +34,6 @@ build/
 
 ### Project ###
 /api-client/src/test/
-/api-common/src/test/
 /api-facade/src/test/
 /api-gateway/src/test/
 /api-provider/src/test/

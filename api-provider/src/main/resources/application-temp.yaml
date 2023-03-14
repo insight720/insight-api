@@ -12,3 +12,8 @@ spring:
         server-addr:
         username:
         password:
+  data:
+    redis:
+      password:
+      port:
+      host:

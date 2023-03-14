@@ -1,7 +1,7 @@
 import {PageContainer,} from '@ant-design/pro-components';
 import React, {useEffect, useState} from 'react';
 import ReactECharts from 'echarts-for-react';
-import {listTopInvokeApiInfo} from "@/services/api-security/analysisController";
+import {listTopInvokeApiInfo} from "@/services/api-facade/analysisController";
 import {message} from "antd";
 
 const ApiAnalysis: React.FC = () => {

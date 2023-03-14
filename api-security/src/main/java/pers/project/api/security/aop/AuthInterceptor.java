@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.exception.ServiceException;
 import pers.project.api.common.model.entity.User;
 import pers.project.api.security.annotation.AuthCheck;
-import pers.project.api.security.common.ErrorCode;
-import pers.project.api.security.exception.BusinessException;
 import pers.project.api.security.service.UserService;
 
 import java.util.Arrays;
@@ -53,14 +53,14 @@ public class AuthInterceptor {
         if (CollectionUtils.isNotEmpty(anyRole)) {
             String userRole = user.getUserRole();
             if (!anyRole.contains(userRole)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+                throw new ServiceException(ErrorCodeEnum.NO_AUTH_ERROR);
             }
         }
         // 必须有所有权限才通过
         if (StringUtils.isNotBlank(mustRole)) {
             String userRole = user.getUserRole();
             if (!mustRole.equals(userRole)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+                throw new ServiceException(ErrorCodeEnum.NO_AUTH_ERROR);
             }
         }
         // 通过权限校验，放行

@@ -40,9 +40,9 @@ spring:
       connection-timeout: 30000
   data:
     redis:
-      password: notroot
-      port: 9736
-      host: 192.168.27.100
+      password:
+      port:
+      host:
 
 springdoc:
   group-configs:
