@@ -1,169 +1,169 @@
 declare namespace API {
-    type ApiInfo = {
-        id?: number;
-        name?: string;
-        description?: string;
-        url?: string;
-        requestParams?: string;
-        requestHeader?: string;
-        responseHeader?: string;
-        status?: number;
-        method?: string;
-        userId?: number;
-        createTime?: string;
-        updateTime?: string;
-        isDelete?: number;
-    };
+  type ApiInfoAddRequest = {
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParams?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    method?: string;
+  };
 
-    type ApiInfoAddRequest = {
-        name?: string;
-        description?: string;
-        url?: string;
-        requestParams?: string;
-        requestHeader?: string;
-        responseHeader?: string;
-        method?: string;
-    };
+  type ApiInfoData = {
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParams?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    status?: number;
+    method?: string;
+    userId?: number;
+    createTime?: string;
+    updateTime?: string;
+    isDelete?: number;
+    totalNum?: number;
+  };
 
-    type ApiInfoInvokeRequest = {
-        id?: number;
-        requestParams?: string;
-    };
+  type ApiInfoEntity = {
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParams?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    status?: number;
+    method?: string;
+    userId?: number;
+    createTime?: string;
+    updateTime?: string;
+    isDelete?: number;
+  };
 
-    type ApiInfoQueryRequest = {
-        current?: number;
-        pageSize?: number;
-        sortField?: string;
-        sortOrder?: string;
-        id?: number;
-        name?: string;
-        description?: string;
-        url?: string;
-        requestParams?: string;
-        requestHeader?: string;
-        responseHeader?: string;
-        status?: number;
-        method?: string;
-        userId?: number;
-    };
+  type ApiInfoInvokeRequest = {
+    id?: number;
+    requestParams?: string;
+  };
 
-    type ApiInfoUpdateRequest = {
-        id?: number;
-        name?: string;
-        description?: string;
-        url?: string;
-        requestParams?: string;
-        requestHeader?: string;
-        responseHeader?: string;
-        status?: number;
-        method?: string;
-    };
+  type ApiInfoQueryRequest = {
+    current?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParams?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    status?: number;
+    method?: string;
+    userId?: number;
+  };
 
-    type ApiInfoVO = {
-        id?: number;
-        name?: string;
-        description?: string;
-        url?: string;
-        requestParams?: string;
-        requestHeader?: string;
-        responseHeader?: string;
-        status?: number;
-        method?: string;
-        userId?: number;
-        createTime?: string;
-        updateTime?: string;
-        isDelete?: number;
-        totalNum?: number;
-    };
+  type ApiInfoUpdateRequest = {
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParams?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    status?: number;
+    method?: string;
+  };
 
-    type BaseResponseApiInfo = {
-        code?: number;
-        data?: ApiInfo;
-        message?: string;
-    };
+  type DeleteRequest = {
+    id?: number;
+  };
 
-    type BaseResponseBoolean = {
-        code?: number;
-        data?: boolean;
-        message?: string;
-    };
+  type getApiInfoByIdParams = {
+    id: number;
+  };
 
-    type BaseResponseListApiInfo = {
-        code?: number;
-        data?: ApiInfo[];
-        message?: string;
-    };
+  type getApiInfoParams = {
+    url: string;
+    method: string;
+  };
 
-    type BaseResponseListApiInfoVO = {
-        code?: number;
-        data?: ApiInfoVO[];
-        message?: string;
-    };
+  type IdRequest = {
+    id?: number;
+  };
 
-    type BaseResponseLong = {
-        code?: number;
-        data?: number;
-        message?: string;
-    };
+  type invokeCountParams = {
+    apiInfoId: number;
+    userId: number;
+  };
 
-    type BaseResponseObject = {
-        code?: number;
-        data?: Record<string, any>;
-        message?: string;
-    };
+  type listApiInfoByPageParams = {
+    apiInfoQueryRequest: ApiInfoQueryRequest;
+  };
 
-    type BaseResponsePageApiInfo = {
-        code?: number;
-        data?: PageApiInfo;
-        message?: string;
-    };
+  type listApiInfoParams = {
+    apiInfoQueryRequest: ApiInfoQueryRequest;
+  };
 
-    type DeleteRequest = {
-        id?: number;
-    };
+  type OrderItem = {
+    column?: string;
+    asc?: boolean;
+  };
 
-    type getApiInfoByIdParams = {
-        id: number;
-    };
+  type PageApiInfoEntity = {
+    records?: ApiInfoEntity[];
+    total?: number;
+    size?: number;
+    current?: number;
+    orders?: OrderItem[];
+    optimizeCountSql?: boolean;
+    searchCount?: boolean;
+    optimizeJoinOfCountSql?: boolean;
+    maxLimit?: number;
+    countId?: string;
+    pages?: number;
+  };
 
-    type getApiInfoParams = {
-        url: string;
-        method: string;
-    };
+  type ResponseApiInfoEntity = {
+    code?: number;
+    data?: ApiInfoEntity;
+    message?: string;
+  };
 
-    type IdRequest = {
-        id?: number;
-    };
+  type ResponseBoolean = {
+    code?: number;
+    data?: boolean;
+    message?: string;
+  };
 
-    type invokeCountParams = {
-        apiInfoId: number;
-        userId: number;
-    };
+  type ResponseListApiInfoData = {
+    code?: number;
+    data?: ApiInfoData[];
+    message?: string;
+  };
 
-    type listApiInfoByPageParams = {
-        apiInfoQueryRequest: ApiInfoQueryRequest;
-    };
+  type ResponseListApiInfoEntity = {
+    code?: number;
+    data?: ApiInfoEntity[];
+    message?: string;
+  };
 
-    type listApiInfoParams = {
-        apiInfoQueryRequest: ApiInfoQueryRequest;
-    };
+  type ResponseLong = {
+    code?: number;
+    data?: number;
+    message?: string;
+  };
 
-    type OrderItem = {
-        column?: string;
-        asc?: boolean;
-    };
+  type ResponseObject = {
+    code?: number;
+    data?: Record<string, any>;
+    message?: string;
+  };
 
-    type PageApiInfo = {
-        records?: ApiInfo[];
-        total?: number;
-        size?: number;
-        current?: number;
-        orders?: OrderItem[];
-        optimizeCountSql?: boolean;
-        searchCount?: boolean;
-        optimizeJoinOfCountSql?: boolean;
-        maxLimit?: number;
-        countId?: string;
-        pages?: number;
-    };
+  type ResponsePageApiInfoEntity = {
+    code?: number;
+    data?: PageApiInfoEntity;
+    message?: string;
+  };
 }

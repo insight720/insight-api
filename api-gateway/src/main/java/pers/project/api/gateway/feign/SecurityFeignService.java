@@ -3,25 +3,24 @@ package pers.project.api.gateway.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.model.entity.User;
+import pers.project.api.common.model.Response;
+import pers.project.api.common.model.entity.UserEntity;
 
 
 /**
  * Security 远程服务
  *
  * @author Luo Fei
- * @date 2023/3/5
+ * @version 2023/3/5
  */
-@FeignClient(name = "security")
+@FeignClient(name = "gateway", contextId = "security", path = "/gateway/security")
 public interface SecurityFeignService {
 
-    @GetMapping("/security/user/getInvokeUser")
-    BaseResponse<User> getInvokeUser(@RequestParam("accessKey") String accessKey);
+    @GetMapping("/user/getInvokeUser")
+    Response<UserEntity> getInvokeUser(@RequestParam("accessKey") String accessKey);
 
-
-    @GetMapping("/security/userApiInfo/invokeCount")
-    BaseResponse<Boolean> invokeCount(@RequestParam("apiInfoId") long apiInfoId,
-                                      @RequestParam("userId") long userId);
+    @GetMapping("/userApiInfo/invokeCount")
+    Response<Boolean> invokeCount(@RequestParam("apiInfoId") long apiInfoId,
+                                  @RequestParam("userId") long userId);
 
 }

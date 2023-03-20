@@ -1,19 +1,15 @@
 package pers.project.api.gateway.config;
 
-import com.alibaba.fastjson2.support.spring6.data.redis.GenericFastJsonRedisSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebSessionIdResolverAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisWebSession;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -29,18 +25,11 @@ import java.util.List;
  * WebFlux 配置类
  *
  * @author Luo Fei
- * @date 2023/3/9
+ * @version 2023/3/9
  */
 @Slf4j
 @Configuration
-@EnableRedisWebSession
 public class WebFluxConfig implements WebFluxConfigurer {
-
-    @Bean
-    @Qualifier("springSessionDefaultRedisSerializer")
-    public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
-        return new GenericFastJsonRedisSerializer();
-    }
 
     /**
      * 解决 WebFlux 应用中缺少 {@code HttpMessageConverters} 的问题。
@@ -82,13 +71,16 @@ public class WebFluxConfig implements WebFluxConfigurer {
             if (cookies == null) {
                 return Collections.emptyList();
             }
-            return cookies.stream().map(HttpCookie::getValue).map(this::base64Decode).toList();
+            return cookies.stream().map(httpCookie -> {
+                String value = httpCookie.getValue();
+                String sessionId = base64Decode(value);
+                return sessionId != null ? sessionId : value;
+            }).toList();
         }
 
         /**
          * @see DefaultCookieSerializer#base64Decode(String)
          */
-        @SuppressWarnings("all")
         private String base64Decode(String base64Value) {
             try {
                 byte[] decodedCookieBytes = Base64.getDecoder().decode(base64Value);

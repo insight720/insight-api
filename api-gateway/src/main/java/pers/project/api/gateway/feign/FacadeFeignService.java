@@ -3,21 +3,21 @@ package pers.project.api.gateway.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.model.entity.ApiInfo;
+import pers.project.api.common.model.Response;
+import pers.project.api.common.model.entity.ApiInfoEntity;
 
 
 /**
  * Facade 远程服务
  *
  * @author Luo Fei
- * @date 2023/3/9
+ * @version 2023/3/9
  */
-@FeignClient(name = "facade")
+@FeignClient(name = "gateway", contextId = "facade", path = "/gateway/facade")
 public interface FacadeFeignService {
 
-    @GetMapping("/facade/getApiInfo")
-    BaseResponse<ApiInfo> getApiInfo(@RequestParam("url") String url,
-                                     @RequestParam("method") String method);
+    @GetMapping("/getApiInfo")
+    Response<ApiInfoEntity> getApiInfo(@RequestParam("url") String url,
+                                       @RequestParam("method") String method);
 
 }

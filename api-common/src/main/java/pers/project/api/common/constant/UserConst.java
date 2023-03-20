@@ -4,7 +4,7 @@ package pers.project.api.common.constant;
  * 用户常量
  *
  * @author Luo Fei
- * @date 2023/3/14
+ * @version 2023/3/14
  */
 public abstract class UserConst {
 

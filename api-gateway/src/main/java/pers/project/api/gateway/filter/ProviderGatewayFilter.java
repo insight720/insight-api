@@ -13,12 +13,14 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.model.entity.ApiInfo;
-import pers.project.api.common.model.entity.User;
-import pers.project.api.common.util.ResultUtils;
+import org.springframework.web.server.WebSession;
+import pers.project.api.common.constant.UserConst;
+import pers.project.api.common.model.Response;
+import pers.project.api.common.model.entity.ApiInfoEntity;
+import pers.project.api.common.model.entity.UserEntity;
+import pers.project.api.common.util.ResponseUtils;
 import pers.project.api.common.util.SignUtils;
-import pers.project.api.gateway.enums.RequestHeadersEnum;
+import pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum;
 import pers.project.api.gateway.feign.FacadeFeignService;
 import pers.project.api.gateway.feign.SecurityFeignService;
 import pers.project.api.gateway.filter.factory.ProviderGatewayFilterFactory;
@@ -27,14 +29,15 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pers.project.api.gateway.enums.RequestHeadersEnum.*;
+import static org.springframework.core.NestedExceptionUtils.getMostSpecificCause;
+import static pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum.*;
 import static pers.project.api.gateway.filter.HttpLogFilter.HTTP_LOG_FILTER_ORDER;
 
 /**
  * Provider 网关过滤器
  *
  * @author Luo Fei
- * @date 2023/3/13
+ * @version 2023/3/13
  */
 @Slf4j
 @Component
@@ -76,7 +79,12 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
         try {
             authorized = authorizeRequest(exchange);
         } catch (Exception e) {
-            log.error("ProviderGatewayFilter.authorizeRequest", e);
+            String requestId = exchange.getRequest().getId();
+            log.warn("""
+                    授权请求 Provider 异常
+                    请求 ID: {}
+                    信息: {}
+                    """, requestId, getMostSpecificCause(e));
             authorized = false;
         }
         // 未授权请求不再进入其他过滤器
@@ -96,7 +104,8 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      *
      * @return true 如果请求被授权
      */
-    @SuppressWarnings("all") // 抑制不必要的 NPE 警告
+    // 抑制 null 警告
+    @SuppressWarnings("all")
     private boolean authorizeRequest(ServerWebExchange exchange) throws Exception {
         // 检查请求头是否缺少或重复
         ServerHttpRequest request = exchange.getRequest();
@@ -111,41 +120,58 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
         if (currentTime - timestamp > ONE_MINUTE) {
             return false;
         }
-
         // 获取请求的用户数据
-        CompletableFuture<BaseResponse<User>> userFuture
-                = CompletableFuture.supplyAsync
-                (() -> {
-                    String accessKey = headers.getFirst(ACCESS_KEY.getName());
-                    return securityFeignService.getInvokeUser(accessKey);
-                });
-        BaseResponse<User> userResponse = ResultUtils.futureGet(userFuture);
-        if (ResultUtils.isFailure(userResponse)) {
+        UserEntity userEntity = getUserInfo(exchange);
+        if (userEntity == null) {
             return false;
         }
-        User user = userResponse.getData();
         // 检查签名是否合法
         String sign = headers.getFirst(SIGN.getName());
         String body = headers.getFirst(BODY.getName());
-        String secretKey = user.getSecretKey();
-        String serverSign = SignUtils.genSign(body, secretKey);
+        String secretKey = userEntity.getSecretKey();
+        String serverSign = SignUtils.sign(body, secretKey);
         if (!sign.equals(serverSign)) {
             return false;
         }
+        String method = request.getMethod().name();
         // 4. 请求的模拟接口是否存在，以及请求方法是否匹配
-        CompletableFuture<BaseResponse<ApiInfo>> apiInfoFuture
-                = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Response<ApiInfoEntity>> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
             String path = request.getPath().value();
-            String method = request.getMethod().name();
             return facadeFeignService.getApiInfo(path, method);
         });
-        BaseResponse<ApiInfo> apiInfoResponse = ResultUtils.futureGet(apiInfoFuture);
-        if (ResultUtils.isFailure(apiInfoResponse)) {
+        Response<ApiInfoEntity> apiInfoResponse = apiInfoFuture.get();
+        if (ResponseUtils.isFailure(apiInfoResponse)) {
             return false;
         }
-        ApiInfo apiInfo = apiInfoResponse.getData();
+        ApiInfoEntity apiInfoEntity = apiInfoResponse.getData();
         // todo 是否还有调用次数
         return true;
+    }
+
+    /**
+     * 获取用户信息
+     * <p>
+     * 从 WebSession 或者 Security 服务获取。
+     *
+     * @return 用户信息，可能为 null。
+     */
+    private UserEntity getUserInfo(ServerWebExchange exchange) throws Exception {
+        // 从 WebSession 获取用户信息
+        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
+        UserEntity userEntity = webSessionFuture.get().getAttribute(UserConst.USER_LOGIN_STATE);
+        if (userEntity != null) {
+            return userEntity;
+        }
+        // 从 Security 服务获取用户信息
+        CompletableFuture<Response<UserEntity>> userFuture = CompletableFuture.supplyAsync(() -> {
+            String accessKey = exchange.getRequest().getHeaders().getFirst(ACCESS_KEY.getName());
+            return securityFeignService.getInvokeUser(accessKey);
+        });
+        Response<UserEntity> userResponse = userFuture.get();
+        if (ResponseUtils.isFailure(userResponse)) {
+            return null;
+        }
+        return userResponse.getData();
     }
 
     /**
@@ -154,10 +180,9 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      * @return ture 如果有
      */
     private boolean hasAbsentOrDuplicateHeaders(HttpHeaders headers) {
-        for (RequestHeadersEnum headerEnum : RequestHeadersEnum.values()) {
+        for (GatewayHeaderEnum headerEnum : GatewayHeaderEnum.values()) {
             List<String> header = headers.get(headerEnum.getName());
-            if (CollectionUtils.isEmpty(header)
-                    || header.size() > 1) {
+            if (CollectionUtils.isEmpty(header) || header.size() > 1) {
                 return true;
             }
         }
@@ -172,6 +197,5 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
         response.setStatusCode(HttpStatus.FORBIDDEN);
         return response.setComplete();
     }
-
 
 }

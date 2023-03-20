@@ -104,7 +104,7 @@ const ApiInfoList: React.FC = () => {
 
     const actionRef = useRef<ActionType>();
     // const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
-    const [currentRow, setCurrentRow] = useState<API.ApiInfo>();
+    const [currentRow, setCurrentRow] = useState<API.ApiInfoEntity>();
     const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
     /**
@@ -344,7 +344,7 @@ const ApiInfoList: React.FC = () => {
         },
       ];
     */
-    const columns: ProColumns<API.ApiInfo>[] = [
+    const columns: ProColumns<API.ApiInfoEntity>[] = [
         {
             title: <FormattedMessage id="index" defaultMessage="序号"/>,
             valueType: 'index',

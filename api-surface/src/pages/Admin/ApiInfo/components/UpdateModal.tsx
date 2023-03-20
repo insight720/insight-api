@@ -2,18 +2,18 @@ import {ProColumns, ProFormInstance, ProTable,} from '@ant-design/pro-components
 import {Modal} from 'antd';
 import React, {useEffect, useRef} from 'react';
 
-export type UpdateModalProps = {
+export type updateModalProps = {
     onCancel: () => void;
-    onSubmit: (values: API.ApiInfoUpdateRequest) => void;
+    onSubmit: (values: API.ApiInfoupdateRequest) => void;
     updateModalOpen: boolean;
-    columns: ProColumns<API.ApiInfo>[]
-    fields: API.ApiInfo
+    columns: ProColumns<API.ApiInfoEntity>[]
+    fields: API.ApiInfoEntity
 };
 
 /**
  * 更新模态框
  */
-const UpdateModal: React.FC<UpdateModalProps> = (props) => {
+const updateModal: React.FC<updateModalProps> = (props) => {
     // 获取更新前的数据
     const formRef = useRef<ProFormInstance>();
     useEffect(() => {
@@ -23,7 +23,7 @@ const UpdateModal: React.FC<UpdateModalProps> = (props) => {
     return (
         <Modal open={props.updateModalOpen} onCancel={props.onCancel} footer={null}>
             <ProTable type='form' columns={props.columns}
-                      onSubmit={async (fields: API.ApiInfoUpdateRequest) => {
+                      onSubmit={async (fields: API.ApiInfoupdateRequest) => {
                           // id 不会提交
                           fields.id = props.fields.id;
                           props.onSubmit(fields);
@@ -33,4 +33,4 @@ const UpdateModal: React.FC<UpdateModalProps> = (props) => {
     );
 };
 
-export default UpdateModal;
+export default updateModal;

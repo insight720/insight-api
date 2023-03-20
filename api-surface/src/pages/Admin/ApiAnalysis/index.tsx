@@ -6,7 +6,7 @@ import {message} from "antd";
 
 const ApiAnalysis: React.FC = () => {
 
-    const [data, setData] = useState<API.ApiInfoVO[]>([]);
+    const [data, setData] = useState<API.ApiInfoData[]>([]);
     const [loading, setLoading] = useState(false);
 
     const loadData = async () => {

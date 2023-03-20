@@ -3,10 +3,10 @@ package pers.project.api.facade.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.constant.enumeration.ErrorEnum;
 import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.util.ResultUtils;
+import pers.project.api.common.model.Response;
+import pers.project.api.common.util.ResponseUtils;
 
 /**
  * 全局异常处理器
@@ -18,15 +18,15 @@ import pers.project.api.common.util.ResultUtils;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceException.class)
-    public BaseResponse<?> businessExceptionHandler(ServiceException e) {
+    public Response<?> businessExceptionHandler(ServiceException e) {
         log.error("businessException: " + e.getMessage(), e);
-        return ResultUtils.failure(e);
+        return ResponseUtils.failure(e);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public BaseResponse<?> runtimeExceptionHandler(RuntimeException e) {
+    public Response<?> runtimeExceptionHandler(RuntimeException e) {
         log.error("runtimeException", e);
-        return ResultUtils.failure(ErrorCodeEnum.SYSTEM_ERROR, e.getMessage());
+        return ResponseUtils.failure(ErrorEnum.SYSTEM_ERROR, e.getMessage());
     }
 
 }

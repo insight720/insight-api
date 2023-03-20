@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.constant.enumeration.ErrorEnum;
 import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.entity.User;
+import pers.project.api.common.model.entity.UserEntity;
 import pers.project.api.security.annotation.AuthCheck;
 import pers.project.api.security.service.UserService;
 
@@ -48,19 +48,19 @@ public class AuthInterceptor {
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         // 当前登录用户
-        User user = userService.getLoginUser(request);
+        UserEntity userEntity = userService.getLoginUser(request);
         // 拥有任意权限即通过
         if (CollectionUtils.isNotEmpty(anyRole)) {
-            String userRole = user.getUserRole();
+            String userRole = userEntity.getUserRole();
             if (!anyRole.contains(userRole)) {
-                throw new ServiceException(ErrorCodeEnum.NO_AUTH_ERROR);
+                throw new ServiceException(ErrorEnum.NO_AUTH_ERROR);
             }
         }
         // 必须有所有权限才通过
         if (StringUtils.isNotBlank(mustRole)) {
-            String userRole = user.getUserRole();
+            String userRole = userEntity.getUserRole();
             if (!mustRole.equals(userRole)) {
-                throw new ServiceException(ErrorCodeEnum.NO_AUTH_ERROR);
+                throw new ServiceException(ErrorEnum.NO_AUTH_ERROR);
             }
         }
         // 通过权限校验，放行

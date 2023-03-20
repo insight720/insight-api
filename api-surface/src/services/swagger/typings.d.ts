@@ -62,7 +62,7 @@ declare namespace API {
         id?: number;
         petId?: number;
         quantity?: number;
-        shipDate?: string;
+        shipversion?: string;
         /** Order Status */
         status?: 'placed' | 'approved' | 'delivered';
         complete?: boolean;

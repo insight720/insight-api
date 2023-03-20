@@ -1,79 +1,67 @@
 package pers.project.api.sdk.client;
 
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson2.JSON;
 import lombok.Data;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 import pers.project.api.sdk.model.Test;
-import pers.project.api.sdk.utils.SignUtils;
+import pers.project.api.sdk.util.SignUtils;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
+import java.net.URI;
+import java.util.concurrent.CompletableFuture;
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
 
 /**
  * 测试客户端
  *
  * @author Luo Fei
- * @date 2023/2/25
+ * @version 2023/3/16
  */
 @Data
-@Slf4j
 public class TestClient {
+
+    private static final WebClient WEB_CLIENT = WebClient.builder().build();
+
+    public static final RandomGeneratorFactory<RandomGenerator>
+            L32_X64_MIX_RANDOM = RandomGeneratorFactory.of("L32X64MixRandom");
+
+    public static final String GATEWAY_HOST = "http://localhost:80/gateway";
 
     private String accessKey;
 
     private String secretKey;
-
-    public static final String GATEWAY_HOST = "http://localhost:80/gateway";
 
     public TestClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
 
-    public String get(String test) {
-        return HttpRequest.get(GATEWAY_HOST + "/provider/test/get?test=" + test)
-                .header(getHeaders(null))
-                .execute()
-                .body();
+    public String post(Test test, String cookieName, String cookieValue) {
+        String requestBody = JSON.toJSONString(test);
+        CompletableFuture<String> bodyFuture = WEB_CLIENT
+                .post()
+                .uri(URI.create(GATEWAY_HOST + "/provider/test/post"))
+                .cookie(cookieName, cookieValue)
+                .bodyValue(requestBody)
+                .headers(httpHeaders -> httpHeaders.addAll(getHeaders(requestBody)))
+                .retrieve()
+                .bodyToMono(String.class)
+                .toFuture();
+        return bodyFuture.join();
     }
 
-    @SneakyThrows
-    public String post(Test test) {
-        String json = getJson(test);
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/provider/test/post")
-                .header(getHeaders(json))
-                .body(json)
-                .execute();
-        log.error("响应内容 ===================== \n {}", httpResponse);
-        return httpResponse
-                .body();
-    }
 
-    private static String getJson(Test test) {
-        return JSONUtil.toJsonStr(test);
+    public HttpHeaders getHeaders(String requestBody) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add("accessKey", accessKey);
+        httpHeaders.add("nonce", String.valueOf(L32_X64_MIX_RANDOM.create(System.currentTimeMillis()).nextLong(10000L)));
+        httpHeaders.add("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        httpHeaders.add("sign", SignUtils.sign("test", secretKey));
+        httpHeaders.add("body", "test");
+        return httpHeaders;
     }
-
-    private Map<String, List<String>> getHeaders(String body) {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("accessKey", accessKey);
-        // 不能直接发送
-//        headers.put("secretKey", secretKey);
-        headers.put("nonce", String.valueOf(ThreadLocalRandom.current().nextLong(10000L)));
-        headers.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        headers.put("sign", SignUtils.genSign(body, secretKey));
-        headers.put("body", body);
-        return headers.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        entry -> Collections.singletonList(entry.getValue())));
-    }
-
 
 }

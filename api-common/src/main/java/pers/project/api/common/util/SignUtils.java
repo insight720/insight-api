@@ -1,26 +1,18 @@
 package pers.project.api.common.util;
 
 
-import cn.hutool.crypto.digest.DigestAlgorithm;
-import cn.hutool.crypto.digest.Digester;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
- * 签名工具
+ * 签名工具类
  *
  * @author Luo Fei
- * @date 2023/3/14
+ * @version 2023/3/16
  */
 public abstract class SignUtils {
 
-    /**
-     * @param body
-     * @param secretKey
-     * @return
-     */
-    public static String genSign(String body, String secretKey) {
-        Digester md5 = new Digester(DigestAlgorithm.SHA256);
-        String content = body + "." + secretKey;
-        return md5.digestHex(content);
+    public static String sign(String body, String secretKey) {
+        return DigestUtils.sha256Hex(body + "." + secretKey);
     }
 
 }

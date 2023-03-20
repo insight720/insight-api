@@ -5,9 +5,8 @@
 import * as analysisController from './analysisController';
 import * as apiInfoController from './apiInfoController';
 import * as userApiInfoController from './userApiInfoController';
-
 export default {
-    apiInfoController,
-    userApiInfoController,
-    analysisController,
+  apiInfoController,
+  userApiInfoController,
+  analysisController,
 };

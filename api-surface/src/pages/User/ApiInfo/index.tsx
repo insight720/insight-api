@@ -10,7 +10,7 @@ import {listApiInfoByPage} from "@/services/api-facade/apiInfoController";
  */
 const ApiInfoList: React.FC = () => {
     const [loading, setLoading] = useState(false);
-    const [list, setList] = useState<API.ApiInfo[]>([]);
+    const [list, setList] = useState<API.ApiInfoEntity[]>([]);
     const [total, setTotal] = useState<number>(0);
     const defaultPageSize = 5;
 

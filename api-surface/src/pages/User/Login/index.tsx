@@ -116,7 +116,7 @@ const Login: React.FC = () => {
     /**
      * 设置登录用户的信息
      */
-    const setUserInfo = async (userInfo: API.UserVO | undefined) => {
+    const setUserInfo = async (userInfo: API.UserData | undefined) => {
         if (userInfo) {
             flushSync(() => {
                 setInitialState((s) => ({

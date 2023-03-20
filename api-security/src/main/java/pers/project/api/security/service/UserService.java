@@ -2,16 +2,16 @@ package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
-import pers.project.api.common.model.entity.User;
+import pers.project.api.common.model.entity.UserEntity;
 
 
 /**
  * 针对表【user (用户) 】的数据库操作 Service
  *
  * @author Luo Fei
- * @date 2023-02-25
+ * @version 2023-02-25
  */
-public interface UserService extends IService<User> {
+public interface UserService extends IService<UserEntity> {
 
     /**
      * 用户注册
@@ -31,7 +31,7 @@ public interface UserService extends IService<User> {
      * @param request
      * @return 脱敏后的用户信息
      */
-    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    UserEntity userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
      * 获取当前登录用户
@@ -39,7 +39,7 @@ public interface UserService extends IService<User> {
      * @param request
      * @return
      */
-    User getLoginUser(HttpServletRequest request);
+    UserEntity getLoginUser(HttpServletRequest request);
 
 
     /**
@@ -56,6 +56,6 @@ public interface UserService extends IService<User> {
      * @param accessKey
      * @return
      */
-    User getInvokeUser(String accessKey);
+    UserEntity getInvokeUser(String accessKey);
 
 }

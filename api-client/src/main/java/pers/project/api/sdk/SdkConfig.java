@@ -8,7 +8,7 @@ import pers.project.api.sdk.client.TestClient;
 
 /**
  * @author Luo Fei
- * @date 2023/1/21
+ * @version 2023/1/21
  */
 @Data
 @AutoConfiguration
@@ -20,7 +20,7 @@ public class SdkConfig {
     private String secretKey;
 
     @Bean
-    public TestClient yuApiClient() {
+    public TestClient testClient() {
         return new TestClient(accessKey, secretKey);
     }
 

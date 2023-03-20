@@ -5,14 +5,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
-import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.constant.enumeration.ErrorEnum;
 import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.model.entity.User;
-import pers.project.api.common.util.ResultUtils;
-import pers.project.api.security.model.dto.request.UserLoginRequest;
-import pers.project.api.security.model.dto.request.UserRegisterRequest;
-import pers.project.api.security.model.vo.UserVO;
+import pers.project.api.common.model.Response;
+import pers.project.api.common.model.entity.UserEntity;
+import pers.project.api.common.util.ResponseUtils;
+import pers.project.api.security.model.data.UserData;
+import pers.project.api.security.model.request.UserLoginRequest;
+import pers.project.api.security.model.request.UserRegisterRequest;
 import pers.project.api.security.service.UserService;
 
 /**
@@ -36,9 +36,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+    public Response<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
@@ -47,7 +47,7 @@ public class UserController {
             return null;
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
-        return ResultUtils.success(result);
+        return ResponseUtils.success(result);
     }
 
     /**
@@ -58,17 +58,17 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public Response<UserEntity> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
-        User user = userService.userLogin(userAccount, userPassword, request);
-        return ResultUtils.success(user);
+        UserEntity userEntity = userService.userLogin(userAccount, userPassword, request);
+        return ResponseUtils.success(userEntity);
     }
 
     /**
@@ -78,12 +78,12 @@ public class UserController {
      * @return
      */
     @PostMapping("/logout")
-    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+    public Response<Boolean> userLogout(HttpServletRequest request) {
         if (request == null) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
         boolean result = userService.userLogout(request);
-        return ResultUtils.success(result);
+        return ResponseUtils.success(result);
     }
 
     /**
@@ -93,19 +93,19 @@ public class UserController {
      * @return
      */
     @GetMapping("/get/login")
-    public BaseResponse<UserVO> getLoginUser(HttpServletRequest request) {
-        User user = userService.getLoginUser(request);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ResultUtils.success(userVO);
+    public Response<UserData> getLoginUser(HttpServletRequest request) {
+        UserEntity userEntity = userService.getLoginUser(request);
+        UserData userData = new UserData();
+        BeanUtils.copyProperties(userEntity, userData);
+        return ResponseUtils.success(userData);
     }
 
     // endregion
 
     // /user
     @GetMapping("/getInvokeUser")
-    public BaseResponse<User> getInvokeUser(@RequestParam("accessKey") String accessKey) {
-        return ResultUtils.success(userService.getInvokeUser(accessKey));
+    public Response<UserEntity> getInvokeUser(@RequestParam("accessKey") String accessKey) {
+        return ResponseUtils.success(userService.getInvokeUser(accessKey));
     }
 
 }

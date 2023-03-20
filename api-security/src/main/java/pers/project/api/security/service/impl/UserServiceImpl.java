@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import pers.project.api.common.enums.ErrorCodeEnum;
+import pers.project.api.common.constant.enumeration.ErrorEnum;
 import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.entity.User;
+import pers.project.api.common.model.entity.UserEntity;
 import pers.project.api.security.mapper.UserMapper;
 import pers.project.api.security.service.UserService;
 
@@ -23,11 +23,11 @@ import static pers.project.api.common.constant.UserConst.USER_LOGIN_STATE;
  * 针对表【user (用户) 】的数据库操作 Service 实现
  *
  * @author Luo Fei
- * @date 2023-02-25
+ * @version 2023-02-25
  */
 @Slf4j
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
 
     @Resource
     private UserMapper userMapper;
@@ -41,72 +41,72 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "参数为空");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "参数为空");
         }
         if (userAccount.length() < 4) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "用户账号过短");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "用户账号过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "用户密码过短");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "用户密码过短");
         }
         // 密码和校验密码相同
         if (!userPassword.equals(checkPassword)) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "两次输入的密码不一致");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "两次输入的密码不一致");
         }
         synchronized (userAccount.intern()) {
             // 账户不能重复
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getUserAccount, userAccount);
+            LambdaQueryWrapper<UserEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserEntity::getUserAccount, userAccount);
             long count = userMapper.selectCount(queryWrapper);
             if (count > 0) {
-                throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "账号重复");
+                throw new ServiceException(ErrorEnum.PARAMS_ERROR, "账号重复");
             }
             // 2. 加密
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
             // 3. 插入数据
-            User user = new User();
-            user.setUserAccount(userAccount);
-            user.setUserPassword(encryptPassword);
+            UserEntity userEntity = new UserEntity();
+            userEntity.setUserAccount(userAccount);
+            userEntity.setUserPassword(encryptPassword);
             // TODO: 2023/1/20 自定义签名认证
-            user.setAccessKey("default");
-            user.setSecretKey("default");
-            boolean saveResult = this.save(user);
+            userEntity.setAccessKey("default");
+            userEntity.setSecretKey("default");
+            boolean saveResult = this.save(userEntity);
             if (!saveResult) {
-                throw new ServiceException(ErrorCodeEnum.SYSTEM_ERROR, "注册失败，数据库错误");
+                throw new ServiceException(ErrorEnum.SYSTEM_ERROR, "注册失败，数据库错误");
             }
-            return user.getId();
+            return userEntity.getId();
         }
     }
 
     @Override
-    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+    public UserEntity userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "参数为空");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "参数为空");
         }
         if (userAccount.length() < 4) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "账号错误");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "账号错误");
         }
         if (userPassword.length() < 8) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "密码错误");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "密码错误");
         }
         // 2. 加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         // 查询用户是否存在
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getUserAccount, userAccount);
-        queryWrapper.eq(User::getUserPassword, encryptPassword);
-        User user = userMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<UserEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserEntity::getUserAccount, userAccount);
+        queryWrapper.eq(UserEntity::getUserPassword, encryptPassword);
+        UserEntity userEntity = userMapper.selectOne(queryWrapper);
         // 用户不存在
-        if (user == null) {
+        if (userEntity == null) {
             log.info("user login failed, userAccount cannot match userPassword");
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR, "用户不存在或密码错误");
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
         HttpSession session = request.getSession();
         System.out.println("session.getId() = " + session.getId());
-        session.setAttribute(USER_LOGIN_STATE, user);
-        return user;
+        session.setAttribute(USER_LOGIN_STATE, userEntity);
+        return userEntity;
     }
 
     /**
@@ -116,20 +116,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public User getLoginUser(HttpServletRequest request) {
+    public UserEntity getLoginUser(HttpServletRequest request) {
         // 先判断是否已登录
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new ServiceException(ErrorCodeEnum.NOT_LOGIN_ERROR);
+        UserEntity currentUserEntity = (UserEntity) userObj;
+        if (currentUserEntity == null || currentUserEntity.getId() == null) {
+            throw new ServiceException(ErrorEnum.NOT_LOGIN_ERROR);
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new ServiceException(ErrorCodeEnum.NOT_LOGIN_ERROR);
+        long userId = currentUserEntity.getId();
+        currentUserEntity = this.getById(userId);
+        if (currentUserEntity == null) {
+            throw new ServiceException(ErrorEnum.NOT_LOGIN_ERROR);
         }
-        return currentUser;
+        return currentUserEntity;
     }
 
 
@@ -141,7 +141,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean userLogout(HttpServletRequest request) {
         if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
-            throw new ServiceException(ErrorCodeEnum.OPERATION_ERROR, "未登录");
+            throw new ServiceException(ErrorEnum.OPERATION_ERROR, "未登录");
         }
         // 移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
@@ -149,14 +149,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public User getInvokeUser(String accessKey) {
+    public UserEntity getInvokeUser(String accessKey) {
         if (StringUtils.isAnyBlank(accessKey)) {
-            throw new ServiceException(ErrorCodeEnum.PARAMS_ERROR);
+            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<UserEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("access_key", accessKey);
-        User user = userMapper.selectOne(queryWrapper);
-        return user;
+        UserEntity userEntity = userMapper.selectOne(queryWrapper);
+        return userEntity;
     }
 
 }

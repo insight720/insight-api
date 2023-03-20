@@ -10,7 +10,7 @@ export default function access(initialState: { currentUser?: API.CurrentUser } |
 }
 */
 
-export default function access(initialState: { currentUser?: API.UserVO } | undefined) {
+export default function access(initialState: { currentUser?: API.UserData } | undefined) {
     const {currentUser} = initialState ?? {};
     return {
         // 用户权限

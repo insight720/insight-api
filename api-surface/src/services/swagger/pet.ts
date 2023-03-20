@@ -2,7 +2,7 @@
 /* eslint-disable */
 import {request} from '@umijs/max';
 
-/** Update an existing pet PUT /pet */
+/** update an existing pet PUT /pet */
 export async function updatePet(body: API.Pet, options?: { [key: string]: any }) {
     return request<any>('/pet', {
         method: 'PUT',
@@ -40,7 +40,7 @@ export async function getPetById(
     });
 }
 
-/** Updates a pet in the store with form data POST /pet/${param0} */
+/** updates a pet in the store with form data POST /pet/${param0} */
 export async function updatePetWithForm(
     // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
     params: API.updatePetWithFormParams,

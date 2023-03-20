@@ -15,20 +15,25 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
+import pers.project.api.common.constant.UserConst;
+import pers.project.api.common.model.entity.UserEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import static io.netty.util.CharsetUtil.UTF_8;
 import static org.springframework.cloud.gateway.filter.NettyWriteResponseFilter.WRITE_RESPONSE_FILTER_ORDER;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CACHED_REQUEST_BODY_ATTR;
+import static org.springframework.core.NestedExceptionUtils.getMostSpecificCause;
 
 /**
  * HTTP 日志过滤器
  *
  * @author Luo Fei
- * @date 2023/3/10
+ * @version 2023/3/10
  */
 @Slf4j
 @Component
@@ -65,7 +70,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
      */
     private static final String HTTP_RESPONSE_LOG_FORMAT = """
             RESPONSE_LOG
-            User ID: {}
             Request ID: {}
             StatusCode: {}
             Headers: {}
@@ -79,7 +83,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
         if (requireHttpResponseBodyLog(exchange)) {
-            // 装饰响应，增加日志记录响应的功能（包括响应体）
             response = decorateHttpResponse(exchange);
         } else {
             logHttpResponse(response, request.getId(), null);
@@ -106,13 +109,13 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     private Object[] extractRequestLogArgs(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         return new Object[]{
-                "用户名未指定",
+                getUserId(exchange),
                 request.getId(),
                 request.getMethod(),
                 request.getURI(),
                 request.getPath(),
                 request.getQueryParams(),
-                tryReadHttpRequestBody(exchange),
+                getHttpRequestBody(exchange),
                 request.getHeaders(),
                 request.getCookies(),
                 request.getLocalAddress(),
@@ -122,7 +125,29 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     }
 
     /**
-     * 尝试读取 HTTP 请求正文
+     * 获取用户 ID
+     *
+     * @return 用户 ID，可能为 null。
+     */
+    private Long getUserId(ServerWebExchange exchange) {
+        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
+        UserEntity userEntity = null;
+        try {
+            userEntity = webSessionFuture.get()
+                    .getAttribute(UserConst.USER_LOGIN_STATE);
+        } catch (Exception e) {
+            String requestId = exchange.getRequest().getId();
+            log.warn("""
+                    获取用户 ID 异常
+                    请求 ID: {}
+                    信息: {}
+                    """, requestId, getMostSpecificCause(e));
+        }
+        return userEntity == null ? null : userEntity.getId();
+    }
+
+    /**
+     * 获取 HTTP 请求正文
      * <p>
      * 使用了框架自带的 {@link CacheRequestBodyGatewayFilterFactory }，
      * 如果有缓存限制或特殊需求可以仿照源码自定义过滤器。
@@ -131,7 +156,7 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
      * @see <a href="https://springdoc.cn/spring-cloud-gateway/#cacherequestbody">
      * CacheRequestBodyGatewayFilterFactory</a>
      */
-    private Object tryReadHttpRequestBody(ServerWebExchange exchange) {
+    private Object getHttpRequestBody(ServerWebExchange exchange) {
         return exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
     }
 
@@ -177,7 +202,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
                                                        String requestID,
                                                        String responseBody) {
         return new Object[]{
-                "用户名未指定",
                 requestID,
                 response.getStatusCode(),
                 response.getHeaders(),
@@ -206,6 +230,8 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
         }
 
         @Override
+        // 抑制 null 警告
+        @SuppressWarnings("all")
         public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
             // 在响应结果返回 Gateway 后执行
             Flux<DataBuffer> bodyFlux = Flux.from(body)

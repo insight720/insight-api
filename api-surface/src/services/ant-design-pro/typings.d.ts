@@ -94,7 +94,7 @@ declare namespace API {
         avatar?: string;
         title?: string;
         status?: string;
-        datetime?: string;
+        versiontime?: string;
         description?: string;
         type?: NoticeIconItemType;
     };

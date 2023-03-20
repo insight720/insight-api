@@ -11,7 +11,7 @@ import {getApiInfoById, invokeApiInfo} from "@/services/api-facade/apiInfoContro
  */
 const Index: React.FC = () => {
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<API.ApiInfo>();
+    const [data, setData] = useState<API.ApiInfoEntity>();
     const [invokeRes, setInvokeRes] = useState<any>();
     const [invokeLoading, setInvokeLoading] = useState(false);
 

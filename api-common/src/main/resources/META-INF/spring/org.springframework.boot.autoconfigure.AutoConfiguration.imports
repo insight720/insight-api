@@ -1,0 +1,4 @@
+pers.project.api.common.config.ExceptionHandlerAutoConfig
+pers.project.api.common.config.FastJsonAutoConfig
+pers.project.api.common.config.FeignAutoConfig
+pers.project.api.common.config.SessionAutoConfig

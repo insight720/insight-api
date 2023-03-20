@@ -6,7 +6,7 @@ export type CreateModalProps = {
     onCancel: () => void;
     onSubmit: (values: API.ApiInfoAddRequest) => void;
     createModalOpen: boolean;
-    columns: ProColumns<API.ApiInfo>[]
+    columns: ProColumns<API.ApiInfoEntity>[]
 };
 
 /**
