@@ -9,7 +9,7 @@ import pers.project.api.common.model.entity.UserEntity;
  * 针对表【user (用户) 】的数据库操作 Service
  *
  * @author Luo Fei
- * @version 2023-02-25
+ * @date 2023-02-25
  */
 public interface UserService extends IService<UserEntity> {
 

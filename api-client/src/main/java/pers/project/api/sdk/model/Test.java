@@ -6,7 +6,7 @@ import lombok.Data;
  * 测试模型
  *
  * @author Luo Fei
- * @version 2023/2/25
+ * @date 2023/2/25
  */
 @Data
 public class Test {

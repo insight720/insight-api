@@ -6,7 +6,7 @@ import pers.project.api.common.model.entity.UserEntity;
 
 /**
  * @author Luo Fei
- * @version 2023/3/5
+ * @date 2023/03/05
  */
 @Mapper
 public interface UserMapper extends BaseMapper<UserEntity> {

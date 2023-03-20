@@ -15,7 +15,7 @@ import org.springframework.session.data.redis.config.annotation.web.server.Enabl
  * Session 自动配置类
  *
  * @author Luo Fei
- * @version 2023/3/14
+ * @date 2023/03/14
  */
 @AutoConfiguration
 public class SessionAutoConfig {

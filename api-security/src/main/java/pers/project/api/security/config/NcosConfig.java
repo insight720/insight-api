@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Luo Fei
- * @version 2023/3/5
+ * @date 2023/03/05
  */
 @Configuration
 @EnableDiscoveryClient

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Provider 网关过滤器工厂
  *
  * @author Luo Fei
- * @version 2023/3/10
+ * @date 2023/03/10
  * @see <a href="https://springdoc.cn/spring-cloud-gateway/#%E7%BC%96%E5%86%99%E8%87%AA%E5%AE%9A%E4%B9%89-gatewayfilter-%E5%B7%A5%E5%8E%82">编写自定义 GatewayFilter 工厂</a>
  */
 @Slf4j

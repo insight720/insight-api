@@ -15,7 +15,7 @@ import pers.project.api.facade.service.ApiInfoService;
  * 针对表【api_info (接口信息) 】的数据库操作 Service 实现
  *
  * @author Luo Fei
- * @version 2023-02-22
+ * @date 2023-02-22
  */
 @Service
 public class ApiInfoServiceImpl extends ServiceImpl<ApiInfoMapper, ApiInfoEntity> implements ApiInfoService {

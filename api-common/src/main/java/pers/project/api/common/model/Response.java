@@ -9,7 +9,7 @@ import pers.project.api.common.constant.enumeration.ErrorEnum;
  * 通用响应
  *
  * @author Luo Fei
- * @version 2023/3/14
+ * @date 2023/03/14
  */
 @Data
 @NoArgsConstructor

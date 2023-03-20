@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * 异常处理程序自动配置类
  *
  * @author Luo Fei
- * @version 2023/3/18
+ * @date 2023/03/18
  */
 @Slf4j
 @AutoConfiguration

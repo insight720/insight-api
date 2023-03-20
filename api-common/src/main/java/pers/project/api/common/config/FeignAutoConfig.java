@@ -12,7 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * Feign 自动配置
  *
  * @author Luo Fei
- * @version 2023/3/15
+ * @date 2023/03/15
  */
 @AutoConfiguration
 @EnableFeignClients(basePackages = "pers.project.api")
@@ -27,7 +27,8 @@ public class FeignAutoConfig {
     public RequestInterceptor requestInterceptor() {
         RequestInterceptor requestInterceptor = requestTemplate ->
         {
-            // TODO: 2023/3/20 新线程发起的请求会丢失上下文信息
+            // TODO: 2023/03/20 新线程发起的请求会丢失上下文信息
+//             用 RequestContextHolder.setRequestAttributes();
             // 1. feign 调用前的原始请求
             ServletRequestAttributes servletRequestAttributes
                     = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

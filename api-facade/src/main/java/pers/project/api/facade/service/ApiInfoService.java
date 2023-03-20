@@ -7,7 +7,7 @@ import pers.project.api.common.model.entity.ApiInfoEntity;
  * 针对表【api_info (接口信息) 】的数据库操作 Service
  *
  * @author Luo Fei
- * @version 2023-02-22
+ * @date 2023-02-22
  */
 public interface ApiInfoService extends IService<ApiInfoEntity> {
 

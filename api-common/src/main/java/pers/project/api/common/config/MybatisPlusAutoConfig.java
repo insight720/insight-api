@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
  * MyBatis-Plus 自动配置类
  *
  * @author Luo Fei
- * @version 2022/12/23
+ * @date 2022/12/23
  */
 @AutoConfiguration
 @ConditionalOnClass(MybatisPlusAutoConfiguration.class)

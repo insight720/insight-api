@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 用户
  *
  * @author Luo Fei
- * @version 2023-02-25
+ * @date 2023-02-25
  */
 @Data
 @TableName(value = "user")

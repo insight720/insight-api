@@ -11,7 +11,7 @@ import pers.project.api.common.model.entity.UserEntity;
  * Security 远程服务
  *
  * @author Luo Fei
- * @version 2023/3/5
+ * @date 2023/03/05
  */
 @FeignClient(name = "gateway", contextId = "security", path = "/gateway/security")
 public interface SecurityFeignService {

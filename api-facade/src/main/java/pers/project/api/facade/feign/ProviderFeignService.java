@@ -1,15 +1,17 @@
 package pers.project.api.facade.feign;
 
-import feign.RequestLine;
 import jakarta.servlet.http.Cookie;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
  * @author Luo Fei
- * @version 2023/3/17
+ * @date 2023/03/17
  */
 @FeignClient("gateway")
 public interface ProviderFeignService {

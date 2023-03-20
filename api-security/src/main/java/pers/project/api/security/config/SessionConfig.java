@@ -9,7 +9,7 @@ import pers.project.api.security.SecurityApplication;
 
 /**
  * @author Luo Fei
- * @version 2023/3/9
+ * @date 2023/03/09
  */
 @Configuration
 public class SessionConfig {

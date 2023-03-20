@@ -7,7 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
  * 签名工具类
  *
  * @author Luo Fei
- * @version 2023/3/16
+ * @date 2023/03/16
  */
 public abstract class SignUtils {
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.project.api.facade.mapper.ApiFormatMapper">
+
+    <resultMap id="BaseResultMap" type="pers.project.api.facade.model.entity.ApiFormat">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="digestId" column="digest_id" jdbcType="BIGINT"/>
+            <result property="requestParam" column="request_param" jdbcType="VARCHAR"/>
+            <result property="requestHeader" column="request_header" jdbcType="VARCHAR"/>
+            <result property="requestBody" column="request_body" jdbcType="VARCHAR"/>
+            <result property="responseHeader" column="response_header" jdbcType="VARCHAR"/>
+            <result property="responseBody" column="response_body" jdbcType="VARCHAR"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,digest_id,request_param,
+        request_header,request_body,response_header,
+        response_body,is_deleted,create_time,
+        update_time
+    </sql>
+
+</mapper>

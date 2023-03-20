@@ -9,7 +9,7 @@ import lombok.Getter;
  * 用户校验请求的请求头。
  *
  * @author Luo Fei
- * @version 2023/3/10
+ * @date 2023/03/10
  */
 @Getter
 @AllArgsConstructor

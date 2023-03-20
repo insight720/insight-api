@@ -10,7 +10,7 @@ import static pers.project.api.common.constant.enumeration.ErrorEnum.NO_ERROR;
  * 结果工具类
  *
  * @author Luo Fei
- * @version 2023/3/14
+ * @date 2023/03/14
  */
 public abstract class ResponseUtils {
 

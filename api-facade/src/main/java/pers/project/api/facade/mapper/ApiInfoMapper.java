@@ -8,7 +8,7 @@ import pers.project.api.common.model.entity.ApiInfoEntity;
  * 针对表【api_info (接口信息) 】的数据库操作 Mapper
  *
  * @author Luo Fei
- * @version 2023-02-22
+ * @date 2023-02-22
  */
 @Mapper
 public interface ApiInfoMapper extends BaseMapper<ApiInfoEntity> {

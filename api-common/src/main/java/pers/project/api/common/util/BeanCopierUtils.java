@@ -10,7 +10,7 @@ import org.springframework.cglib.beans.BeanCopier;
  * BeanCopier 工具类
  *
  * @author Luo Fei
- * @version 2023/3/15
+ * @date 2023/03/15
  */
 public abstract class BeanCopierUtils {
 

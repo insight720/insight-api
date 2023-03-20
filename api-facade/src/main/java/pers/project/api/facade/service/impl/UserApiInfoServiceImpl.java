@@ -14,7 +14,7 @@ import pers.project.api.facade.service.UserApiInfoService;
  * 针对表【user_api_info (用户调用接口关系) 】的数据库操作 Service 实现
  *
  * @author Luo Fei
- * @version 2023-02-27
+ * @date 2023-02-27
  */
 @Service
 public class UserApiInfoServiceImpl extends ServiceImpl<UserApiInfoMapper, UserEntity> implements UserApiInfoService {

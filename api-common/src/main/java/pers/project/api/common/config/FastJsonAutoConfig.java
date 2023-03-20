@@ -27,7 +27,7 @@ import java.util.List;
  * FastJson 自动配置类
  *
  * @author Luo Fei
- * @version 2023/3/15
+ * @date 2023/03/15
  * @see <a href="https://github.com/alibaba/fastjson2/blob/main/docs/spring_support_cn.md">FastJson2 配置</a>
  */
 @AutoConfiguration

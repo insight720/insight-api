@@ -8,7 +8,7 @@ import pers.project.api.sdk.client.TestClient;
 
 /**
  * @author Luo Fei
- * @version 2023/1/21
+ * @date 2023/1/21
  */
 @Data
 @AutoConfiguration

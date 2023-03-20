@@ -23,7 +23,7 @@ import static pers.project.api.common.constant.UserConst.USER_LOGIN_STATE;
  * 针对表【user (用户) 】的数据库操作 Service 实现
  *
  * @author Luo Fei
- * @version 2023-02-25
+ * @date 2023-02-25
  */
 @Slf4j
 @Service

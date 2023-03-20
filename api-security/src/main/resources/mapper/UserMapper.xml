@@ -25,4 +25,5 @@
         user_password,access_key,secret_key,
         create_time,update_time,is_delete
     </sql>
+
 </mapper>

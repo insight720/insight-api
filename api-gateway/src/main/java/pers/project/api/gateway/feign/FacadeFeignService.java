@@ -11,7 +11,7 @@ import pers.project.api.common.model.entity.ApiInfoEntity;
  * Facade 远程服务
  *
  * @author Luo Fei
- * @version 2023/3/9
+ * @date 2023/03/09
  */
 @FeignClient(name = "gateway", contextId = "facade", path = "/gateway/facade")
 public interface FacadeFeignService {

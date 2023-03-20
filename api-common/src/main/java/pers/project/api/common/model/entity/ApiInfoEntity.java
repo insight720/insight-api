@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import org.springframework.web.bind.annotation.GetMapping;
 
-import java.net.http.HttpClient;
 import java.time.LocalDateTime;
 
 
@@ -14,7 +12,7 @@ import java.time.LocalDateTime;
  * 接口信息
  *
  * @author Luo Fei
- * @version 2023-02-22
+ * @date 2023-02-22
  */
 @Data
 @TableName(value = "api_info")

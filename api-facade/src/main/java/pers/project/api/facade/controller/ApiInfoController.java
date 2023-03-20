@@ -37,7 +37,7 @@ import static pers.project.api.common.constant.UserConst.USER_LOGIN_STATE;
  * 接口信息控制器
  *
  * @author Luo Fei
- * @version 2023/3/9
+ * @date 2023/03/09
  */
 @RestController
 public class ApiInfoController {
@@ -51,7 +51,7 @@ public class ApiInfoController {
     @Resource
     private ProviderFeignService providerFeignService;
 
-    // TODO: 2023/3/9 权限校验
+    // TODO: 2023/03/9 权限校验
     /**
      * 测试调用
      *
@@ -251,7 +251,7 @@ public class ApiInfoController {
      */
     @PostMapping("/online")
     public Response<Boolean> onlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
-        // TODO: 2023/3/6 调用次数
+        // TODO: 2023/03/6 调用次数
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }

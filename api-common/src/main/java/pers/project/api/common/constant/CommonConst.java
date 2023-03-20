@@ -4,7 +4,7 @@ package pers.project.api.common.constant;
  * 通用常量
  *
  * @author Luo Fei
- * @version 2023/3/14
+ * @date 2023/03/14
  */
 public abstract class CommonConst {
 
