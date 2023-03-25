@@ -34,6 +34,8 @@ spring:
         server-addr:
         username:
         password:
+  main:
+    web-application-type: reactive
 logging:
   level:
     org.springframework.cloud.gateway: info

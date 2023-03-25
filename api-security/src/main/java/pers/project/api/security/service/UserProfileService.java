@@ -11,4 +11,5 @@ import pers.project.api.security.model.entity.UserProfile;
  */
 public interface UserProfileService extends IService<UserProfile> {
 
+
 }

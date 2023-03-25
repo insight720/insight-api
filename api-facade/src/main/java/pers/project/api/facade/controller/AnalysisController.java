@@ -1,26 +1,11 @@
 package pers.project.api.facade.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pers.project.api.common.enums.ErrorCodeEnum;
-import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.dto.response.BaseResponse;
-import pers.project.api.common.model.entity.ApiInfo;
-import pers.project.api.common.util.ResultUtils;
 import pers.project.api.facade.mapper.ApiInfoMapper;
 import pers.project.api.facade.mapper.UserApiInfoMapper;
-import pers.project.api.facade.model.entity.UserApiInfo;
-import pers.project.api.facade.model.vo.ApiInfoVO;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 分析控制器
@@ -36,7 +21,7 @@ public class AnalysisController {
     @Resource
     private ApiInfoMapper apiInfoMapper;
 
-    @GetMapping("/top/api/invoke")
+/*    @GetMapping("/top/api/invoke")
     public BaseResponse<List<ApiInfoVO>> listTopInvokeApiInfo() {
         List<UserApiInfo> userApiInfoList = userApiInfoMapper.listTopInvokeApiInfo(3);
         Map<Long, List<UserApiInfo>> apiInfoIdObjMap = userApiInfoList.stream()
@@ -55,6 +40,6 @@ public class AnalysisController {
             return apiInfoVO;
         }).collect(Collectors.toList());
         return ResultUtils.success(apiInfoVOList);
-    }
+    }*/
 
 }

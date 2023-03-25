@@ -1,8 +1,8 @@
 package pers.project.api.common.util;
 
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.SneakyThrows;
 import org.springframework.cglib.beans.BeanCopier;
 
@@ -14,8 +14,9 @@ import org.springframework.cglib.beans.BeanCopier;
  */
 public abstract class BeanCopierUtils {
 
-    private static final Cache<BeanCopierId, BeanCopier>
-            BEAN_COPIER_CACHE = Caffeine.newBuilder().build();
+    public static final LoadingCache<BeanCopierId, BeanCopier>
+            BEAN_COPIER_CACHE = Caffeine.newBuilder().build
+            (id -> BeanCopier.create(id.source, id.target, false));
 
     private record BeanCopierId(Class<?> source, Class<?> target) {
     }
@@ -32,8 +33,7 @@ public abstract class BeanCopierUtils {
      */
     public static void copyProperties(Object source, Object target) {
         BeanCopierId copierId = new BeanCopierId(source.getClass(), target.getClass());
-        BeanCopier beanCopier = BEAN_COPIER_CACHE.get(copierId,
-                id -> BeanCopier.create(id.source, id.target, false));
+        BeanCopier beanCopier = BEAN_COPIER_CACHE.get(copierId);
         beanCopier.copy(source, target, null);
     }
 
@@ -46,8 +46,10 @@ public abstract class BeanCopierUtils {
      * @param tClass 目标类的 Class 对象
      * @return 目标类对象
      * @see BeanCopierUtils#copyProperties(Object, Object)
+     * @deprecated 使用 new 创建目标类对象效率更高。
      */
     @SneakyThrows
+    @Deprecated(forRemoval = true)
     public static <T> T copy(Object source, Class<T> tClass) {
         T target = tClass.getDeclaredConstructor().newInstance();
         if (source != null) {

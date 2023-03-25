@@ -15,6 +15,8 @@ import pers.project.api.security.service.UserProfileService;
 @Service
 public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfile> implements UserProfileService {
 
+
+
 }
 
 

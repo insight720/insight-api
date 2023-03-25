@@ -3,8 +3,6 @@ package pers.project.api.facade.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.constant.enumeration.ErrorEnum;
-import pers.project.api.common.exception.ServiceException;
 import pers.project.api.facade.mapper.UserApiInfoMapper;
 import pers.project.api.facade.model.entity.UserEntity;
 import pers.project.api.facade.service.UserApiInfoService;
@@ -28,7 +26,7 @@ public class UserApiInfoServiceImpl extends ServiceImpl<UserApiInfoMapper, UserE
     public boolean invokeCount(long apiInfoId, long userId) {
         // 判断
         if (apiInfoId <= 0 || userId <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+//
         }
         UpdateWrapper<UserEntity> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("api_info_id", apiInfoId);

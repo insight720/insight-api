@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pers.project.api.common.model.Response;
-import pers.project.api.common.util.ResponseUtils;
+import pers.project.api.common.model.Result;
+import pers.project.api.common.util.ResultUtils;
 import pers.project.api.facade.service.UserApiInfoService;
 
 
@@ -28,9 +28,9 @@ public class UserApiInfoController {
 
     // /userApiInfo
     @GetMapping("/invokeCount")
-    public Response<Boolean> invokeCount(@RequestParam("apiInfoId") long apiInfoId,
-                                         @RequestParam("userId") long userId) {
-        return ResponseUtils.success(userApiInfoService.invokeCount(apiInfoId, userId));
+    public Result<Boolean> invokeCount(@RequestParam("apiInfoId") long apiInfoId,
+                                       @RequestParam("userId") long userId) {
+        return ResultUtils.success(userApiInfoService.invokeCount(apiInfoId, userId));
     }
 
 }

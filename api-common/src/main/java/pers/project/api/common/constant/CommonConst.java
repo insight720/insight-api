@@ -6,16 +6,17 @@ package pers.project.api.common.constant;
  * @author Luo Fei
  * @date 2023/03/14
  */
-public abstract class CommonConst {
+
+public interface CommonConst {
 
     /**
      * 升序
      */
-    public static final String SORT_ORDER_ASC = "ascend";
+    String SORT_ORDER_ASC = "ascend";
 
     /**
      * 降序
      */
-    public static final String SORT_ORDER_DESC = " descend";
+    String SORT_ORDER_DESC = " descend";
 
 }

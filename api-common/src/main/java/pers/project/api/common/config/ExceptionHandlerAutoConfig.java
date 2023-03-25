@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pers.project.api.common.constant.enumeration.ErrorEnum;
-import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.Response;
-import pers.project.api.common.util.ResponseUtils;
+import pers.project.api.common.exception.BusinessException;
+import pers.project.api.common.model.Result;
+import pers.project.api.common.util.ResultUtils;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -31,23 +31,23 @@ import java.util.stream.Collectors;
 @ConditionalOnWebApplication(type = Type.SERVLET)
 public class ExceptionHandlerAutoConfig {
 
-    @ExceptionHandler(value = ServiceException.class)
+    @ExceptionHandler(value = BusinessException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response<Void> serviceException(HttpServletRequest request,
-                                           ServiceException exception) {
+    public Result<Void> serviceException(HttpServletRequest request,
+                                         BusinessException exception) {
         if (log.isDebugEnabled()) {
             log.warn("服务异常: {}", exception.getMessage());
             log.warn("服务异常 URI: {}", request.getRequestURI());
         }
-        return ResponseUtils.failure(exception);
+        return ResultUtils.failure(exception.getErrorEnum(), exception.getMessage());
     }
 
     // region 参数验证
 
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Response<Void> constraintViolationException(HttpServletRequest request,
-                                                       ConstraintViolationException exception) {
+    public Result<Void> constraintViolationException(HttpServletRequest request,
+                                                     ConstraintViolationException exception) {
         // 参数验证异常: methodName.fieldName: message, methodName.fieldName: message
         String message = exception.getMessage();
         log.warn("参数验证异常: {}", message);
@@ -56,12 +56,12 @@ public class ExceptionHandlerAutoConfig {
         String content = Arrays.stream(message.split(","))
                 .map(s -> s.trim().substring(s.indexOf('.') + 1))
                 .collect(Collectors.joining(", "));
-        return ResponseUtils.failure(ErrorEnum.PARAMS_ERROR, content);
+        return ResultUtils.failure(ErrorEnum.PARAM_ERROR, message);
     }
 
     @ExceptionHandler(value = BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Response<Void> bindException(HttpServletRequest request, BindException exception) {
+    public Result<Void> bindException(HttpServletRequest request, BindException exception) {
         // 参数验证异常: objectName.fieldName: message
         String objectName = exception.getBindingResult().getObjectName();
         String message = exception.getFieldErrors()
@@ -71,17 +71,17 @@ public class ExceptionHandlerAutoConfig {
                 .collect(Collectors.joining(", "));
         log.warn("参数验证异常: {}", message);
         log.warn("参数验证异常 URI: {}", request.getRequestURI());
-        return ResponseUtils.failure(ErrorEnum.PARAMS_ERROR, message);
+        return ResultUtils.failure(ErrorEnum.PARAM_ERROR, message);
     }
 
     // endregion
 
     @ExceptionHandler(value = Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Response<Void> throwable(HttpServletRequest request, Throwable throwable) {
+    public Result<Void> throwable(HttpServletRequest request, Throwable throwable) {
         log.error("未知异常: ", throwable);
         log.error("未知异常 URI: {}", request.getRequestURI());
-        return ResponseUtils.failure(ErrorEnum.SYSTEM_ERROR);
+        return ResultUtils.failure(ErrorEnum.SERVER_ERROR);
     }
 
 }

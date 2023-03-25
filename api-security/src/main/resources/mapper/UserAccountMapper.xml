@@ -5,23 +5,25 @@
 <mapper namespace="pers.project.api.security.mapper.UserAccountMapper">
 
     <resultMap id="BaseResultMap" type="pers.project.api.security.model.entity.UserAccount">
-        <id property="id" column="id" jdbcType="BIGINT"/>
-        <result property="account" column="account" jdbcType="VARCHAR"/>
-        <result property="password" column="password" jdbcType="VARCHAR"/>
-        <result property="authority" column="authority" jdbcType="VARCHAR"/>
-        <result property="accountKey" column="account_key" jdbcType="VARCHAR"/>
-        <result property="accessKey" column="access_key" jdbcType="VARCHAR"/>
-        <result property="accountStatus" column="account_status" jdbcType="TINYINT"/>
-        <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
-        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="phoneNumber" column="phone_number" jdbcType="VARCHAR"/>
+            <result property="authority" column="authority" jdbcType="VARCHAR"/>
+            <result property="accountKey" column="account_key" jdbcType="VARCHAR"/>
+            <result property="accessKey" column="access_key" jdbcType="VARCHAR"/>
+            <result property="accountStatus" column="account_status" jdbcType="TINYINT"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,account,password,
-        authority,account_key,access_key,
-        account_status,is_deleted,create_time,
-        update_time
+        id,username,password,
+        email,phone_number,authority,
+        account_key,access_key,account_status,
+        is_deleted,create_time,update_time
     </sql>
 
 </mapper>

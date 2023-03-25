@@ -6,11 +6,11 @@ package pers.project.api.common.constant;
  * @author Luo Fei
  * @date 2023/03/14
  */
-public abstract class UserConst {
+public interface UserConst {
 
     /**
      * 用户登录态键
      */
-    public static final String USER_LOGIN_STATE = "userLoginState";
+    String USER_LOGIN_STATE = "userLoginState";
 
 }

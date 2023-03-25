@@ -6,78 +6,63 @@ import {SettingDrawer} from '@ant-design/pro-components';
 import type {RunTimeLayoutConfig} from '@umijs/max';
 import {history, Link} from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
-import {requestConfig} from '../config/requestConfig';
+import {requestConfig} from './requestConfig';
 import React from 'react';
 import {AvatarDropdown, AvatarName} from './components/RightContent/AvatarDropdown';
-import {getLoginUser} from "@/services/api-security/userController";
 import {InitialState} from "@/typings";
+import {message} from "antd";
+import {autoGetCsrfToken} from "@/services/api-security/securityController";
+import {fetchLoginUserInfo} from "@/services/api-security/userDetailsController";
 
 const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/user/login';
+const loginPath = '/login';
 
 /**
- * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
- * */
-
-/*
-export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
-}> {
-
-  const fetchUserInfo = async () => {
+ * 获取 CSRF 令牌
+ */
+const fetchCsrfToken = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
-    } catch (error) {
-      history.push(loginPath);
+        const result = await autoGetCsrfToken();
+        return result.data;
+    } catch (error: any) {
+        message.error(error.message || '服务器内部错误，请重试！');
+        history.push(loginPath);
     }
     return undefined;
-  };
-  // 如果不是登录页面，执行
-  const { location } = history;
-  if (location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
-    return {
-      fetchUserInfo,
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
-  }
-  return {
-    fetchUserInfo,
-    settings: defaultSettings as Partial<LayoutSettings>,
-  };
-}
-*/
+};
+
+/**
+ * 获取用户信息
+ */
+const fetchUserInfo = async () => {
+    try {
+        const result = await fetchLoginUserInfo();
+        return result.data;
+    } catch (error: any) {
+        message.error(error.message || '用户未登录');
+        history.push(loginPath);
+    }
+    return undefined;
+};
+
 /**
  * 页面初始状态
+ *
+ * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  */
 export async function getInitialState(): Promise<InitialState> {
-
-    const fetchUserInfo = async () => {
-        try {
-            const msg = await getLoginUser();
-            return msg.data;
-        } catch (error) {
-            history.push(loginPath);
-        }
-        return undefined;
-    };
     // 如果不是登录页面，执行
     const {location} = history;
     if (location.pathname !== loginPath) {
         const currentUser = await fetchUserInfo();
         return {
-            fetchUserInfo,
             currentUser,
+            fetchUserInfo,
             settings: defaultSettings as Partial<LayoutSettings>,
         };
     }
+    // 登陆页面获取 CsrfToken（无需获取数据，它会自动保存在 Cookie 中）
+    await fetchCsrfToken();
     return {
         fetchUserInfo,
         settings: defaultSettings as Partial<LayoutSettings>,
@@ -89,16 +74,14 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
     return {
         actionsRender: () => [<Question key="doc"/>, <SelectLang key="SelectLang"/>],
         avatarProps: {
-            // src: initialState?.currentUser?.avatar,
-            src: initialState?.currentUser?.userAvatar,
+            src: initialState?.currentUser?.avatar,
             title: <AvatarName/>,
             render: (_, avatarChildren) => {
                 return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
             },
         },
         waterMarkProps: {
-            // content: initialState?.currentUser?.name,
-            content: initialState?.currentUser?.userName,
+            content: initialState?.currentUser?.username,
         },
         footerRender: () => <Footer/>,
         onPageChange: () => {
@@ -169,6 +152,5 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request = {
-    // ...errorConfig,
     ...requestConfig,
 };

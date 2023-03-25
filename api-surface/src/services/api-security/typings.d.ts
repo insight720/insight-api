@@ -1,66 +1,42 @@
 declare namespace API {
-    type BaseResponseBoolean = {
-        code?: number;
-        data?: boolean;
-        message?: string;
-    };
+  type CustomCsrfToken = {
+    tokenValue?: string;
+  };
 
-    type BaseResponseLong = {
-        code?: number;
-        data?: number;
-        message?: string;
-    };
+  type LoginUserDTO = {
+    username?: string;
+    email?: string;
+    phoneNumber?: string;
+    authority?: string;
+    accountStatus?: number;
+    profileId?: number;
+    accountId?: number;
+    nickname?: string;
+    avatar?: string;
+    biography?: string;
+  };
 
-    type BaseResponseUser = {
-        code?: number;
-        data?: User;
-        message?: string;
-    };
+  type ResultCustomCsrfToken = {
+    code?: string;
+    message?: string;
+    data?: CustomCsrfToken;
+  };
 
-    type BaseResponseUserVO = {
-        code?: number;
-        data?: UserVO;
-        message?: string;
-    };
+  type ResultLoginUserDTO = {
+    code?: string;
+    message?: string;
+    data?: LoginUserDTO;
+  };
 
-    type getInvokeUserParams = {
-        accessKey: string;
-    };
+  type ResultVoid = {
+    code?: string;
+    message?: string;
+    data?: Record<string, any>;
+  };
 
-    type User = {
-        id?: number;
-        userName?: string;
-        userAccount?: string;
-        userAvatar?: string;
-        gender?: number;
-        userRole?: string;
-        userPassword?: string;
-        accessKey?: string;
-        secretKey?: string;
-        createTime?: string;
-        updateTime?: string;
-        isDelete?: number;
-    };
-
-    type UserLoginRequest = {
-        userAccount?: string;
-        userPassword?: string;
-    };
-
-    type UserRegisterRequest = {
-        userAccount?: string;
-        userPassword?: string;
-        checkPassword?: string;
-    };
-
-    type UserVO = {
-        id?: number;
-        userName?: string;
-        userAccount?: string;
-        userAvatar?: string;
-        gender?: number;
-        userRole?: string;
-        createTime?: string;
-        updateTime?: string;
-    };
+  type UserRegistryVO = {
+    username: string;
+    password: string;
+    confirmedPassword: string;
+  };
 }

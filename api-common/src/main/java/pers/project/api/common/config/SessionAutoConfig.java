@@ -1,15 +1,16 @@
 package pers.project.api.common.config;
 
-import com.alibaba.fastjson2.support.spring6.data.redis.GenericFastJsonRedisSerializer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.session.FlushMode;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisWebSession;
+import pers.project.api.common.handler.CustomFastJsonRedisSerializer;
 
 /**
  * Session 自动配置类
@@ -17,16 +18,22 @@ import org.springframework.session.data.redis.config.annotation.web.server.Enabl
  * @author Luo Fei
  * @date 2023/03/14
  */
+@Slf4j
 @AutoConfiguration
 public class SessionAutoConfig {
 
     @Bean
-    @ConditionalOnMissingBean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
-        return new GenericFastJsonRedisSerializer();
+        return new CustomFastJsonRedisSerializer(new String[]{
+                "org.springframework.security.core.context.SecurityContextImpl",
+                "org.springframework.security.authentication.UsernamePasswordAuthenticationToken",
+                "org.springframework.security.web.authentication.WebAuthenticationDetails",
+                "pers.project.api.security.handler.CustomizedGrantedAuthority",
+                "pers.project.api.security.model.CustomUserDetails"
+        });
     }
 
-    @EnableRedisHttpSession
+    @EnableRedisIndexedHttpSession(flushMode = FlushMode.IMMEDIATE)
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = Type.SERVLET)
     public static class HttpSessionConfig {

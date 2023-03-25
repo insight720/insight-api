@@ -36,16 +36,6 @@ public class UserProfile {
     private Long accountId;
 
     /**
-     * 邮箱
-     */
-    private String email;
-
-    /**
-     * 手机号
-     */
-    private String mobilePhone;
-
-    /**
      * 昵称
      */
     private String nickname;

@@ -26,7 +26,7 @@ declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;
  */
 interface InitialState {
     settings?: Partial<LayoutSettings>;
-    currentUser?: API.UserVO;
+    currentUser?: API.LoginUserDTO;
     loading?: boolean;
-    fetchUserInfo?: () => Promise<API.UserVO | undefined>;
+    fetchUserInfo?: () => Promise<API.LoginUserDTO | undefined>;
 }

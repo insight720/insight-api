@@ -62,6 +62,7 @@ export default [
         component: './404',
       },
     */
+    // 欢迎页
     {
         path: '/',
         redirect: '/welcome',
@@ -72,22 +73,19 @@ export default [
         icon: 'smile',
         component: './Welcome',
     },
+    // 错误页
     {
         path: '*',
         layout: false,
         component: './404',
     },
+    // 登录页
     {
-        path: '/user',
+        path: '/login',
         layout: false,
-        routes: [
-            {
-                name: 'login',
-                path: '/user/login',
-                component: './User/Login',
-            },
-        ],
+        component: './Login',
     },
+    // 用户页面
     {
         path: '/user',
         name: '用户页',
@@ -110,6 +108,7 @@ export default [
             },
         ],
     },
+    // 管理员页面
     {
         path: '/admin',
         name: 'admin',

@@ -11,14 +11,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.constant.CommonConst;
-import pers.project.api.common.constant.enumeration.ErrorEnum;
-import pers.project.api.common.exception.ServiceException;
-import pers.project.api.common.model.Response;
+import pers.project.api.common.model.Result;
 import pers.project.api.common.model.entity.ApiInfoEntity;
 import pers.project.api.common.model.entity.UserEntity;
 import pers.project.api.common.model.request.DeleteRequest;
 import pers.project.api.common.model.request.IdRequest;
-import pers.project.api.common.util.ResponseUtils;
+import pers.project.api.common.util.ResultUtils;
 import pers.project.api.facade.feign.ProviderFeignService;
 import pers.project.api.facade.model.request.apiinfo.ApiInfoAddRequest;
 import pers.project.api.facade.model.request.apiinfo.ApiInfoInvokeRequest;
@@ -60,18 +58,18 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/invoke")
-    public Response<Object> invokeApiInfo(@RequestBody ApiInfoInvokeRequest apiInfoInvokeRequest, HttpServletRequest request) {
+    public Result<Object> invokeApiInfo(@RequestBody ApiInfoInvokeRequest apiInfoInvokeRequest, HttpServletRequest request) {
         if (apiInfoInvokeRequest == null || apiInfoInvokeRequest.getId() <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+//            2023/03/21
         }
         long id = apiInfoInvokeRequest.getId();
         // 判断是否存在
         ApiInfoEntity oldInterfaceInfo = apiInfoService.getById(id);
         if (oldInterfaceInfo == null) {
-            throw new ServiceException(ErrorEnum.NOT_FOUND_ERROR);
+//            
         }
         if (oldInterfaceInfo.getStatus() == 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR, "接口已关闭");
+//            (ErrorEnum.PARAMS_ERROR, "接口已关闭");
         }
         UserEntity loginUserEntity = getLoginUser(request);
         String accessKey = loginUserEntity.getAccessKey();
@@ -87,7 +85,7 @@ public class ApiInfoController {
             HttpHeaders httpHeaders = tempClient.getHeaders(requestParams);
             testResult = providerFeignService.get("test", httpHeaders, cookies[0]);
         }
-        return ResponseUtils.success(testResult);
+        return ResultUtils.success(testResult);
     }
 
     // region 增删改查
@@ -100,9 +98,9 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/add")
-    public Response<Long> addApiInfo(@RequestBody ApiInfoAddRequest apiInfoAddRequest, HttpServletRequest request) {
+    public Result<Long> addApiInfo(@RequestBody ApiInfoAddRequest apiInfoAddRequest, HttpServletRequest request) {
         if (apiInfoAddRequest == null) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         ApiInfoEntity apiInfoEntity = new ApiInfoEntity();
         BeanUtils.copyProperties(apiInfoAddRequest, apiInfoEntity);
@@ -112,10 +110,10 @@ public class ApiInfoController {
         apiInfoEntity.setUserId(loginUserEntity.getId());
         boolean result = apiInfoService.save(apiInfoEntity);
         if (!result) {
-            throw new ServiceException(ErrorEnum.OPERATION_ERROR);
+//            (ErrorEnum.OPERATION_ERROR);
         }
         long newApiInfoId = apiInfoEntity.getId();
-        return ResponseUtils.success(newApiInfoId);
+        return ResultUtils.success(newApiInfoId);
     }
 
     /**
@@ -126,23 +124,22 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/delete")
-    public Response<Boolean> deleteApiInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public Result<Boolean> deleteApiInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
         }
         UserEntity userEntity = getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            throw new ServiceException(ErrorEnum.NOT_FOUND_ERROR);
+            
         }
         // 仅本人或管理员可删除
         if (!oldApiInfoEntity.getUserId().equals(userEntity.getId())) {
-            throw new ServiceException(ErrorEnum.NO_AUTH_ERROR);
+            
         }
         boolean b = apiInfoService.removeById(id);
-        return ResponseUtils.success(b);
+        return ResultUtils.success(b);
     }
 
     /**
@@ -153,9 +150,9 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/update")
-    public Response<Boolean> updateApiInfo(@RequestBody ApiInfoUpdateRequest apiInfoupdateRequest, HttpServletRequest request) {
+    public Result<Boolean> updateApiInfo(@RequestBody ApiInfoUpdateRequest apiInfoupdateRequest, HttpServletRequest request) {
         if (apiInfoupdateRequest == null || apiInfoupdateRequest.getId() <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         ApiInfoEntity apiInfoEntity = new ApiInfoEntity();
         BeanUtils.copyProperties(apiInfoupdateRequest, apiInfoEntity);
@@ -166,14 +163,14 @@ public class ApiInfoController {
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            throw new ServiceException(ErrorEnum.NOT_FOUND_ERROR);
+            
         }
         // 仅本人或管理员可修改
         if (!oldApiInfoEntity.getUserId().equals(userEntity.getId())) {
-            throw new ServiceException(ErrorEnum.NO_AUTH_ERROR);
+            
         }
         boolean result = apiInfoService.updateById(apiInfoEntity);
-        return ResponseUtils.success(result);
+        return ResultUtils.success(result);
     }
 
     /**
@@ -183,12 +180,12 @@ public class ApiInfoController {
      * @return
      */
     @GetMapping("/get")
-    public Response<ApiInfoEntity> getApiInfoById(long id) {
+    public Result<ApiInfoEntity> getApiInfoById(long id) {
         if (id <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         ApiInfoEntity apiInfoEntity = apiInfoService.getById(id);
-        return ResponseUtils.success(apiInfoEntity);
+        return ResultUtils.success(apiInfoEntity);
     }
 
     /**
@@ -198,14 +195,14 @@ public class ApiInfoController {
      * @return
      */
     @GetMapping("/list")
-    public Response<List<ApiInfoEntity>> listApiInfo(ApiInfoQueryRequest apiInfoQueryRequest) {
+    public Result<List<ApiInfoEntity>> listApiInfo(ApiInfoQueryRequest apiInfoQueryRequest) {
         ApiInfoEntity apiInfoEntityQuery = new ApiInfoEntity();
         if (apiInfoQueryRequest != null) {
             BeanUtils.copyProperties(apiInfoQueryRequest, apiInfoEntityQuery);
         }
         QueryWrapper<ApiInfoEntity> queryWrapper = new QueryWrapper<>(apiInfoEntityQuery);
         List<ApiInfoEntity> apiInfoEntityList = apiInfoService.list(queryWrapper);
-        return ResponseUtils.success(apiInfoEntityList);
+        return ResultUtils.success(apiInfoEntityList);
     }
 
     /**
@@ -216,9 +213,9 @@ public class ApiInfoController {
      * @return
      */
     @GetMapping("/list/page")
-    public Response<Page<ApiInfoEntity>> listApiInfoByPage(ApiInfoQueryRequest apiInfoQueryRequest, HttpServletRequest request) {
+    public Result<Page<ApiInfoEntity>> listApiInfoByPage(ApiInfoQueryRequest apiInfoQueryRequest, HttpServletRequest request) {
         if (apiInfoQueryRequest == null) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         ApiInfoEntity apiInfoEntityQuery = new ApiInfoEntity();
         BeanUtils.copyProperties(apiInfoQueryRequest, apiInfoEntityQuery);
@@ -231,13 +228,13 @@ public class ApiInfoController {
         apiInfoEntityQuery.setDescription(null);
         // 限制爬虫
         if (size > 50) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         QueryWrapper<ApiInfoEntity> queryWrapper = new QueryWrapper<>(apiInfoEntityQuery);
         queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField), sortOrder.equals(CommonConst.SORT_ORDER_ASC), sortField);
         Page<ApiInfoEntity> apiInfoPage = apiInfoService.page(new Page<>(current, size), queryWrapper);
-        return ResponseUtils.success(apiInfoPage);
+        return ResultUtils.success(apiInfoPage);
     }
 
     // endregion
@@ -250,16 +247,16 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/online")
-    public Response<Boolean> onlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+    public Result<Boolean> onlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
         // TODO: 2023/03/6 调用次数
         if (idRequest == null || idRequest.getId() <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         long id = idRequest.getId();
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            throw new ServiceException(ErrorEnum.NOT_FOUND_ERROR);
+            
         }
         // 判断该接口是否可以调用
         Test test = new Test();
@@ -268,14 +265,14 @@ public class ApiInfoController {
         Cookie session = cookies[0];
         String response = testClient.post(test, session.getName(), session.getValue());
         if (StringUtils.isBlank(response)) {
-            throw new ServiceException(ErrorEnum.SYSTEM_ERROR, "接口验证失败");
+//            (ErrorEnum.SYSTEM_ERROR, "接口验证失败");
         }
         // 仅本人或管理员可修改
         ApiInfoEntity ApiInfoEntity = new ApiInfoEntity();
         ApiInfoEntity.setId(id);
         ApiInfoEntity.setStatus(1);
         boolean result = apiInfoService.updateById(ApiInfoEntity);
-        return ResponseUtils.success(result);
+        return ResultUtils.success(result);
     }
 
     /**
@@ -286,30 +283,30 @@ public class ApiInfoController {
      * @return
      */
     @PostMapping("/offline")
-    public Response<Boolean> offlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+    public Result<Boolean> offlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
         if (idRequest == null || idRequest.getId() <= 0) {
-            throw new ServiceException(ErrorEnum.PARAMS_ERROR);
+
         }
         long id = idRequest.getId();
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            throw new ServiceException(ErrorEnum.NOT_FOUND_ERROR);
+            
         }
         // 仅本人或管理员可修改
         ApiInfoEntity ApiInfoEntity = new ApiInfoEntity();
         ApiInfoEntity.setId(id);
         ApiInfoEntity.setStatus(0);
         boolean result = apiInfoService.updateById(ApiInfoEntity);
-        return ResponseUtils.success(result);
+        return ResultUtils.success(result);
     }
 
 
 
     // /apiInfo
     @GetMapping("/getApiInfo")
-    public Response<ApiInfoEntity> getApiInfo(@RequestParam("url") String url, @RequestParam("method") String method) {
-        return ResponseUtils.success(apiInfoService.getApiInfo(url, method));
+    public Result<ApiInfoEntity> getApiInfo(@RequestParam("url") String url, @RequestParam("method") String method) {
+        return ResultUtils.success(apiInfoService.getApiInfo(url, method));
     }
 
     private UserEntity getLoginUser(HttpServletRequest request) {
@@ -317,7 +314,7 @@ public class ApiInfoController {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         UserEntity currentUserEntity = (UserEntity) userObj;
         if (currentUserEntity == null || currentUserEntity.getId() == null) {
-            throw new ServiceException(ErrorEnum.NOT_LOGIN_ERROR);
+//            (ErrorEnum.NOT_LOGIN_ERROR);
         }
         return currentUserEntity;
     }

@@ -1,7 +1,7 @@
 package pers.project.api.gateway.constant.enumeration;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 网关请求头枚举
@@ -12,7 +12,7 @@ import lombok.Getter;
  * @date 2023/03/10
  */
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum GatewayHeaderEnum {
 
     ACCESS_KEY("accessKey"),

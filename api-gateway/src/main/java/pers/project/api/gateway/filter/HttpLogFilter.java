@@ -15,19 +15,14 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
-import pers.project.api.common.constant.UserConst;
-import pers.project.api.common.model.entity.UserEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 
 import static io.netty.util.CharsetUtil.UTF_8;
 import static org.springframework.cloud.gateway.filter.NettyWriteResponseFilter.WRITE_RESPONSE_FILTER_ORDER;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CACHED_REQUEST_BODY_ATTR;
-import static org.springframework.core.NestedExceptionUtils.getMostSpecificCause;
 
 /**
  * HTTP 日志过滤器
@@ -130,20 +125,20 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
      * @return 用户 ID，可能为 null。
      */
     private Long getUserId(ServerWebExchange exchange) {
-        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
-        UserEntity userEntity = null;
-        try {
-            userEntity = webSessionFuture.get()
-                    .getAttribute(UserConst.USER_LOGIN_STATE);
-        } catch (Exception e) {
-            String requestId = exchange.getRequest().getId();
-            log.warn("""
-                    获取用户 ID 异常
-                    请求 ID: {}
-                    信息: {}
-                    """, requestId, getMostSpecificCause(e));
-        }
-        return userEntity == null ? null : userEntity.getId();
+//        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
+//        UserEntity userEntity = null;
+//        try {
+//            userEntity = webSessionFuture.get()
+//                    .getAttribute(UserConst.USER_LOGIN_STATE);
+//        } catch (Exception e) {
+//            String requestId = exchange.getRequest().getId();
+//            log.warn("""
+//                    获取用户 ID 异常
+//                    请求 ID: {}
+//                    信息: {}
+//                    """, requestId, getMostSpecificCause(e));
+//        }
+        return null;
     }
 
     /**

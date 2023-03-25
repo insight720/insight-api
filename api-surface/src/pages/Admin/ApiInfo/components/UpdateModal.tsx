@@ -4,7 +4,7 @@ import React, {useEffect, useRef} from 'react';
 
 export type updateModalProps = {
     onCancel: () => void;
-    onSubmit: (values: API.ApiInfoupdateRequest) => void;
+    onSubmit: (values: API.ApiInfoUpdateRequest) => void;
     updateModalOpen: boolean;
     columns: ProColumns<API.ApiInfoEntity>[]
     fields: API.ApiInfoEntity
@@ -23,7 +23,7 @@ const updateModal: React.FC<updateModalProps> = (props) => {
     return (
         <Modal open={props.updateModalOpen} onCancel={props.onCancel} footer={null}>
             <ProTable type='form' columns={props.columns}
-                      onSubmit={async (fields: API.ApiInfoupdateRequest) => {
+                      onSubmit={async (fields: API.ApiInfoUpdateRequest) => {
                           // id 不会提交
                           fields.id = props.fields.id;
                           props.onSubmit(fields);

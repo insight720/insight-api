@@ -13,12 +13,10 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
-import pers.project.api.common.constant.UserConst;
-import pers.project.api.common.model.Response;
+import pers.project.api.common.model.Result;
 import pers.project.api.common.model.entity.ApiInfoEntity;
 import pers.project.api.common.model.entity.UserEntity;
-import pers.project.api.common.util.ResponseUtils;
+import pers.project.api.common.util.ResultUtils;
 import pers.project.api.common.util.SignUtils;
 import pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum;
 import pers.project.api.gateway.feign.FacadeFeignService;
@@ -135,15 +133,15 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
         }
         String method = request.getMethod().name();
         // 4. 请求的模拟接口是否存在，以及请求方法是否匹配
-        CompletableFuture<Response<ApiInfoEntity>> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Result<ApiInfoEntity>> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
             String path = request.getPath().value();
             return facadeFeignService.getApiInfo(path, method);
         });
-        Response<ApiInfoEntity> apiInfoResponse = apiInfoFuture.get();
-        if (ResponseUtils.isFailure(apiInfoResponse)) {
+        Result<ApiInfoEntity> apiInfoResult = apiInfoFuture.get();
+        if (ResultUtils.isFailure(apiInfoResult)) {
             return false;
         }
-        ApiInfoEntity apiInfoEntity = apiInfoResponse.getData();
+        ApiInfoEntity apiInfoEntity = apiInfoResult.getData();
         // todo 是否还有调用次数
         return true;
     }
@@ -156,22 +154,23 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      * @return 用户信息，可能为 null。
      */
     private UserEntity getUserInfo(ServerWebExchange exchange) throws Exception {
-        // 从 WebSession 获取用户信息
-        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
-        UserEntity userEntity = webSessionFuture.get().getAttribute(UserConst.USER_LOGIN_STATE);
-        if (userEntity != null) {
-            return userEntity;
-        }
-        // 从 Security 服务获取用户信息
-        CompletableFuture<Response<UserEntity>> userFuture = CompletableFuture.supplyAsync(() -> {
-            String accessKey = exchange.getRequest().getHeaders().getFirst(ACCESS_KEY.getName());
-            return securityFeignService.getInvokeUser(accessKey);
-        });
-        Response<UserEntity> userResponse = userFuture.get();
-        if (ResponseUtils.isFailure(userResponse)) {
-            return null;
-        }
-        return userResponse.getData();
+//        // 从 WebSession 获取用户信息
+//        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
+//        UserEntity userEntity = webSessionFuture.get().getAttribute(UserConst.USER_LOGIN_STATE);
+//        if (userEntity != null) {
+//            return userEntity;
+//        }
+//        // 从 Security 服务获取用户信息
+//        CompletableFuture<Result<UserEntity>> userFuture = CompletableFuture.supplyAsync(() -> {
+//            String accessKey = exchange.getRequest().getHeaders().getFirst(ACCESS_KEY.getName());
+//            return securityFeignService.getInvokeUser(accessKey);
+//        });
+//        Result<UserEntity> userResult = userFuture.get();
+//        if (ResultUtils.isFailure(userResult)) {
+//            return null;
+//        }
+//        return userResult.getData();
+        return null;
     }
 
     /**

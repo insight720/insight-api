@@ -1,4 +1,3 @@
-// import { outLogin } from '@/services/ant-design-pro/api';
 import {LogoutOutlined, SettingOutlined, UserOutlined} from '@ant-design/icons';
 import {useEmotionCss} from '@ant-design/use-emotion-css';
 import {history, useModel} from '@umijs/max';
@@ -8,7 +7,7 @@ import type {MenuInfo} from 'rc-menu/lib/interface';
 import React, {useCallback} from 'react';
 import {flushSync} from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
-import {userLogout} from "@/services/api-security/userController";
+import {logout} from "@/services/api-security/springSecurity";
 
 export type GlobalHeaderRightProps = {
     menu?: boolean;
@@ -18,8 +17,7 @@ export type GlobalHeaderRightProps = {
 export const AvatarName = () => {
     const {initialState} = useModel('@@initialState');
     const {currentUser} = initialState || {};
-    // return <span className="anticon">{currentUser?.name}</span>;
-    return <span className="anticon">{currentUser?.userName}</span>;
+    return <span className="anticon">{currentUser?.username}</span>;
 };
 
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children}) => {
@@ -27,16 +25,15 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
      * 退出登录，并且将当前的 url 保存
      */
     const loginOut = async () => {
-        // await outLogin();
-        await userLogout();
+        await logout();
         const {search, pathname} = window.location;
         const urlParams = new URL(window.location.href).searchParams;
         /** 此方法会跳转到 redirect 参数所在的位置 */
         const redirect = urlParams.get('redirect');
         // Note: There may be security issues, please note
-        if (window.location.pathname !== '/user/login' && !redirect) {
+        if (window.location.pathname !== '/login' && !redirect) {
             history.replace({
-                pathname: '/user/login',
+                pathname: '/login',
                 search: stringify({
                     redirect: pathname + search,
                 }),
@@ -93,33 +90,30 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
 
     const {currentUser} = initialState;
 
-    // if (!currentUser || !currentUser.name) {
-    if (!currentUser || !currentUser.userName) {
+    // 如果用户未登录或没有账户名，则显示加载中状态
+    if (!currentUser || !currentUser.username) {
         return loading;
     }
 
+    // 头像下拉菜单项
     const menuItems = [
-        ...(menu
-            ? [
-                {
-                    key: 'center',
-                    icon: <UserOutlined/>,
-                    label: '个人中心',
-                },
-                {
-                    key: 'settings',
-                    icon: <SettingOutlined/>,
-                    label: '个人设置',
-                },
-                {
-                    type: 'divider' as const,
-                },
-            ]
-            : []),
+        {
+            key: 'center',
+            icon: <UserOutlined/>,
+            label: '个人中心',
+        },
+        {
+            key: 'settings',
+            icon: <SettingOutlined/>,
+            label: '个人设置',
+        },
         {
             key: 'logout',
             icon: <LogoutOutlined/>,
             label: '退出登录',
+        },
+        {
+            type: 'divider' as const,
         },
     ];
 
