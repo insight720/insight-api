@@ -93,6 +93,18 @@ export default [
         access: 'canUser',
         routes: [
             {
+                name: '用户资料',
+                icon: 'table',
+                path: '/user/profile',
+                component: './User/Profile',
+            },
+            {
+                name: '账户设置',
+                icon: 'table',
+                path: '/user/account',
+                component: './User/Account',
+            },
+            {
                 name: '我的接口',
                 icon: 'table',
                 path: '/user/api_info',

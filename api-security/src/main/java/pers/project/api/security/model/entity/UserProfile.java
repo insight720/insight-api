@@ -28,17 +28,12 @@ public class UserProfile {
      * 主键
      */
     @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+    private String id;
 
     /**
      * 账户主键
      */
-    private Long accountId;
-
-    /**
-     * 昵称
-     */
-    private String nickname;
+    private String accountId;
 
     /**
      * 头像
@@ -46,9 +41,44 @@ public class UserProfile {
     private String avatar;
 
     /**
+     * 昵称
+     */
+    private String nickname;
+
+    /**
+     * 个人网站
+     */
+    private String website;
+
+    /**
+     * GitHub
+     */
+    private String github;
+
+    /**
+     * Gitee
+     */
+    private String gitee;
+
+    /**
      * 个人简介
      */
     private String biography;
+
+    /**
+     * IP 地址
+     */
+    private String ipAddress;
+
+    /**
+     * IP 属地
+     */
+    private String ipOrigin;
+
+    /**
+     * 上次登录时间
+     */
+    private LocalDateTime lastLoginTime;
 
     /**
      * 是否删除（1 表示删除，0 表示未删除）

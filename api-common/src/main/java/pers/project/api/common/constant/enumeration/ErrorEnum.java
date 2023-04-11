@@ -21,13 +21,18 @@ public enum ErrorEnum {
 
     AUTHORIZATION_ERROR("A0300", "访问权限异常"),
 
-    DATABASE_ERROR("C0300", "数据库服务出错"),
+
 
     PARAM_ERROR("A0400", "用户请求参数错误"),
 
     SERVER_ERROR("B0001", "系统执行出错"),
 
-    REGISTRY_ERROR("A0100", "用户注册错误");
+    REGISTRY_ERROR("A0100", "用户注册错误"),
+
+    // 确定保留
+    DATABASE_ERROR("C0300", "数据库服务出错"),
+    LOGIN_ERROR("A0200", "用户登录异常"),
+    UPLOAD_ERROR("A0700", "用户上传文件异常");
 
     private final String code;
 

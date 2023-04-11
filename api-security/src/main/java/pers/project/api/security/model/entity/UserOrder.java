@@ -28,7 +28,7 @@ public class UserOrder {
      * 主键
      */
     @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+    private String id;
 
     /**
      * 订单编号
@@ -38,17 +38,17 @@ public class UserOrder {
     /**
      * 账户主键
      */
-    private Long accountId;
+    private String accountId;
 
     /**
      * 接口摘要主键
      */
-    private Long digestId;
+    private String digestId;
 
     /**
      * 用户接口用法主键
      */
-    private Long usageId;
+    private String usageId;
 
     /**
      * 接口用法类型

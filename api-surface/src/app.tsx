@@ -11,24 +11,23 @@ import React from 'react';
 import {AvatarDropdown, AvatarName} from './components/RightContent/AvatarDropdown';
 import {InitialState} from "@/typings";
 import {message} from "antd";
-import {autoGetCsrfToken} from "@/services/api-security/securityController";
-import {fetchLoginUserInfo} from "@/services/api-security/userDetailsController";
+import {generateCsrfToken} from "@/services/api-security/securityController";
+import {getLoginUserInfo} from "@/services/api-security/userDetailsController";
 
-const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/login';
 
 /**
  * 获取 CSRF 令牌
+ *
+ * 令牌会自动保存在 Cookie 中
  */
 const fetchCsrfToken = async () => {
     try {
-        const result = await autoGetCsrfToken();
+        const result = await generateCsrfToken();
         return result.data;
     } catch (error: any) {
-        message.error(error.message || '服务器内部错误，请重试！');
-        history.push(loginPath);
+        message.error(error.message || "服务器内部错误，请重试！");
+        return undefined;
     }
-    return undefined;
 };
 
 /**
@@ -36,14 +35,18 @@ const fetchCsrfToken = async () => {
  */
 const fetchUserInfo = async () => {
     try {
-        const result = await fetchLoginUserInfo();
+        const result = await getLoginUserInfo();
         return result.data;
     } catch (error: any) {
-        message.error(error.message || '用户未登录');
-        history.push(loginPath);
+        message.error(error.message || '用户未登录！');
+        return undefined;
     }
-    return undefined;
 };
+
+const isDev = process.env.NODE_ENV === 'development';
+
+// 登录路径
+const loginPath = "/login";
 
 /**
  * 页面初始状态
@@ -51,26 +54,28 @@ const fetchUserInfo = async () => {
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  */
 export async function getInitialState(): Promise<InitialState> {
-    // 如果不是登录页面，执行
     const {location} = history;
+
     if (location.pathname !== loginPath) {
+        // 如果不是登录页面，获取登录用户信息
         const currentUser = await fetchUserInfo();
         return {
             currentUser,
-            fetchUserInfo,
+            fetchUserInfo: fetchUserInfo,
+            settings: defaultSettings as Partial<LayoutSettings>,
+        };
+    } else {
+        await fetchCsrfToken();
+        return {
+            fetchUserInfo: fetchUserInfo,
             settings: defaultSettings as Partial<LayoutSettings>,
         };
     }
-    // 登陆页面获取 CsrfToken（无需获取数据，它会自动保存在 Cookie 中）
-    await fetchCsrfToken();
-    return {
-        fetchUserInfo,
-        settings: defaultSettings as Partial<LayoutSettings>,
-    };
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => {
+
     return {
         actionsRender: () => [<Question key="doc"/>, <SelectLang key="SelectLang"/>],
         avatarProps: {

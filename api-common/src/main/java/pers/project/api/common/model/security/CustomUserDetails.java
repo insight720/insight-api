@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -59,26 +60,51 @@ public class CustomUserDetails implements UserDetails {
     /**
      * 用户资料主键
      */
-    private Long profileId;
+    private String profileId;
 
     // region Same with UserProfile
     /**
      * 账户主键
      */
-    private Long accountId;
-    /**
-     * 昵称
-     */
-    private String nickname;
+    private String accountId;
     /**
      * 头像
      */
     private String avatar;
     /**
+     * 昵称
+     */
+    private String nickname;
+    /**
+     * 个人网站
+     */
+    private String website;
+    /**
+     * GitHub
+     */
+    private String github;
+    /**
+     * Gitee
+     */
+    private String gitee;
+    /**
      * 个人简介
      */
     private String biography;
+    /**
+     * IP 地址
+     */
+    private String ipAddress;
+    /**
+     * IP 属地
+     */
+    private String ipOrigin;
+    /**
+     * 上次登录时间
+     */
+    private LocalDateTime lastLoginTime;
     // endregion
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new CustomizedGrantedAuthority(authority));

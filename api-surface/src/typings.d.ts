@@ -24,9 +24,13 @@ declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;
 /**
  * 全局初始状态
  */
-interface InitialState {
+export interface InitialState {
+    // UI 设置
     settings?: Partial<LayoutSettings>;
+
+    // 当前登录用户
     currentUser?: API.LoginUserDTO;
-    loading?: boolean;
+
+    // 获取当前登录用户信息
     fetchUserInfo?: () => Promise<API.LoginUserDTO | undefined>;
 }

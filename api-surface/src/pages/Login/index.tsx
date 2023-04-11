@@ -1,5 +1,4 @@
 import Footer from '@/components/Footer';
-import {getFakeCaptcha} from '@/services/ant-design-pro/login';
 import {
     AlipayCircleOutlined,
     LockOutlined,
@@ -17,8 +16,9 @@ import Settings from '../../../config/defaultSettings';
 import React, {useState} from 'react';
 import {flushSync} from 'react-dom';
 import RegistryModal from "@/pages/Login/components/RegistryModal";
-import {login, UserLoginVO} from "@/services/api-security/springSecurity";
+import {login, UserLoginVO} from "@/services/hidden/springSecurity";
 import {history} from "@@/core/history";
+import {generateCsrfToken} from "@/services/api-security/securityController";
 
 const ActionIcons = () => {
     const langClassName = useEmotionCss(({token}) => {
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
     /**
      * 设置登录用户的信息
      */
-    const setUserInfo = async (userInfo: API.LoginUserDTO | undefined) => {
+    const setLoginUserInfo = async (userInfo: API.LoginUserDTO | undefined) => {
         if (userInfo) {
             flushSync(() => {
                 setInitialState((s) => ({
@@ -128,9 +128,11 @@ const Login: React.FC = () => {
                     id: 'pages.login.success',
                     defaultMessage: '登录成功',
                 });
+                await setLoginUserInfo(result.data);
+                // 登录后 CSRF Cookie 会被清除
+                await generateCsrfToken();
+                history.push('/');
                 message.success(defaultLoginSuccessMessage);
-                await setUserInfo(result.data);
-                history.push(urlParams.get('redirect') || '/');
                 return;
             }
         } catch (error: any) {
@@ -345,9 +347,7 @@ const Login: React.FC = () => {
                                     },
                                 ]}
                                 onGetCaptcha={async (phone) => {
-                                    const result = await getFakeCaptcha({
-                                        phone,
-                                    });
+                                    const result = "";
                                     if (!result) {
                                         return;
                                     }
@@ -428,9 +428,7 @@ const Login: React.FC = () => {
                                     },
                                 ]}
                                 onGetCaptcha={async (phone) => {
-                                    const result = await getFakeCaptcha({
-                                        phone,
-                                    });
+                                    const result = await "";
                                     if (!result) {
                                         return;
                                     }

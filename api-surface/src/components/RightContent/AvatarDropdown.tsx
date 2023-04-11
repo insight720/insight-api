@@ -1,13 +1,13 @@
 import {LogoutOutlined, SettingOutlined, UserOutlined} from '@ant-design/icons';
 import {useEmotionCss} from '@ant-design/use-emotion-css';
 import {history, useModel} from '@umijs/max';
-import {Spin} from 'antd';
-import {stringify} from 'querystring';
+import {message, Spin} from 'antd';
 import type {MenuInfo} from 'rc-menu/lib/interface';
 import React, {useCallback} from 'react';
 import {flushSync} from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
-import {logout} from "@/services/api-security/springSecurity";
+import {logout} from "@/services/hidden/springSecurity";
+import {generateCsrfToken} from "@/services/api-security/securityController";
 
 export type GlobalHeaderRightProps = {
     menu?: boolean;
@@ -21,25 +21,26 @@ export const AvatarName = () => {
 };
 
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children}) => {
+
     /**
-     * 退出登录，并且将当前的 url 保存
+     * 退出登录
      */
     const loginOut = async () => {
-        await logout();
-        const {search, pathname} = window.location;
-        const urlParams = new URL(window.location.href).searchParams;
-        /** 此方法会跳转到 redirect 参数所在的位置 */
-        const redirect = urlParams.get('redirect');
-        // Note: There may be security issues, please note
-        if (window.location.pathname !== '/login' && !redirect) {
-            history.replace({
-                pathname: '/login',
-                search: stringify({
-                    redirect: pathname + search,
-                }),
+        try {
+            await logout()
+            // 注销后 CSRF Cookie 会被清除
+            await generateCsrfToken();
+            flushSync(() => {
+                setInitialState((s) => ({...s, currentUser: undefined}));
             });
+        } catch (error: any) {
+            message.error(error.message || "注销失败，请重试！");
+            return;
         }
+        history.push('/login');
+        message.success("注销成功");
     };
+
     const actionClassName = useEmotionCss(({token}) => {
         return {
             display: 'flex',
@@ -60,14 +61,13 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
     const onMenuClick = useCallback(
         (event: MenuInfo) => {
             const {key} = event;
+            // 点击退出登录
             if (key === 'logout') {
-                flushSync(() => {
-                    setInitialState((s) => ({...s, currentUser: undefined}));
-                });
                 loginOut();
                 return;
             }
-            history.push(`/account/${key}`);
+            // 点击其他选项
+            history.push(`/user/${key}`);
         },
         [setInitialState],
     );
@@ -98,14 +98,14 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
     // 头像下拉菜单项
     const menuItems = [
         {
-            key: 'center',
+            key: 'profile',
             icon: <UserOutlined/>,
-            label: '个人中心',
+            label: '用户资料',
         },
         {
-            key: 'settings',
+            key: 'account',
             icon: <SettingOutlined/>,
-            label: '个人设置',
+            label: '账户设置',
         },
         {
             key: 'logout',

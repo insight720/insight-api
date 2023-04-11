@@ -1,6 +1,21 @@
 declare namespace API {
-  type CustomCsrfToken = {
-    tokenValue?: string;
+  type AccountAuthorityDTO = {
+    accountId: string;
+    authority: string;
+  };
+
+  type AccountStatusDTO = {
+    accountId: string;
+    statusCode: number;
+  };
+
+  type generateKeyPairParams = {
+    accountId: string;
+  };
+
+  type KeyPairDTO = {
+    accountKey?: string;
+    secretKey?: string;
   };
 
   type LoginUserDTO = {
@@ -8,18 +23,25 @@ declare namespace API {
     email?: string;
     phoneNumber?: string;
     authority?: string;
+    accountKey?: string;
     accountStatus?: number;
-    profileId?: number;
-    accountId?: number;
-    nickname?: string;
+    profileId?: string;
+    accountId?: string;
     avatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
     biography?: string;
+    ipAddress?: string;
+    ipOrigin?: string;
+    lastLoginTime?: string;
   };
 
-  type ResultCustomCsrfToken = {
+  type ResultKeyPairDTO = {
     code?: string;
     message?: string;
-    data?: CustomCsrfToken;
+    data?: KeyPairDTO;
   };
 
   type ResultLoginUserDTO = {
@@ -28,10 +50,26 @@ declare namespace API {
     data?: LoginUserDTO;
   };
 
+  type ResultString = {
+    code?: string;
+    message?: string;
+    data?: string;
+  };
+
   type ResultVoid = {
     code?: string;
     message?: string;
     data?: Record<string, any>;
+  };
+
+  type UserProfileSettingVO = {
+    profileId: string;
+    avatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
   };
 
   type UserRegistryVO = {

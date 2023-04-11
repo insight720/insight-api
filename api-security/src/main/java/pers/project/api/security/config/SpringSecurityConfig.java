@@ -1,6 +1,7 @@
 package pers.project.api.security.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,13 +12,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
@@ -29,6 +33,8 @@ import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
 
 
@@ -40,20 +46,35 @@ import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
  * @see <a href="https://springdoc.cn/spring-security/">
  * Spring Security 中文文档</a>
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SpringSecurityConfig {
 
     /**
-     * 密码编码器
+     * BCRYPT 密码强度
+     * <p>
+     * 有效值从 4 到 31，默认值为 10。强度越大，散列密码所需要做的工作越多。
+     *
+     * @see BCryptPasswordEncoder
+     */
+    private static final int BCRYPT_STRENGTH = 10;
+
+    /**
+     * BCrypt 密码编码器
+     * <p>
+     * 注意：从 {@link BCryptPasswordEncoder#getSalt()} 方法可知，
+     * 如果在 {@code BCryptPasswordEncoder} 构造函数中指定 {@code SecureRandom}，
+     * 则它只会使用单例的 {@code SecureRandom}。
      *
      * @see <a href="https://springdoc.cn/spring-security/features/authentication/password-storage.html#authentication-password-storage-configuration">
      * 密码存储配置</a>
      */
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(BCryptVersion.$2Y, BCRYPT_STRENGTH);
     }
 
     /**
@@ -86,9 +107,27 @@ public class SpringSecurityConfig {
     }
 
     /**
+     * Spring Security 上下文存储策略
+     * <p>
+     * 这里只是把默认实现暴露为 Bean 来显式保存上下文信息。
+     *
+     * @see <a href="https://springdoc.cn/spring-security/servlet/authentication/persistence.html#securitycontextrepository">
+     * SecurityContextRepository</a>
+     * @see <a href="https://springdoc.cn/spring-security/migration/servlet/session-management.html#_%E8%A6%81%E6%B1%82%E6%98%8E%E7%A1%AE%E4%BF%9D%E5%AD%98_securitycontextrepository">
+     * 要求明确保存 SecurityContextRepository</a>
+     */
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new DelegatingSecurityContextRepository(
+                new RequestAttributeSecurityContextRepository(),
+                new HttpSessionSecurityContextRepository()
+        );
+    }
+
+    /**
      * 自定义 WebSecurity 的回调接口
      * <p>
-     * 用于配置 Spring Security 忽略的资源请求。
+     * 用于配置 Spring Security 忽略的资源请求，仅在测试环境生效。
      *
      * @see WebSecurity
      */
@@ -96,6 +135,7 @@ public class SpringSecurityConfig {
     @Profile("dev")
     public WebSecurityCustomizer ignoringCustomizer() {
         return (web) -> web.ignoring().requestMatchers(new String[]{
+                "/account/key/{id}",
                 "/doc.html",
                 "/v3/api-docs",
                 "/v3/api-docs/*",
@@ -104,14 +144,10 @@ public class SpringSecurityConfig {
         });
     }
 
+
     @Configuration
     @RequiredArgsConstructor
     public static class SecurityFilterChainConfig {
-
-        private static final RequestMatcher[] PERMITTED_REQUEST_MATCHERS = {
-                AntPathRequestMatcher.antMatcher(GET, "/csrf"),
-                AntPathRequestMatcher.antMatcher(POST, "/account/registry"),
-        };
 
         // region CSRF  防护
         private static final String CSRF_COOKIE_PATH = "/";
@@ -135,8 +171,21 @@ public class SpringSecurityConfig {
         private final AccessDeniedHandler accessDeniedHandler;
         // endregion
 
+        private final SecurityContextRepository securityContextRepository;
+
+        private static final RequestMatcher[] PERMITTED_REQUEST_MATCHERS = {
+                // 用户未登录时允许访问的路径
+                antMatcher(GET, "/csrf"),
+                antMatcher(POST, "/account/registry"),
+                antMatcher("/profile/setting"),
+                antMatcher("/profile/avatar"),
+        };
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            // 配置 Spring Security 上下文
+            http.securityContext()
+                    .securityContextRepository(securityContextRepository);
             // 配置请求授权
             http.authorizeHttpRequests()
                     .requestMatchers(PERMITTED_REQUEST_MATCHERS)
@@ -145,7 +194,11 @@ public class SpringSecurityConfig {
                     .hasAuthority(ROLE_USER);
             // 配置 CSRF 防护
             http.csrf().csrfTokenRepository(cookieCsrfTokenRepository())
-                    .csrfTokenRequestHandler(csrfTokenRequestHandler());
+                    .csrfTokenRequestHandler(csrfTokenRequestHandler())
+                    .ignoringRequestMatchers(new AntPathRequestMatcher[]{
+                            antMatcher("/profile/setting"),
+                            antMatcher("/profile/avatar")
+                    });
             // 配置会话管理
             http.sessionManagement()
                     .maximumSessions(MAXIMUM_SESSIONS)
@@ -180,7 +233,7 @@ public class SpringSecurityConfig {
         }
 
         /**
-         * @see <a href="https://springdoc.cn/spring-security/servlet/exploits/csrf.html#servlet-csrf-configure">自定义CsrfTokenRepository</a>
+         * @see <a href="https://springdoc.cn/spring-security/servlet/exploits/csrf.html#servlet-csrf-configure">自定义 CsrfTokenRepository</a>
          */
         private CookieCsrfTokenRepository cookieCsrfTokenRepository() {
             CookieCsrfTokenRepository tokenRepository

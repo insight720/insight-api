@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.web.reactive.WebSessionIdResolverA
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.util.MultiValueMap;
@@ -30,6 +31,11 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class WebFluxConfig implements WebFluxConfigurer {
+
+    @Override
+    public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+        configurer.defaultCodecs().maxInMemorySize(1024 * 10);
+    }
 
     /**
      * 解决 WebFlux 应用中缺少 {@code HttpMessageConverters} 的问题。

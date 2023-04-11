@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
-import pers.project.api.security.model.CustomCsrfToken;
 import pers.project.api.security.service.SecurityService;
+
 
 /**
  * Security 模块控制器
@@ -24,9 +24,9 @@ public class SecurityController {
     private final SecurityService securityService;
 
     @GetMapping("/csrf")
-    public Result<CustomCsrfToken> autoGetCsrfToken(HttpServletRequest request) {
-        CustomCsrfToken csrfToken = securityService.getCsrfToken(request);
-        return ResultUtils.success(csrfToken);
+    public Result<Void> generateCsrfToken(HttpServletRequest request) {
+        securityService.loadDeferredCsrfToken(request);
+        return ResultUtils.success();
     }
 
 }

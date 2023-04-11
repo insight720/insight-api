@@ -2,6 +2,9 @@ server:
   port: 8090
 
 spring:
+  codec:
+    # 此属性限制缓存的请求体大小，默认为 256K
+    max-in-memory-size: 10MB
   application:
     name: gateway
   cloud:

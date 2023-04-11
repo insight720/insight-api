@@ -1,13 +1,10 @@
 package pers.project.api.security.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.exception.ServerException;
-import pers.project.api.security.model.CustomCsrfToken;
 import pers.project.api.security.service.SecurityService;
-
-import static pers.project.api.common.constant.enumeration.ErrorEnum.SERVER_ERROR;
 
 /**
  * Security 模块的 Service 实现
@@ -15,24 +12,22 @@ import static pers.project.api.common.constant.enumeration.ErrorEnum.SERVER_ERRO
  * @author Luo Fei
  * @date 2023/03/24
  */
+@Slf4j
 @Service
 public class SecurityServiceImpl implements SecurityService {
 
     private static final String CSRF_TOKEN_ATTRIBUTE = "_csrf";
 
     @Override
-    public CustomCsrfToken getCsrfToken(HttpServletRequest request) {
-        String tokenValue;
-        try {
-            CsrfToken csrfToken = (CsrfToken) request.getAttribute(CSRF_TOKEN_ATTRIBUTE);
-            tokenValue = csrfToken.getToken();
-        } catch (Exception e) {
-            String message = "CsrfToken not found, message: " + e.getMessage();
-            throw new ServerException(SERVER_ERROR, message);
+    public void loadDeferredCsrfToken(HttpServletRequest request) {
+        Object attribute = request.getAttribute(CSRF_TOKEN_ATTRIBUTE);
+        // instanceof 可以判空
+        if (attribute instanceof CsrfToken csrfToken) {
+            // 必须调用，否则 CsrfToken 被 Lambda 表达式延迟加载，不会生成 Cookie
+            csrfToken.getToken();
+            return;
         }
-        CustomCsrfToken customCsrfToken = new CustomCsrfToken();
-        customCsrfToken.setTokenValue(tokenValue);
-        return customCsrfToken;
+        throw new IllegalStateException("Should never get here");
     }
 
 }

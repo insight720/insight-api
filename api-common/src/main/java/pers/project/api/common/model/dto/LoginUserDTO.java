@@ -2,6 +2,8 @@ package pers.project.api.common.model.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 登录用户 DTO
  *
@@ -10,6 +12,8 @@ import lombok.Data;
  */
 @Data
 public class LoginUserDTO {
+
+    // region Same with UserAccount
     /**
      * 账号
      */
@@ -27,6 +31,10 @@ public class LoginUserDTO {
      */
     private String authority;
     /**
+     * 帐户密钥
+     */
+    private String accountKey;
+    /**
      * 账号状态
      */
     private Integer accountStatus;
@@ -35,25 +43,49 @@ public class LoginUserDTO {
     /**
      * 用户资料主键
      */
-    private Long profileId;
+    private String profileId;
 
     // region Same with UserProfile
     /**
      * 账户主键
      */
-    private Long accountId;
-    /**
-     * 昵称
-     */
-    private String nickname;
+    private String accountId;
     /**
      * 头像
      */
     private String avatar;
     /**
+     * 昵称
+     */
+    private String nickname;
+    /**
+     * 个人网站
+     */
+    private String website;
+    /**
+     * GitHub
+     */
+    private String github;
+    /**
+     * Gitee
+     */
+    private String gitee;
+    /**
      * 个人简介
      */
     private String biography;
+    /**
+     * IP 地址
+     */
+    private String ipAddress;
+    /**
+     * IP 属地
+     */
+    private String ipOrigin;
+    /**
+     * 上次登录时间
+     */
+    private LocalDateTime lastLoginTime;
     // endregion
 
 }

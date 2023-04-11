@@ -19,7 +19,6 @@ export const requestConfig: RequestConfig = {
     requestInterceptors: [// 请求配置
         (config: RequestOptions) => {
             // 拦截请求配置，进行个性化处理。
-            console.log(config);
             return config;
         },
     ],
@@ -27,7 +26,6 @@ export const requestConfig: RequestConfig = {
     // 响应拦截器
     responseInterceptors: [
         (result) => {
-            sessionStorage.getItem("")
             // 拦截响应数据，进行个性化处理
             const {data} = result as unknown as Result;
             // 响应错误信息

@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `api-facade`.`user_quantity_usage`
 CREATE SCHEMA IF NOT EXISTS `api-security`;
 USE `api-security`;
 
+DROP TABLE IF EXISTS `api-security`.`user_account`;
 CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
 (
     `id`             BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
@@ -89,15 +90,20 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
     `update_time`    DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
 ) COMMENT '用户帐户';
 
-
 DROP TABLE `api-security`.`user_profile`;
 CREATE TABLE IF NOT EXISTS `api-security`.`user_profile`
 (
     `id`          BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
     `account_id`  BIGINT UNSIGNED        NOT NULL COMMENT '账户主键',
-    `nickname`    VARCHAR(256)           NULL COMMENT '昵称',
     `avatar`      VARCHAR(512)           NULL COMMENT '头像',
+    `nickname`    VARCHAR(256)           NULL COMMENT '昵称',
+    `website`     VARCHAR(256)           NULL COMMENT '个人网站',
+    `github`      VARCHAR(256)           NULL COMMENT 'GitHub',
+    `gitee`       VARCHAR(256)           NULL COMMENT 'Gitee',
     `biography`   VARCHAR(1024)          NULL COMMENT '个人简介',
+    `ip_address`  VARCHAR(256)           NULL COMMENT 'IP 地址',
+    `ip_origin`   VARCHAR(256)           NULL COMMENT 'IP 属地',
+    `last_login_time`  VARCHAR(256)           NULL COMMENT '上次登陆时间',
     `is_deleted`  TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
     `create_time` DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
     `update_time` DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
