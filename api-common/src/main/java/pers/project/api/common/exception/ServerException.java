@@ -2,7 +2,7 @@ package pers.project.api.common.exception;
 
 
 import lombok.Getter;
-import pers.project.api.common.constant.enumeration.ErrorEnum;
+import pers.project.api.common.enumeration.ErrorEnum;
 
 /**
  * 服务器异常

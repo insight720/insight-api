@@ -31,7 +31,7 @@ import pers.project.api.security.service.CustomUserDetailsService;
 import java.time.LocalDateTime;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static pers.project.api.common.constant.enumeration.ErrorEnum.LOGIN_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.LOGIN_ERROR;
 
 /**
  * Spring Security 加载用户特定数据的自定义 Service 实现

@@ -6,33 +6,30 @@ import com.qcloud.cos.auth.BasicCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.region.Region;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pers.project.api.security.config.properties.UploadProperties;
+import pers.project.api.security.config.properties.UploadContextProperties;
 
 /**
- * 上传配置类
+ * 上传上下文配置类
  *
  * @author Luo Fei
  * @date 2023/03/28
  */
 @Configuration
-@EnableConfigurationProperties(UploadProperties.class)
-public class UploadConfig {
+@EnableConfigurationProperties(UploadContextProperties.class)
+public class UploadContextConfig {
 
     /**
      * COS 配置类
      */
     @Configuration
     @RequiredArgsConstructor
-    @ConditionalOnProperty(prefix = "insight-api.upload", name = "strategy",
-            havingValue = "cos", matchIfMissing = true)
-    @EnableConfigurationProperties(UploadProperties.CosProperties.class)
+    @EnableConfigurationProperties(UploadContextProperties.CosProperties.class)
     public static class CosConfig {
 
-        private final UploadProperties.CosProperties properties;
+        private final UploadContextProperties.CosProperties properties;
 
         /**
          * COS 客户端

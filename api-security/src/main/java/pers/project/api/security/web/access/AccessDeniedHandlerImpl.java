@@ -13,7 +13,7 @@ import pers.project.api.common.util.ResultUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static pers.project.api.common.constant.enumeration.ErrorEnum.AUTHORIZATION_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.AUTHORIZATION_ERROR;
 
 /**
  * Spring Security 授权异常处理程序

@@ -1,4 +1,4 @@
-package pers.project.api.security.constant.enumeration;
+package pers.project.api.security.enumeration;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

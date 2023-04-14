@@ -6,7 +6,6 @@ package pers.project.api.common.constant;
  * @author Luo Fei
  * @date 2023/03/14
  */
-
 public interface CommonConst {
 
     /**

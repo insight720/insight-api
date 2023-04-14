@@ -14,18 +14,11 @@ import pers.project.api.security.model.vo.UserProfileSettingVO;
 public interface UserProfileService extends IService<UserProfile> {
 
     /**
-     * 上传头像
-     *
-     * @param file 头像文件
-     * @return 头像 URL
-     */
-    String uploadAvatar(MultipartFile file);
-
-    /**
      * 更新用户资料
      *
+     * @param avatarFile       头像文件
      * @param profileSettingVO 资料设置 VO
      */
-    void updateUserProfile(UserProfileSettingVO profileSettingVO);
+    void updateUserProfile(MultipartFile avatarFile, UserProfileSettingVO profileSettingVO);
 
 }

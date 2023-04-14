@@ -16,6 +16,7 @@ import pers.project.api.security.service.SecurityService;
 @Service
 public class SecurityServiceImpl implements SecurityService {
 
+
     private static final String CSRF_TOKEN_ATTRIBUTE = "_csrf";
 
     @Override

@@ -17,19 +17,22 @@ import pers.project.api.common.validation.constraint.SnowflakeId;
 @Data
 public class UserProfileSettingVO {
 
+    // region Same with CustomUserDetails
     /**
      * 用户资料主键
      */
     @SnowflakeId
     private String profileId;
+    // endregion
 
-    // region Same with UserProfile
     /**
-     * 头像
+     * 原来的头像
      */
     @NullOrNotBlank
     @URL
-    private String avatar;
+    private String originalAvatar;
+
+    // region Same with UserProfile and CustomUserDetails
 
     /**
      * 昵称

@@ -3,7 +3,10 @@ package pers.project.api.security.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
@@ -13,7 +16,6 @@ import pers.project.api.security.service.UserProfileService;
 
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
-import static org.springframework.util.unit.DataUnit.MEGABYTES;
 
 /**
  * 用户资料控制器
@@ -29,18 +31,12 @@ public class UserProfileController {
 
     private final UserProfileService userProfileService;
 
-    @PostMapping("/avatar")
-    public Result<String> selectAvatar
-            (@FileSpec(maxSize = 7, maxSizeUnit = MEGABYTES,
-                    mediaTypes = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
-             @RequestPart("avatar") MultipartFile file) {
-        String avatarUrl = userProfileService.uploadAvatar(file);
-        return ResultUtils.success(avatarUrl);
-    }
-
-    @PutMapping("/setting")
-    public Result<Void> setProfile(@Valid @RequestBody UserProfileSettingVO profileSettingVO) {
-        userProfileService.updateUserProfile(profileSettingVO);
+    @PutMapping(path = "/setting")
+    public Result<Void> setProfile
+            (@FileSpec(maxSize = "7MB", mediaTypes = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
+             @RequestPart(required = false) MultipartFile avatarFile,
+             @Valid @RequestPart UserProfileSettingVO profileSettingVO) {
+        userProfileService.updateUserProfile(avatarFile, profileSettingVO);
         return ResultUtils.success();
     }
 

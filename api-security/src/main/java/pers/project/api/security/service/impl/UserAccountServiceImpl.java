@@ -22,8 +22,8 @@ import pers.project.api.security.service.UserAccountService;
 
 import java.security.SecureRandom;
 
-import static pers.project.api.common.constant.enumeration.ErrorEnum.DATABASE_ERROR;
-import static pers.project.api.common.constant.enumeration.ErrorEnum.REGISTRY_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.DATABASE_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.REGISTRY_ERROR;
 import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
 import static pers.project.api.security.crypto.Argon2KeyGenerator.SUGGESTED_SOURCE_LENGTH;
 

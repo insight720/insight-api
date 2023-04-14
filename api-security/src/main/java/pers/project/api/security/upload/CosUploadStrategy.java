@@ -1,4 +1,4 @@
-package pers.project.api.security.strategy.impl;
+package pers.project.api.security.upload;
 
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.exception.CosClientException;
@@ -7,24 +7,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
-import pers.project.api.security.config.properties.UploadProperties;
-import pers.project.api.security.execption.UploadException;
-import pers.project.api.security.strategy.UploadStrategy;
+import pers.project.api.security.config.properties.UploadContextProperties;
+import pers.project.api.security.execption.UploadContextException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 
 import static org.apache.commons.io.FilenameUtils.EXTENSION_SEPARATOR;
 
 /**
- * OSS 上传策略（默认）
+ * 腾讯云对象存储（COS）上传策略
  *
  * @author Luo Fei
  * @date 2023/03/28
@@ -32,18 +31,17 @@ import static org.apache.commons.io.FilenameUtils.EXTENSION_SEPARATOR;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "insight-api.upload", name = "strategy",
-        havingValue = "cos", matchIfMissing = true)
-public class CosUploadStrategyImpl implements UploadStrategy {
+public class CosUploadStrategy implements UploadStrategy {
 
     private final COSClient cosClient;
 
-    private final UploadProperties.CosProperties properties;
+    private final UploadContextProperties.CosProperties properties;
 
     @Override
-    public String uploadFile(MultipartFile file, String directoryUri) throws UploadException {
+    public String uploadByUserProfileId(String userProfileId, MultipartFile file, String directoryUri) throws UploadContextException {
         byte[] fileBytes;
-        String md5Digest, contentMd5;
+        String contentMd5, fileAndUserProfileIdMd5;
+        MessageDigest md5Digest = DigestUtils.getMd5Digest();
         try (InputStream inputStream = file.getInputStream()) {
             if (log.isDebugEnabled()) {
                 // sun.nio.ch.ChannelInputStream 数据只能读取一次
@@ -53,22 +51,27 @@ public class CosUploadStrategyImpl implements UploadStrategy {
             }
             // 不能上传大文件，否则可能产生 OOM
             fileBytes = IOUtils.toByteArray(inputStream);
-            byte[] md5Bytes = DigestUtils.md5Digest(fileBytes);
-            md5Digest = Hex.encodeHexString(md5Bytes);
-            contentMd5 = Base64.encodeBase64String(md5Bytes);
+            md5Digest.update(fileBytes);
+            // 调用 digest() 后 md5Digest 会被重置
+            byte[] fileMd5Bytes = md5Digest.digest();
+            contentMd5 = Base64.encodeBase64String(fileMd5Bytes);
+            // 复用已重置的 md5Digest
+            md5Digest.update(fileBytes);
+            md5Digest.update(userProfileId.getBytes());
+            fileAndUserProfileIdMd5 = Hex.encodeHexString(md5Digest.digest());
         } catch (IOException e) {
-            throw new UploadException(e);
+            throw new UploadContextException(e);
         }
-        // 文件内容的 MD5 摘要生成新文件名
+        // 文件内容和用户资料 ID 的 MD5 摘要生成新文件名
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
         if (extension == null) {
-            throw new UploadException("File extension not found");
+            throw new UploadContextException("File extension not found");
         }
-        String newFileName = md5Digest + EXTENSION_SEPARATOR + extension;
-        // 不上传重复的文件
+        String newFileName = fileAndUserProfileIdMd5 + EXTENSION_SEPARATOR + extension;
+        // 不上传已存在的文件
         String bucketName = properties.getBucketName();
         String fileUri = directoryUri + newFileName;
-        boolean exist = cosClient.doesObjectExist(bucketName, newFileName);
+        boolean exist = cosClient.doesObjectExist(bucketName, fileUri);
         if (exist) {
             return properties.getDomainName() + fileUri;
         }
@@ -84,9 +87,21 @@ public class CosUploadStrategyImpl implements UploadStrategy {
         try {
             cosClient.putObject(bucketName, fileUri, new ByteArrayInputStream(fileBytes), metadata);
         } catch (CosClientException e) {
-            throw new UploadException(e);
+            throw new UploadContextException(e);
         }
         return properties.getDomainName() + fileUri;
+    }
+
+    @Override
+    public void deleteByUrl(String fileUrl) throws UploadContextException {
+        int domainNameLength = properties.getDomainName().length();
+        // substring 截取 domainName 之后的字符串
+        String fileUri = fileUrl.substring(domainNameLength);
+        try {
+            cosClient.deleteObject(properties.getBucketName(), fileUri);
+        } catch (CosClientException e) {
+            throw new UploadContextException(e);
+        }
     }
 
 }

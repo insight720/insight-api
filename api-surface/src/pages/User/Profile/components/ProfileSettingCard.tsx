@@ -1,10 +1,9 @@
 import {FooterToolbar, ProCard, ProForm, ProFormText, ProFormTextArea,} from '@ant-design/pro-components';
 import React, {useState} from "react";
-import {message, Typography, Upload, UploadFile, UploadProps} from "antd";
-import {LoadingOutlined, PlusOutlined} from "@ant-design/icons";
-import {RcFile, UploadChangeParam} from "antd/es/upload";
-import Cookies from "js-cookie";
-import {setProfile} from "@/services/api-security/userProfileController";
+import {Button, message, Upload, UploadFile} from "antd";
+import {UploadOutlined} from "@ant-design/icons";
+import {RcFile} from "antd/es/upload";
+import {setProfile} from "@/services/hidden/userProfileController";
 import {flushSync} from "react-dom";
 import {ProFormGroup} from "@ant-design/pro-form/lib";
 
@@ -30,11 +29,8 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
     // 设置全局初始状态
     const {setInitialState} = props;
 
-    // 头像加载中状态
-    const [avatarLoading, setAvatarLoading] = useState(false);
-
-    // 新设置的头像地址
-    const [newAvatar, setNewAvatar] = useState<string>();
+    // 头像文件列表
+    const [avatarFileList, setAvatarFileList] = useState<RcFile[]>([]);
 
     /**
      * 判断是否为空对象（null，undefined，没有属性值）
@@ -49,32 +45,31 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
      * 资料设置表单提交
      */
     const submitSettingForm = async (fields: any) => {
-        if (isEmptyObject(fields) && newAvatar === undefined) {
-            // 没有设置新头像或其他项
-            message.error("你没有修改任何资料！");
-            return false;
-        }
-        // 将空字符串替换为 null
+        console.log(avatarFileList);
+        // 将空字符串替换为 null（空字符串无法通过后端参数校验）
         Object.keys(fields).forEach(key => {
             if (fields[key] === "") {
                 fields[key] = null;
             }
         });
-        // 检查所有属性都为 null 的情况
-        const values = Object.values(fields);
-        if (values.every(value => value === null)) {
-            message.error("不能提交全部为空的表单！");
+        let originalAvatar = currentUser?.avatar;
+        if (originalAvatar === "") {
+            originalAvatar = undefined;
+        }
+        // 没有设置新头像或其他项
+        if (isEmptyObject(fields) && avatarFileList.length === 0) {
+            message.error("你没有修改任何资料！");
             return false;
         }
         message.loading('修改中');
         try {
-            await setProfile({
-                ...fields,
-                avatar: newAvatar,
-                profileId: currentUser?.profileId
-            });
-            // 已设置新头像，将其链接清除
-            setNewAvatar(undefined);
+            await setProfile(avatarFileList[0], {
+                profileId: currentUser?.profileId,
+                originalAvatar: originalAvatar,
+                ...fields
+            })
+            // 已设置新头像，将其文件清除
+            setAvatarFileList([])
             // 获取新的用户信息，并设置到全局状态中
             const newCurrentUser = await fetchUserInfo?.();
             if (newCurrentUser) {
@@ -99,54 +94,31 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
      * 上传头像前的检查
      */
     const beforeAvatarUpload = (file: RcFile) => {
+        // 头像大小和内容检查
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
         if (!isJpgOrPng) {
             message.error('您只能上传 JPG 或 PNG 文件！');
         }
-        const isLt5M = file.size / 1024 / 1024 < 7;
-        if (!isLt5M) {
+        const isLt7M = file.size / 1024 / 1024 < 7;
+        if (!isLt7M) {
             message.error('图像必须小于 7 MB！');
         }
-        return isJpgOrPng && isLt5M;
-    };
-
-    /**
-     * 上传状态改变时的回调
-     */
-    const onUploadStatusChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
-        const uploadStatus = info.file.status;
-        switch (uploadStatus) {
-            case "uploading":
-                setAvatarLoading(true);
-                break;
-            case "error":
-            case "removed":
-                message.destroy();
-                message.error(info.file.response.message || "头像上传失败，请稍后再试！")
-                break;
-            case "done":
-            case "success":
-                setAvatarLoading(false);
-                setNewAvatar(info.file.response.data);
-                message.destroy();
-                message.success('头像上传成功');
-                break;
+        console.log(file);
+        // 暂存头像文件，提交表单时一起发送给后端
+        if (isJpgOrPng && isLt7M) {
+            setAvatarFileList([file])
         }
+        // false 阻止自动上传
+        return false;
     };
 
     /**
-     * 头像上传按钮
+     * 点击删除上传的头像
      */
-    const avatarUploadButton = (
-        <div>
-            {avatarLoading ? <LoadingOutlined/> : <PlusOutlined/>}
-            <div style={{marginTop: 8}}>{
-                <Typography.Text italic>
-                    上传新头像 （JPG 或 PNG 文件，且小于 7 MB）
-                </Typography.Text>}
-            </div>
-        </div>
-    );
+    const onAvatarRemove = (file: UploadFile) => {
+        // 清除新上传头像的文件
+        setAvatarFileList([])
+    };
 
     return (
         <ProCard>
@@ -156,8 +128,8 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                     render: (_, dom) =>
                         <FooterToolbar>{dom}</FooterToolbar>,
                     onReset: (value) => {
-                        // 重置时清除新上传头像的链接
-                        setNewAvatar(undefined);
+                        // 重置时清除新上传头像的文件
+                        setAvatarFileList([])
                     }
                 }}
                 onFinish={async (firmFields) => {
@@ -169,24 +141,14 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                 <ProForm.Group title="头像和昵称" align="center" tooltip="你可以选择喜欢的头像和昵称">
 
                     <Upload
-                        name="avatar"
-                        listType="picture-card"
-                        className="avatar-uploader"
-                        showUploadList={false}
-                        // 后端接口地址
-                        action={"/gateway/security/profile/avatar"}
-                        // 添加 CSRF 请求头
-                        headers={{
-                            'X-XSRF-TOKEN': Cookies.get('XSRF-TOKEN') as string
-                        }}
+                        fileList={avatarFileList}
+                        showUploadList
                         beforeUpload={beforeAvatarUpload}
-                        onChange={onUploadStatusChange}
+                        onRemove={onAvatarRemove}
                     >
-                        {
-                            newAvatar ?
-                                <img src={newAvatar} alt="新头像无法显示" style={{width: '100%'}}/>
-                                : avatarUploadButton
-                        }
+                        <Button size="large" icon={<UploadOutlined/>}>
+                            选择头像
+                        </Button>
                     </Upload>
 
                     <ProFormText width="md" tooltip="账户名是唯一的，但昵称可能重复" name="nickname"

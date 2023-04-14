@@ -58,27 +58,17 @@ public class FileSpecValidator implements ConstraintValidator<FileSpec, Multipar
     private List<MediaType> allowedMediaTypes;
 
     @Override
-    // Suppress DataSize.of
-    @SuppressWarnings("all")
     public void initialize(FileSpec fileSpec) {
-        // 检查 maxSize 和 minSize
-        long maxSize = fileSpec.maxSize();
-        long minSize = fileSpec.minSize();
-        Assert.isTrue(maxSize >= 0, () -> "Illegal negative maxSize: " + maxByteSize);
-        Assert.isTrue(minSize >= 0, () -> "Illegal negative minSize: " + minByteSize);
-        Assert.isTrue(maxSize >= minSize, () -> """
-                Illegal maxSize and minSize: maxSize %d is less than minSize %d
-                """.formatted(maxSize, minSize));
         // 数据单位转换为字节
-        try {
-            maxByteSize = DataSize.of(maxSize, fileSpec.maxSizeUnit()).toBytes();
-            minByteSize = DataSize.of(minSize, fileSpec.minSizeUnit()).toBytes();
-        } catch (ArithmeticException e) {
-            throw new IllegalArgumentException("""
-                    Illegal maxSize and minSize: \
-                    The product of maxSize %d and minSize %d overflows long
-                    """.formatted(maxSize, minSize), e);
-        }
+        String maxSize = fileSpec.maxSize();
+        maxByteSize = DataSize.parse(maxSize).toBytes();
+        Assert.isTrue(maxByteSize >= 0, () -> "Illegal negative maxSize: " + maxSize);
+        String minSize = fileSpec.minSize();
+        minByteSize = DataSize.parse(minSize).toBytes();
+        Assert.isTrue(minByteSize >= 0, () -> "Illegal negative minSize: " + minByteSize);
+        Assert.isTrue(maxByteSize >= minByteSize, () -> """
+                Illegal maxSize and minSize: maxSize %s is less than minSize %s
+                """.formatted(maxSize, minSize));
         // 设置允许的 MediaType
         allowCompatible = fileSpec.compatible();
         try {
@@ -87,8 +77,7 @@ public class FileSpecValidator implements ConstraintValidator<FileSpec, Multipar
                     .toList();
         } catch (InvalidMediaTypeException e) {
             throw new IllegalArgumentException
-                    ("Illegal allowedMediaTypes: "
-                     + Arrays.toString(fileSpec.mediaTypes()), e);
+                    ("Illegal mediaTypes: " + Arrays.toString(fileSpec.mediaTypes()), e);
         }
     }
 
@@ -102,7 +91,7 @@ public class FileSpecValidator implements ConstraintValidator<FileSpec, Multipar
         long byteSize = file.getSize();
         if (byteSize < minByteSize || byteSize > maxByteSize) {
             addMessageParameterValue("""
-                    The file size is %d bytes and is not within the range of %d to %d bytes
+                    The file size in bytes is %d and is not within the range of %d to %d
                     """.formatted(byteSize, minByteSize, maxByteSize), context);
             return false;
         }

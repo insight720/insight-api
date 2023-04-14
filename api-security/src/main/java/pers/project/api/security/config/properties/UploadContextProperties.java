@@ -4,21 +4,14 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 上传属性
+ * 上传上下文属性
  *
  * @author Luo Fei
  * @date 2023/03/28
  */
 @Data
 @ConfigurationProperties(prefix = "insight-api.upload")
-public class UploadProperties {
-
-    /**
-     * 上传策略
-     * <pre>
-     * cos   腾讯云对象存储（默认）</pre>
-     */
-    private String strategy;
+public class UploadContextProperties {
 
     /**
      * COS 上传属性

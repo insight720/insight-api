@@ -1,9 +1,9 @@
 package pers.project.api.common.util;
 
-import pers.project.api.common.constant.enumeration.ErrorEnum;
+import pers.project.api.common.enumeration.ErrorEnum;
 import pers.project.api.common.model.Result;
 
-import static pers.project.api.common.constant.enumeration.ErrorEnum.NO_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.NO_ERROR;
 
 
 /**

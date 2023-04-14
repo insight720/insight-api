@@ -1,4 +1,4 @@
-package pers.project.api.common.constant.enumeration;
+package pers.project.api.common.enumeration;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -11,7 +11,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pers.project.api.common.constant.enumeration.ErrorEnum;
+import pers.project.api.common.enumeration.ErrorEnum;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;

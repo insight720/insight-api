@@ -4,7 +4,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.MediaType;
-import org.springframework.util.unit.DataUnit;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import pers.project.api.common.validation.validator.FileSpecValidator;
@@ -46,44 +46,26 @@ public @interface FileSpec {
      * 允许的最大文件大小
      * <p>
      * 默认为 {@link Long#MAX_VALUE} 字节，相当于不做限制。
-     * <p>
-     * 单位由 {@link FileSpec#maxSizeUnit()} 设置。
+     *
+     * @see DataSize#parse(CharSequence)
      */
-    long maxSize() default Long.MAX_VALUE;
+    String maxSize() default "9223372036854775807B";
 
     /**
      * 允许的最小文件大小
      * <p>
      * 默认为 1 字节，仅不允许空的 {@code MultipartFile}。
-     * <p>
-     * 单位由 {@link FileSpec#minSizeUnit()} 设置。
-     */
-    long minSize() default 1;
-
-    /**
-     * 最大文件大小的单位
-     * <p>
-     * 默认为字节，可使用 {@code DataUnit} 枚举设置。
      *
-     * @see DataUnit
+     * @see DataSize#parse(CharSequence)
      */
-    DataUnit maxSizeUnit() default DataUnit.BYTES;
-
-    /**
-     * 最小文件大小的单位
-     * <p>
-     * 默认为字节，可使用 {@code DataUnit} 枚举设置。
-     *
-     * @see DataUnit
-     */
-    DataUnit minSizeUnit() default DataUnit.BYTES;
+    String minSize() default "1B";
 
     /**
      * 允许的文件类型
      * <p>
-     * 默认为所有类型，使用 {@code MediaType} 中的常量进行设置。
+     * 默认为所有类型，使用 {@link MediaType} 中的常量进行设置。
      *
-     * @see MediaType
+     * @see MediaType#parseMediaType(String)
      */
     String[] mediaTypes() default {MediaType.ALL_VALUE};
 
