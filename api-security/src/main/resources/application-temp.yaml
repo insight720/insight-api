@@ -77,3 +77,22 @@ insight-api:
       region:
       bucket-name:
       domain-name:
+  verification:
+    phone:
+      secret-id:
+      secret-key:
+      region:
+      sms-sdk-app-id:
+      sign-name:
+      template-id:
+      validity-period: 5
+    email:
+      secret-id:
+      secret-key:
+      region: ap-hongkong
+      from:
+      subject:
+      template-id:
+      variable-names: [ verificationCode, validityPeriod ]
+      trigger-type: 1
+      validity-period: 5

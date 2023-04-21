@@ -25,7 +25,7 @@ export async function logout(options?: { [key: string]: any }) {
 /**
  * 后端不存在该类型（写在这里防止 OpenAPI 删除）
  */
-export type UserLoginVO = {
+export type UsernameLoginDTO = {
     username: string,
     password: string,
 };

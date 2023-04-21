@@ -8,19 +8,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import pers.project.api.security.config.properties.UploadContextProperties;
 import pers.project.api.security.execption.UploadContextException;
+import pers.project.api.security.properties.UploadContextProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-import static org.apache.commons.io.FilenameUtils.EXTENSION_SEPARATOR;
+import static com.baomidou.mybatisplus.core.toolkit.StringPool.DOT;
+
 
 /**
  * 腾讯云对象存储（COS）上传策略
@@ -50,24 +51,24 @@ public class CosUploadStrategy implements UploadStrategy {
                         """, inputStream.getClass());
             }
             // 不能上传大文件，否则可能产生 OOM
-            fileBytes = IOUtils.toByteArray(inputStream);
+            fileBytes = inputStream.readAllBytes();
             md5Digest.update(fileBytes);
             // 调用 digest() 后 md5Digest 会被重置
             byte[] fileMd5Bytes = md5Digest.digest();
             contentMd5 = Base64.encodeBase64String(fileMd5Bytes);
             // 复用已重置的 md5Digest
             md5Digest.update(fileBytes);
-            md5Digest.update(userProfileId.getBytes());
+            md5Digest.update(userProfileId.getBytes(StandardCharsets.UTF_8));
             fileAndUserProfileIdMd5 = Hex.encodeHexString(md5Digest.digest());
         } catch (IOException e) {
             throw new UploadContextException(e);
         }
         // 文件内容和用户资料 ID 的 MD5 摘要生成新文件名
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         if (extension == null) {
             throw new UploadContextException("File extension not found");
         }
-        String newFileName = fileAndUserProfileIdMd5 + EXTENSION_SEPARATOR + extension;
+        String newFileName = fileAndUserProfileIdMd5 + DOT + extension;
         // 不上传已存在的文件
         String bucketName = properties.getBucketName();
         String fileUri = directoryUri + newFileName;

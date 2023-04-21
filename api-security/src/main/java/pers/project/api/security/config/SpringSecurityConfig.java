@@ -26,7 +26,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
@@ -65,7 +64,7 @@ public class SpringSecurityConfig {
     /**
      * BCrypt 密码编码器
      * <p>
-     * 注意：从 {@link BCryptPasswordEncoder#getSalt()} 方法可知，
+     * 注意：从 {@code  BCryptPasswordEncoder#getSalt()} 方法可知，
      * 如果在 {@code BCryptPasswordEncoder} 构造函数中指定 {@code SecureRandom}，
      * 则它只会使用单例的 {@code SecureRandom}。
      *
@@ -135,7 +134,6 @@ public class SpringSecurityConfig {
     @Profile("dev")
     public WebSecurityCustomizer ignoringCustomizer() {
         return (web) -> web.ignoring().requestMatchers(new String[]{
-                "/account/key/{id}",
                 "/doc.html",
                 "/v3/api-docs",
                 "/v3/api-docs/*",
@@ -175,10 +173,6 @@ public class SpringSecurityConfig {
 
         private static final RequestMatcher[] PERMITTED_REQUEST_MATCHERS = {
                 // 用户未登录时允许访问的路径
-                antMatcher(GET, "/csrf"),
-                antMatcher(POST, "/account/registry"),
-                antMatcher("/profile/setting"),
-                antMatcher("/profile/avatar"),
         };
 
         @Bean
@@ -188,17 +182,21 @@ public class SpringSecurityConfig {
                     .securityContextRepository(securityContextRepository);
             // 配置请求授权
             http.authorizeHttpRequests()
-                    .requestMatchers(PERMITTED_REQUEST_MATCHERS)
-                    .permitAll()
+                    .requestMatchers(new RequestMatcher[] {
+                            // 用户未登录时允许访问的路径
+                            antMatcher(GET, "/csrf/token"),
+                            antMatcher(POST, "/account/registry"),
+                            antMatcher(POST, "/details/login"),
+                            antMatcher(POST, "/verification/code")
+                    })
+                    .permitAll();
+            // TODO: 2023/4/20 配置不生效
+            http.authorizeHttpRequests()
                     .anyRequest()
                     .hasAuthority(ROLE_USER);
             // 配置 CSRF 防护
             http.csrf().csrfTokenRepository(cookieCsrfTokenRepository())
-                    .csrfTokenRequestHandler(csrfTokenRequestHandler())
-                    .ignoringRequestMatchers(new AntPathRequestMatcher[]{
-                            antMatcher("/profile/setting"),
-                            antMatcher("/profile/avatar")
-                    });
+                    .csrfTokenRequestHandler(csrfTokenRequestHandler());
             // 配置会话管理
             http.sessionManagement()
                     .maximumSessions(MAXIMUM_SESSIONS)

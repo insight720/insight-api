@@ -81,7 +81,7 @@ public final class SecureRandomFactory {
             Provider provider = Security.getProvider(providerName);
             if (provider != null) {
                 random = SecureRandom.getInstance(algorithm, params, provider);
-                if (false) {
+                if (log.isDebugEnabled()) {
                     String message = """
                             Security algorithm %s was found from provider %s. [For SecureRandom] %s
                             """.formatted(random.getAlgorithm(), random.getProvider(), random);

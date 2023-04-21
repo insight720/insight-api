@@ -1,74 +1,91 @@
 declare namespace API {
-    type AccountAuthorityDTO = {
-        accountId: string;
-        authority: string;
-    };
+  type ApiKeyPairVO = {
+    accountKey?: string;
+    accessKey?: string;
+  };
 
-    type AccountStatusDTO = {
-        accountId: string;
-        statusCode: number;
-    };
+  type getNewApiKeyPairParams = {
+    accountId: string;
+  };
 
-    type generateKeyPairParams = {
-        accountId: string;
-    };
+  type LoginUserDTO = {
+    username?: string;
+    email?: string;
+    phoneNumber?: string;
+    authority?: string;
+    accountKey?: string;
+    accountStatus?: number;
+    profileId?: string;
+    accountId?: string;
+    avatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
+    ipAddress?: string;
+    ipOrigin?: string;
+    lastLoginTime?: string;
+  };
 
-    type KeyPairDTO = {
-        accountKey?: string;
-        secretKey?: string;
-    };
+  type PhoneOrEmailLoginDTO = {
+    email?: string;
+    phoneNumber?: string;
+    strategy: string;
+    verificationCode?: string;
+  };
 
-    type LoginUserDTO = {
-        username?: string;
-        email?: string;
-        phoneNumber?: string;
-        authority?: string;
-        accountKey?: string;
-        accountStatus?: number;
-        profileId?: string;
-        accountId?: string;
-        avatar?: string;
-        nickname?: string;
-        website?: string;
-        github?: string;
-        gitee?: string;
-        biography?: string;
-        ipAddress?: string;
-        ipOrigin?: string;
-        lastLoginTime?: string;
-    };
+  type ResultApiKeyPairVO = {
+    code?: string;
+    message?: string;
+    data?: ApiKeyPairVO;
+  };
 
-    type ResultKeyPairDTO = {
-        code?: string;
-        message?: string;
-        data?: KeyPairDTO;
-    };
+  type ResultLoginUserDTO = {
+    code?: string;
+    message?: string;
+    data?: LoginUserDTO;
+  };
 
-    type ResultLoginUserDTO = {
-        code?: string;
-        message?: string;
-        data?: LoginUserDTO;
-    };
+  type ResultVoid = {
+    code?: string;
+    message?: string;
+    data?: Record<string, any>;
+  };
 
-    type ResultVoid = {
-        code?: string;
-        message?: string;
-        data?: Record<string, any>;
-    };
+  type UserAccountAuthorityDTO = {
+    accountId?: string;
+    authority: string;
+  };
 
-    type UserProfileSettingVO = {
-        profileId?: string;
-        originalAvatar?: string;
-        nickname?: string;
-        website?: string;
-        github?: string;
-        gitee?: string;
-        biography?: string;
-    };
+  type UserAccountStatusDTO = {
+    accountId?: string;
+    statusCode: number;
+  };
 
-    type UserRegistryVO = {
-        username: string;
-        password: string;
-        confirmedPassword: string;
-    };
+  type UserProfileSettingDTO = {
+    profileId?: string;
+    originalAvatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
+  };
+
+  type UserRegistryDTO = {
+    username: string;
+    password: string;
+    confirmedPassword: string;
+    email?: string;
+    phoneNumber?: string;
+    strategy: string;
+    verificationCode?: string;
+  };
+
+  type VerificationCodeSendingDTO = {
+    phoneNumber?: string;
+    email?: string;
+    strategy: string;
+  };
 }

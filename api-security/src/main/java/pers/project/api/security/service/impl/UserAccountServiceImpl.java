@@ -6,26 +6,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import pers.project.api.common.exception.BusinessException;
-import pers.project.api.security.crypto.Argon2KeyGenerator;
+import pers.project.api.common.model.security.CustomUserDetails;
+import pers.project.api.common.util.bean.BeanCopierUtils;
+import pers.project.api.security.crypto.Argon2KeyPairGenerator;
 import pers.project.api.security.crypto.SecureRandomFactory;
 import pers.project.api.security.mapper.UserAccountMapper;
 import pers.project.api.security.mapper.UserProfileMapper;
-import pers.project.api.security.model.dto.AccountAuthorityDTO;
-import pers.project.api.security.model.dto.AccountStatusDTO;
-import pers.project.api.security.model.dto.KeyPairDTO;
+import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
+import pers.project.api.security.model.dto.UserAccountStatusDTO;
+import pers.project.api.security.model.dto.UserRegistryDTO;
+import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.entity.UserAccount;
 import pers.project.api.security.model.entity.UserProfile;
-import pers.project.api.security.model.vo.UserRegistryVO;
+import pers.project.api.security.model.vo.ApiKeyPairVO;
+import pers.project.api.security.service.CustomUserDetailsService;
+import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.service.UserAccountService;
 
 import java.security.SecureRandom;
 
-import static pers.project.api.common.enumeration.ErrorEnum.DATABASE_ERROR;
-import static pers.project.api.common.enumeration.ErrorEnum.REGISTRY_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.*;
 import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
-import static pers.project.api.security.crypto.Argon2KeyGenerator.SUGGESTED_SOURCE_LENGTH;
+import static pers.project.api.security.crypto.Argon2KeyPairGenerator.SUGGESTED_SOURCE_LENGTH;
+import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
 
 
 /**
@@ -43,50 +48,55 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
 
     private final UserProfileMapper userProfileMapper;
 
+    private final CustomUserDetailsService userDetailsService;
+
+    private final SecurityService securityService;
+
+    private final TransactionTemplate transactionTemplate;
+
     @Override
-    @Transactional(rollbackFor = Throwable.class)
-    public void saveAccount(UserRegistryVO userRegistryVO) {
-        // 确认密码一致
-        String rowPassword = userRegistryVO.getPassword();
-        String confirmedPassword = userRegistryVO.getConfirmedPassword();
-        if (!confirmedPassword.equals(rowPassword)) {
-            throw new BusinessException(REGISTRY_ERROR, "你输入的两个密码不一致");
-        }
-        // 检查账户名是否重复
-        String username = userRegistryVO.getUsername();
-        boolean exists = lambdaQuery().eq(UserAccount::getUsername, username).exists();
-        if (exists) {
-            throw new BusinessException(REGISTRY_ERROR, "账户名已存在");
-        }
+    public void saveNewAccount(UserRegistryDTO userRegistryDTO) {
+        // 校验注册数据
+        validateUserRegistryDTO(userRegistryDTO);
         // 保存用户账户
-        String encodedPassword = passwordEncoder.encode(rowPassword);
+        String encodedPassword = passwordEncoder.encode(userRegistryDTO.getPassword());
         UserAccount userAccount = new UserAccount();
-        userAccount.setUsername(username);
+        userAccount.setUsername(userRegistryDTO.getUsername());
         userAccount.setPassword(encodedPassword);
+        // phoneNumber 和 email 有一个为 null
+        userAccount.setPhoneNumber(userRegistryDTO.getPhoneNumber());
+        userAccount.setEmail(userRegistryDTO.getEmail());
+        // 默认为用户权限
         userAccount.setAuthority(ROLE_USER);
-        try {
-            save(userAccount);
-        } catch (Exception e) {
-            // 罕见的情况，比如用户名重复
-            String message = "Saving account failed, username: " + username;
-            log.error(message, e);
-            throw new BusinessException(DATABASE_ERROR, "创建账户失败，请稍后再试！");
-        }
-        // 保存用户资料
-        UserProfile userProfile = new UserProfile();
-        userProfile.setAccountId(userAccount.getId());
-        userProfileMapper.insert(userProfile);
+        // 编程式事务，与 @Transactional 一样具有默认的 propagation 和 isolation
+        transactionTemplate.executeWithoutResult(ignored -> {
+            try {
+                save(userAccount);
+            } catch (Exception e) {
+                // 罕见的情况，比如用户名重复
+                // 抛出异常会在 TransactionTemplate.execute 中执行回滚
+                String message = "Saving account failed, userAccount: " + userAccount;
+                log.warn(message, e);
+                throw new BusinessException(DATABASE_ERROR, "创建账户失败，请稍后再试！");
+            }
+            // 创建用户资料
+            UserProfile userProfile = new UserProfile();
+            userProfile.setAccountId(userAccount.getId());
+            userProfileMapper.insert(userProfile);
+        });
     }
 
     @Override
-    public KeyPairDTO getKeyPairDTO(String accountId) {
-        // 生成密钥对
+    public ApiKeyPairVO getApiKeyPairVO(String accountId) {
+        // 使用 SecureRandom 为密钥生成提供安全随机数
         SecureRandom secureRandom = SecureRandomFactory.defaultRandom();
+        // 安全随机数作为密钥对源字节数组
         byte[] sourceBytes = new byte[SUGGESTED_SOURCE_LENGTH];
         secureRandom.nextBytes(sourceBytes);
-        String accountKey = Argon2KeyGenerator.generate(sourceBytes, secureRandom);
-        String accessKey = Argon2KeyGenerator.generate(sourceBytes, secureRandom);
-        // 保存密钥对
+        // 使用 Argon2 哈希算法生成唯一密钥对
+        String accountKey = Argon2KeyPairGenerator.generate(sourceBytes, secureRandom);
+        String accessKey = Argon2KeyPairGenerator.generate(sourceBytes, secureRandom);
+        // 保存唯一密钥对
         LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(UserAccount::getAccountKey, accountKey);
         updateWrapper.set(UserAccount::getAccessKey, accessKey);
@@ -101,15 +111,19 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
             log.error(message, e);
             throw new BusinessException(DATABASE_ERROR, "创建密钥失败，请稍后再试！");
         }
-        // 返回密钥数据
-        KeyPairDTO keyPairDTO = new KeyPairDTO();
-        keyPairDTO.setAccountKey(accountKey);
-        keyPairDTO.setSecretKey(accessKey);
-        return keyPairDTO;
+        // 更新 Spring Security 上下文中的用户资料
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setAccountKey(accountKey);
+        userDetailsService.updateLoginUserDetails(userDetails);
+        // 返回唯一密钥对
+        ApiKeyPairVO apiKeyPairVO = new ApiKeyPairVO();
+        apiKeyPairVO.setAccountKey(accountKey);
+        apiKeyPairVO.setAccessKey(accessKey);
+        return apiKeyPairVO;
     }
 
     @Override
-    public void updateAccountStatus(AccountStatusDTO accountStatusDTO) {
+    public void updateAccountStatus(UserAccountStatusDTO accountStatusDTO) {
         LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(UserAccount::getAccountStatus, accountStatusDTO.getStatusCode());
         updateWrapper.eq(UserAccount::getId, accountStatusDTO.getAccountId());
@@ -117,11 +131,50 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     }
 
     @Override
-    public void updateAccountAuthority(AccountAuthorityDTO accountAuthorityDTO) {
+    public void updateAccountAuthority(UserAccountAuthorityDTO accountAuthorityDTO) {
         LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(UserAccount::getAuthority, accountAuthorityDTO.getAuthority());
         updateWrapper.eq(UserAccount::getId, accountAuthorityDTO.getAccountId());
         update(updateWrapper);
+    }
+
+    /**
+     * 验证用户注册 VO
+     *
+     * @param userRegistryDTO 用户注册 VO
+     * @throws BusinessException 如果校验失败
+     */
+    private void validateUserRegistryDTO(UserRegistryDTO userRegistryDTO) {
+        // 确认密码一致
+        boolean isConfirmed = userRegistryDTO.getPassword()
+                .equals(userRegistryDTO.getConfirmedPassword());
+        if (!isConfirmed) {
+            throw new BusinessException(REGISTRY_ERROR, "你输入的两个密码不一致！");
+        }
+        // 检查验证码
+        VerificationCodeCheckDTO codeCheckDTO = new VerificationCodeCheckDTO();
+        BeanCopierUtils.copy(userRegistryDTO, codeCheckDTO);
+        boolean isVerified = securityService.checkVerificationCode(codeCheckDTO);
+        if (!isVerified) {
+            throw new BusinessException(VERIFICATION_CODE_ERROR, "验证码错误！");
+        }
+        // 检查账户名是否重复
+        boolean usernameExists = lambdaQuery()
+                .eq(UserAccount::getUsername, userRegistryDTO.getUsername())
+                .exists();
+        if (usernameExists) {
+            throw new BusinessException(REGISTRY_ERROR, "账户名已存在！");
+        }
+        // 检查邮箱或手机号是否已被使用
+        boolean isUsingPhone = PHONE.name().equals(userRegistryDTO.getStrategy());
+        boolean phoneOrEmailExists = lambdaQuery()
+                .eq(isUsingPhone, UserAccount::getPhoneNumber, userRegistryDTO.getPhoneNumber())
+                .eq(!isUsingPhone, UserAccount::getEmail, userRegistryDTO.getEmail())
+                .exists();
+        if (phoneOrEmailExists) {
+            String argument = isUsingPhone ? "手机号" : "邮箱";
+            throw new BusinessException(REGISTRY_ERROR, "%s 已被使用！".formatted(argument));
+        }
     }
 
 }

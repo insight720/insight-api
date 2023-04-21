@@ -6,7 +6,7 @@ import {RcFile} from "antd/es/upload/interface";
 /** 此处后端没有提供注释 PUT /profile/setting */
 export async function setProfile(
     avatarFile: RcFile,
-    profileSettingVO: API.UserProfileSettingVO,
+    profileSettingVO: API.UserProfileSettingDTO,
     options ?: {
         [key: string]: any
     }

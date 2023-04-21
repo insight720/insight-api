@@ -15,12 +15,23 @@ import lombok.experimental.Accessors;
 @RequiredArgsConstructor
 public enum AccountStatusEnum {
 
-    NORMAL(0, "正常"),
+    NORMAL_KEY_AVAILABLE(1, "正常 - 密钥可用"),
 
-    NOT_AVAILABLE(1, "不可用");
+    NORMAL_KEY_UNAVAILABLE(2, "正常 - 密钥不可用"),
 
+    DISABLED_KEY_AVAILABLE(3, "已禁用 - 密钥可用"),
+
+    DISABLED_KEY_UNAVAILABLE(4, "已禁用 - 密钥不可用");
+
+    /**
+     * 账户状态码
+     */
     private final Integer statusCode;
 
+    /**
+     * 账户状态描述
+     */
     private final String description;
 
 }
+

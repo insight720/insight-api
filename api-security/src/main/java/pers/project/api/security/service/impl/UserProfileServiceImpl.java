@@ -1,8 +1,10 @@
 package pers.project.api.security.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dreamlu.mica.ip2region.core.Ip2regionSearcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,8 +14,8 @@ import pers.project.api.common.util.bean.BeanCopierUtils;
 import pers.project.api.common.util.transaction.TransactionUtils;
 import pers.project.api.security.execption.UploadContextException;
 import pers.project.api.security.mapper.UserProfileMapper;
+import pers.project.api.security.model.dto.UserProfileSettingDTO;
 import pers.project.api.security.model.entity.UserProfile;
-import pers.project.api.security.model.vo.UserProfileSettingVO;
 import pers.project.api.security.service.CustomUserDetailsService;
 import pers.project.api.security.service.UserProfileService;
 import pers.project.api.security.upload.UploadContext;
@@ -33,13 +35,17 @@ import static pers.project.api.security.enumeration.UploadFileEnum.AVATAR;
 @RequiredArgsConstructor
 public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfile> implements UserProfileService {
 
+    private final HttpServletRequest request;
+
     private final UploadContext uploadContext;
+
+    private final Ip2regionSearcher ip2regionSearcher;
 
     private final CustomUserDetailsService userDetailsService;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void updateUserProfile(MultipartFile avatarFile, UserProfileSettingVO profileSettingVO) {
+    public void updateUserProfile(MultipartFile avatarFile, UserProfileSettingDTO profileSettingVO) {
         // 先明确需求，一个用户只存储一个头像
         String profileId = profileSettingVO.getProfileId();
         // 如果用户设置新头像，则尝试上传头像文件
@@ -73,6 +79,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         }
         userDetailsService.updateLoginUserDetails(userDetails);
     }
+
 
     /**
      * 上传新头像

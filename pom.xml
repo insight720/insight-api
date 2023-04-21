@@ -18,17 +18,18 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <spring-boot.version>3.0.3</spring-boot.version>
-        <spring-cloud.version>2022.0.1</spring-cloud.version>
+        <spring-boot.version>3.0.5</spring-boot.version>
+        <spring-cloud.version>2022.0.2</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0-RC1</spring-cloud-alibaba.version>
-        <knife4j.version>4.0.0</knife4j.version>
+        <knife4j.version>4.1.0</knife4j.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <!-- 2.0.27 以下版本存在与项目相关的序列化 BUG https://github.com/alibaba/fastjson2/issues/1286 -->
-        <fastjson2.version>2.0.27</fastjson2.version>
+        <fastjson2.version>2.0.28</fastjson2.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <cos_api.version>5.6.139</cos_api.version>
-        <mica-ip2region.version>3.0.3</mica-ip2region.version>
+        <cos_api.version>5.6.137.2</cos_api.version>
+        <mica-ip2region.version>3.0.5</mica-ip2region.version>
         <sensitive-word.version>0.2.1</sensitive-word.version>
+        <tencentcloud-sdk-java.version>3.1.737</tencentcloud-sdk-java.version>
     </properties>
 
     <!-- 子模块 -->
@@ -92,18 +93,6 @@
                 <artifactId>fastjson2-extension-spring6</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
-            </dependency>
-            <!-- https://cloud.tencent.com/document/product/436/10199 -->
-            <dependency>
-                <groupId>com.qcloud</groupId>
-                <artifactId>cos_api</artifactId>
-                <version>${cos_api.version}</version>
-            </dependency>
             <!-- https://mvnrepository.com/artifact/net.dreamlu/mica-ip2region -->
             <dependency>
                 <groupId>net.dreamlu</groupId>
@@ -115,6 +104,24 @@
                 <groupId>com.github.houbb</groupId>
                 <artifactId>sensitive-word</artifactId>
                 <version>${sensitive-word.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.qcloud/cos_api -->
+            <dependency>
+                <groupId>com.qcloud</groupId>
+                <artifactId>cos_api</artifactId>
+                <version>${cos_api.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.tencentcloudapi/tencentcloud-sdk-java-sms -->
+            <dependency>
+                <groupId>com.tencentcloudapi</groupId>
+                <artifactId>tencentcloud-sdk-java-sms</artifactId>
+                <version>${tencentcloud-sdk-java.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.tencentcloudapi/tencentcloud-sdk-java-ses -->
+            <dependency>
+                <groupId>com.tencentcloudapi</groupId>
+                <artifactId>tencentcloud-sdk-java-ses</artifactId>
+                <version>${tencentcloud-sdk-java.version}</version>
             </dependency>
         </dependencies>
 

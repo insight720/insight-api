@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.common.validation.constraint.FileSpec;
-import pers.project.api.security.model.vo.UserProfileSettingVO;
+import pers.project.api.security.model.dto.UserProfileSettingDTO;
 import pers.project.api.security.service.UserProfileService;
 
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -35,7 +35,7 @@ public class UserProfileController {
     public Result<Void> setProfile
             (@FileSpec(maxSize = "7MB", mediaTypes = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
              @RequestPart(required = false) MultipartFile avatarFile,
-             @Valid @RequestPart UserProfileSettingVO profileSettingVO) {
+             @Valid @RequestPart UserProfileSettingDTO profileSettingVO) {
         userProfileService.updateUserProfile(avatarFile, profileSettingVO);
         return ResultUtils.success();
     }

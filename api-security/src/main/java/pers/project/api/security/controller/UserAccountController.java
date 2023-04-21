@@ -8,10 +8,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
-import pers.project.api.security.model.dto.AccountAuthorityDTO;
-import pers.project.api.security.model.dto.AccountStatusDTO;
-import pers.project.api.security.model.dto.KeyPairDTO;
-import pers.project.api.security.model.vo.UserRegistryVO;
+import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
+import pers.project.api.security.model.dto.UserAccountStatusDTO;
+import pers.project.api.security.model.dto.UserRegistryDTO;
+import pers.project.api.security.model.vo.ApiKeyPairVO;
 import pers.project.api.security.service.UserAccountService;
 
 /**
@@ -28,28 +28,30 @@ public class UserAccountController {
 
     private final UserAccountService userAccountService;
 
-    @GetMapping("/key/{accountId}")
-    public Result<KeyPairDTO> generateKeyPair(@NotBlank @PathVariable String accountId) {
-        //  TODO: 2023/4/6 1 需不需要返回 2 更不更新信息
-        KeyPairDTO keyPairDTO = userAccountService.getKeyPairDTO(accountId);
-        return ResultUtils.success(keyPairDTO);
-    }
-
     @PostMapping("/registry")
-    public Result<Void> registerUser(@Valid @RequestBody UserRegistryVO userRegistryVO) {
-        userAccountService.saveAccount(userRegistryVO);
+    public Result<Void> register(@Valid @RequestBody UserRegistryDTO userRegistryDTO) {
+        userAccountService.saveNewAccount(userRegistryDTO);
         return ResultUtils.success();
     }
 
+    /**
+     * @see <a href="https://github.com/spring-projects/spring-security/issues/13058">ISSUES</a>
+     */
+    @GetMapping("/{accountId}/key")
+    public Result<ApiKeyPairVO> getNewApiKeyPair(@NotBlank @PathVariable String accountId) {
+        ApiKeyPairVO apiKeyPairVO = userAccountService.getApiKeyPairVO(accountId);
+        return ResultUtils.success(apiKeyPairVO);
+    }
+
     @PutMapping("/status")
-    public Result<Void> modifyAccountStatus(@Valid @RequestBody AccountStatusDTO accountStatusDTO) {
+    public Result<Void> modifyAccountStatus(@Valid @RequestBody UserAccountStatusDTO accountStatusDTO) {
         userAccountService.updateAccountStatus(accountStatusDTO);
         return ResultUtils.success();
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/authority")
-    public Result<Void> modifyAccountAuthority(@Valid @RequestBody AccountAuthorityDTO accountAuthorityDTO) {
+    public Result<Void> modifyAccountAuthority(@Valid @RequestBody UserAccountAuthorityDTO accountAuthorityDTO) {
         userAccountService.updateAccountAuthority(accountAuthorityDTO);
         return ResultUtils.success();
     }

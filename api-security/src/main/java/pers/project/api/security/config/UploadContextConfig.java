@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pers.project.api.security.config.properties.UploadContextProperties;
+import pers.project.api.security.properties.UploadContextProperties;
 
 /**
  * 上传上下文配置类

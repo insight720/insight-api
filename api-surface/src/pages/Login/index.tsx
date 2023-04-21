@@ -11,14 +11,15 @@ import {
 import {LoginForm, ProFormCaptcha, ProFormCheckbox, ProFormText,} from '@ant-design/pro-components';
 import {useEmotionCss} from '@ant-design/use-emotion-css';
 import {FormattedMessage, Helmet, SelectLang, useIntl, useModel} from '@umijs/max';
-import {Alert, Button, message, Tabs} from 'antd';
+import {Button, message, Select, Tabs} from 'antd';
 import Settings from '../../../config/defaultSettings';
 import React, {useState} from 'react';
 import {flushSync} from 'react-dom';
 import RegistryModal from "@/pages/Login/components/RegistryModal";
-import {login, UserLoginVO} from "@/services/hidden/springSecurity";
+import {login, UsernameLoginDTO} from "@/services/hidden/springSecurity";
 import {history} from "@@/core/history";
-import {generateCsrfToken} from "@/services/api-security/securityController";
+import {getCsrfToken, getVerificationCode} from "@/services/api-security/securityController";
+import {loginByVerificationCode} from "@/services/api-security/userDetailsController";
 
 const ActionIcons = () => {
     const langClassName = useEmotionCss(({token}) => {
@@ -66,24 +67,19 @@ const Lang = () => {
     );
 };
 
-const LoginMessage: React.FC<{
-    content: string;
-}> = ({content}) => {
-    return (
-        <Alert
-            style={{
-                marginBottom: 24,
-            }}
-            message={content}
-            type="error"
-            showIcon
-        />
-    );
-};
-
 const Login: React.FC = () => {
-    const [loginType, setLoginType] = useState<string>('account');
+    // 登录类型
+    const [loginType, setLoginType] = useState<string>('USERNAME');
+
+    // 全局初始状态
     const {setInitialState} = useModel('@@initialState');
+
+    // 注册模态框开关
+    const [registryModalOpen, handleRegistryModalOpen] = useState<boolean>(false);
+
+    // 手机号前缀选项（如 +86）
+    const [phoneOption, setPhoneOption] = useState<string>("+86")
+
 
     const containerClassName = useEmotionCss(() => {
         return {
@@ -98,9 +94,9 @@ const Login: React.FC = () => {
     });
 
     const locale = useIntl();
-
+    // 表单数据
     /**
-     * 设置登录用户的信息
+     * 设置用户的登陆状态
      */
     const setLoginUserInfo = async (userInfo: API.LoginUserDTO | undefined) => {
         if (userInfo) {
@@ -114,9 +110,9 @@ const Login: React.FC = () => {
     };
 
     /**
-     * 提交登录表单
+     * 处理用户名登录
      */
-    const handleSubmit = async (values: UserLoginVO) => {
+    const handleUsernameLogin = async (values: UsernameLoginDTO) => {
         try {
             // 登录
             const urlParams = new URL(window.location.href).searchParams;
@@ -130,7 +126,7 @@ const Login: React.FC = () => {
                 });
                 await setLoginUserInfo(result.data);
                 // 登录后 CSRF Cookie 会被清除
-                await generateCsrfToken();
+                await getCsrfToken();
                 history.push('/');
                 message.success(defaultLoginSuccessMessage);
                 return;
@@ -144,8 +140,33 @@ const Login: React.FC = () => {
         }
     };
 
-    // 注册模态框开关
-    const [registryModalOpen, handleRegistryModalOpen] = useState<boolean>(false);
+    /**
+     * 处理手机或邮箱登录
+     */
+    const handlePhoneOrEmailLogin = async (values: API.PhoneOrEmailLoginDTO) => {
+        try {
+            // 通过验证码登录
+            const result = await loginByVerificationCode(values);
+            if (result.data) {
+                const defaultLoginSuccessMessage = locale.formatMessage({
+                    id: 'pages.login.success',
+                    defaultMessage: '登录成功！',
+                });
+                await setLoginUserInfo(result.data);
+                // 登录后 CSRF Cookie 会被清除
+                await getCsrfToken();
+                history.push('/');
+                message.success(defaultLoginSuccessMessage);
+                return;
+            }
+        } catch (error: any) {
+            const defaultLoginFailureMessage = locale.formatMessage({
+                id: 'pages.login.failure',
+                defaultMessage: '登录失败，请重试！',
+            });
+            message.error(error.message || defaultLoginFailureMessage);
+        }
+    };
 
     // @ts-ignore
     return (
@@ -186,7 +207,27 @@ const Login: React.FC = () => {
                         <ActionIcons key="icons"/>,
                     ]}
                     onFinish={async (values) => {
-                        await handleSubmit(values as UserLoginVO);
+                        // 根据登录类型进行登录
+                        switch (loginType) {
+                            case "USERNAME":
+                                await handleUsernameLogin(values as UsernameLoginDTO);
+                                break;
+                            case "PHONE":
+                                await handlePhoneOrEmailLogin({
+                                    strategy: "PHONE",
+                                    phoneNumber: phoneOption + values.phone,
+                                    ...values
+                                })
+                                break;
+                            case "EMAIL":
+                                await handlePhoneOrEmailLogin({
+                                    strategy: "EMAIL",
+                                    ...values
+                                });
+                                break;
+                            default:
+                                alert("登录类型错误！");
+                        }
                     }}
                 >
                     <Tabs
@@ -195,38 +236,30 @@ const Login: React.FC = () => {
                         centered
                         items={[
                             {
-                                key: 'account',
+                                key: 'USERNAME',
                                 label: locale.formatMessage({
                                     id: 'pages.login.accountLogin.tab',
                                     defaultMessage: '账户密码登录',
                                 }),
                             },
                             {
-                                key: 'email',
-                                label: locale.formatMessage({
-                                    id: 'pages.login.emailLogin.tab',
-                                    defaultMessage: '邮箱号登录',
-                                }),
-                            },
-                            {
-                                key: 'mobile',
+                                key: 'PHONE',
                                 label: locale.formatMessage({
                                     id: 'pages.login.phoneLogin.tab',
                                     defaultMessage: '手机号登录',
                                 }),
                             },
+                            {
+                                key: 'EMAIL',
+                                label: locale.formatMessage({
+                                    id: 'pages.login.emailLogin.tab',
+                                    defaultMessage: '邮箱号登录',
+                                }),
+                            },
                         ]}
                     />
 
-                    {status === 'error' && loginType === 'account' && (
-                        <LoginMessage
-                            content={locale.formatMessage({
-                                id: 'pages.login.accountLogin.errorMessage',
-                                defaultMessage: '账户或密码错误(admin/ant.design)',
-                            })}
-                        />
-                    )}
-                    {loginType === 'account' && (
+                    {loginType === "USERNAME" && (
                         <>
                             <ProFormText
                                 name="username"
@@ -234,17 +267,23 @@ const Login: React.FC = () => {
                                     size: 'large',
                                     prefix: <UserOutlined/>,
                                 }}
-                                placeholder={locale.formatMessage({
-                                    id: 'pages.login.username.placeholder',
-                                    defaultMessage: '用户名: admin or user',
-                                })}
                                 rules={[
                                     {
                                         required: true,
                                         message: (
                                             <FormattedMessage
-                                                id="pages.login.username.required"
-                                                defaultMessage="请输入用户名!"
+                                                id="Account name is required"
+                                                defaultMessage="账户名是必填项！"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        min: 3,
+                                        max: 25,
+                                        message: (
+                                            <FormattedMessage
+                                                id="Account name length should be between 3 to 25"
+                                                defaultMessage="账户名长度应为 3 至 25 个字符！"
                                             />
                                         ),
                                     },
@@ -265,26 +304,136 @@ const Login: React.FC = () => {
                                         required: true,
                                         message: (
                                             <FormattedMessage
-                                                id="pages.login.password.required"
-                                                defaultMessage="请输入密码！"
+                                                id="Password is required"
+                                                defaultMessage="密码是必填项！"
                                             />
                                         ),
                                     },
+                                    {
+                                        pattern: /^(?=.*\d)(?=.*\D).{8,25}$/,
+                                        message: (
+                                            <FormattedMessage
+                                                id="Passwords should be between 8 and 25 characters long and cannot be numeric only"
+                                                defaultMessage="密码长度应为 8 至 25 个字符，且不能为纯数字！"
+                                            />
+                                        ),
+                                    }
                                 ]}
                             />
                         </>
                     )}
 
+                    {loginType === "PHONE" && (
+                        <>
+                            <ProFormText
+                                addonBefore={
+                                    <Select style={{width: 70}}
+                                            defaultValue={"+86"}
+                                            onChange={value => {
+                                                setPhoneOption(value)
+                                            }}>
+                                        <option value="+86">+86</option>
+                                    </Select>
+                                }
+                                fieldProps={{
+                                    size: 'large',
+                                    prefix: <MobileOutlined/>,
+                                }}
+                                name="phone"
+                                placeholder={locale.formatMessage({
+                                    id: 'pages.login.phoneNumber.placeholder',
+                                    defaultMessage: '手机号',
+                                })}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: (
+                                            <FormattedMessage
+                                                id="Mobile phone number is required"
+                                                defaultMessage="手机号是必填项！"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        pattern: /^1[3-9]\d{9}$/,
+                                        message: (
+                                            <FormattedMessage
+                                                id="is not a valid phone number"
+                                                defaultMessage="不是有效的手机号！"
+                                            />
+                                        ),
+                                    }
+                                ]}
+                            />
+                            <ProFormCaptcha
+                                fieldProps={{
+                                    size: 'large',
+                                    prefix: <LockOutlined/>,
+                                }}
+                                captchaProps={{
+                                    size: 'large',
+                                }}
+                                placeholder={locale.formatMessage({
+                                    id: 'pages.login.captcha.placeholder',
+                                    defaultMessage: '请输入验证码',
+                                })}
+                                captchaTextRender={(timing, count) => {
+                                    if (timing) {
+                                        return `${count} ${locale.formatMessage({
+                                            id: 'pages.getCaptchaSecondText',
+                                            defaultMessage: '获取验证码',
+                                        })}`;
+                                    }
+                                    return locale.formatMessage({
+                                        id: 'pages.login.phoneLogin.getVerificationCode',
+                                        defaultMessage: '获取验证码',
+                                    });
+                                }}
+                                name="verificationCode"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: (
+                                            <FormattedMessage
+                                                id="Please enter the verification code"
+                                                defaultMessage="验证码是必填项！"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        pattern: /^\d{6}$/,
+                                        message: (
+                                            <FormattedMessage
+                                                id="is not a valid verification code"
+                                                defaultMessage="不是有效的验证码！"
+                                            />
+                                        )
+                                    }
+                                ]}
+                                phoneName="phone"
+                                onGetCaptcha={async (phone) => {
+                                    // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
+                                    // throw new Error("获取验证码错误")
+                                    await getVerificationCode({
+                                        // phoneOption 是 +86 前缀
+                                        phoneNumber: phoneOption + phone,
+                                        email: undefined,
+                                        strategy: loginType
+                                    });
+                                    message.success("获取验证码成功！");
+                                }}
+                            />
+                        </>
+                    )}
 
-                    {status === 'error' && loginType === 'email' && <LoginMessage content="验证码错误"/>}
-                    {loginType === 'email' && (
+                    {loginType === "EMAIL" && (
                         <>
                             <ProFormText
                                 fieldProps={{
                                     size: 'large',
                                     prefix: <MailOutlined/>,
                                 }}
-                                name="mobile"
+                                name="email"
                                 placeholder={locale.formatMessage({
                                     id: 'pages.login.emailAddress.placeholder',
                                     defaultMessage: '请输入邮箱号！',
@@ -300,11 +449,11 @@ const Login: React.FC = () => {
                                         ),
                                     },
                                     {
-                                        pattern: /^1\d{10}$/,
+                                        type: 'email',
                                         message: (
                                             <FormattedMessage
-                                                id="pages.login.phoneNumber.invalid"
-                                                defaultMessage="邮箱号格式错误！"
+                                                id="pages.login.emailAddress.invalidFormat"
+                                                defaultMessage="邮箱号格式不正确！"
                                             />
                                         ),
                                     },
@@ -318,10 +467,6 @@ const Login: React.FC = () => {
                                 captchaProps={{
                                     size: 'large',
                                 }}
-                                placeholder={locale.formatMessage({
-                                    id: 'pages.login.captcha.placeholder',
-                                    defaultMessage: '请输入验证码',
-                                })}
                                 captchaTextRender={(timing, count) => {
                                     if (timing) {
                                         return `${count} ${locale.formatMessage({
@@ -334,105 +479,37 @@ const Login: React.FC = () => {
                                         defaultMessage: '获取验证码',
                                     });
                                 }}
-                                name="captcha"
+                                name="verificationCode"
                                 rules={[
                                     {
                                         required: true,
                                         message: (
                                             <FormattedMessage
-                                                id="pages.login.captcha.required"
-                                                defaultMessage="请输入验证码！"
-                                            />
-                                        ),
-                                    },
-                                ]}
-                                onGetCaptcha={async (phone) => {
-                                    const result = "";
-                                    if (!result) {
-                                        return;
-                                    }
-                                    message.success('获取验证码成功！验证码为：1234');
-                                }}
-                            />
-                        </>
-                    )}
-
-                    {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误"/>}
-                    {loginType === 'mobile' && (
-                        <>
-                            <ProFormText
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <MobileOutlined/>,
-                                }}
-                                name="mobile"
-                                placeholder={locale.formatMessage({
-                                    id: 'pages.login.phoneNumber.placeholder',
-                                    defaultMessage: '手机号',
-                                })}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: (
-                                            <FormattedMessage
-                                                id="pages.login.phoneNumber.required"
-                                                defaultMessage="请输入手机号！"
+                                                id="Please enter the verification code"
+                                                defaultMessage="验证码是必填项！"
                                             />
                                         ),
                                     },
                                     {
-                                        pattern: /^1\d{10}$/,
+                                        pattern: /^\d{6}$/,
                                         message: (
                                             <FormattedMessage
-                                                id="pages.login.phoneNumber.invalid"
-                                                defaultMessage="手机号格式错误！"
+                                                id="is not a valid verification code"
+                                                defaultMessage="不是有效的验证码！"
                                             />
-                                        ),
-                                    },
-                                ]}
-                            />
-                            <ProFormCaptcha
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <LockOutlined/>,
-                                }}
-                                captchaProps={{
-                                    size: 'large',
-                                }}
-                                placeholder={locale.formatMessage({
-                                    id: 'pages.login.captcha.placeholder',
-                                    defaultMessage: '请输入验证码',
-                                })}
-                                captchaTextRender={(timing, count) => {
-                                    if (timing) {
-                                        return `${count} ${locale.formatMessage({
-                                            id: 'pages.getCaptchaSecondText',
-                                            defaultMessage: '获取验证码',
-                                        })}`;
+                                        )
                                     }
-                                    return locale.formatMessage({
-                                        id: 'pages.login.phoneLogin.getVerificationCode',
-                                        defaultMessage: '获取验证码',
+                                ]}
+                                phoneName="email"
+                                onGetCaptcha={async (email) => {
+                                    // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
+                                    // throw new Error("获取验证码错误！")
+                                    await getVerificationCode({
+                                        phoneNumber: undefined,
+                                        email: email,
+                                        strategy: loginType
                                     });
-                                }}
-                                name="captcha"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: (
-                                            <FormattedMessage
-                                                id="pages.login.captcha.required"
-                                                defaultMessage="请输入验证码！"
-                                            />
-                                        ),
-                                    },
-                                ]}
-                                onGetCaptcha={async (phone) => {
-                                    const result = await "";
-                                    if (!result) {
-                                        return;
-                                    }
-                                    message.success('获取验证码成功！验证码为：1234');
+                                    message.success('获取验证码成功！');
                                 }}
                             />
                         </>
@@ -451,8 +528,7 @@ const Login: React.FC = () => {
                             float: 'right',
                         }} onClick={() => {
                             handleRegistryModalOpen(true);
-                        }
-                        }>
+                        }}>
                             <FormattedMessage id="pages.login" defaultMessage="注册账号"/>
                         </Button>
                         <RegistryModal open={registryModalOpen}

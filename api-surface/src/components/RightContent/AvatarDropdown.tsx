@@ -7,7 +7,7 @@ import React, {useCallback} from 'react';
 import {flushSync} from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
 import {logout} from "@/services/hidden/springSecurity";
-import {generateCsrfToken} from "@/services/api-security/securityController";
+import {getCsrfToken} from "@/services/api-security/securityController";
 
 export type GlobalHeaderRightProps = {
     menu?: boolean;
@@ -29,7 +29,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
         try {
             await logout()
             // 注销后 CSRF Cookie 会被清除
-            await generateCsrfToken();
+            await getCsrfToken();
             flushSync(() => {
                 setInitialState((s) => ({...s, currentUser: undefined}));
             });

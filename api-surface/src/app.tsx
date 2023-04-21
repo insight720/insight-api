@@ -11,7 +11,7 @@ import React from 'react';
 import {AvatarDropdown, AvatarName} from './components/RightContent/AvatarDropdown';
 import {InitialState} from "@/typings";
 import {message} from "antd";
-import {generateCsrfToken} from "@/services/api-security/securityController";
+import {getCsrfToken} from "@/services/api-security/securityController";
 import {getLoginUserInfo} from "@/services/api-security/userDetailsController";
 
 
@@ -22,7 +22,7 @@ import {getLoginUserInfo} from "@/services/api-security/userDetailsController";
  */
 const fetchCsrfToken = async () => {
     try {
-        const result = await generateCsrfToken();
+        const result = await getCsrfToken();
         return result.data;
     } catch (error: any) {
         message.error(error.message || "服务器内部错误，请重试！");

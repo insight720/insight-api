@@ -15,10 +15,7 @@ import lombok.experimental.Accessors;
 @RequiredArgsConstructor
 public enum UploadStrategyEnum {
 
-    /**
-     * 腾讯云对象存储
-     */
-    COS("cosUploadStrategy");
+    COS("cosUploadStrategy", "腾讯云对象存储（COS）上传策略");
 
     /**
      * 上传策略实现类的 Bean 名称
@@ -26,5 +23,10 @@ public enum UploadStrategyEnum {
      * 默认为首字母小写的上传策略实现类名。
      */
     private final String beanName;
+
+    /**
+     * 上传策略的描述
+     */
+    private final String description;
 
 }

@@ -1,4 +1,4 @@
-package pers.project.api.security.config.properties;
+package pers.project.api.security.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

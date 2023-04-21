@@ -1,11 +1,11 @@
 package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import pers.project.api.security.model.dto.AccountAuthorityDTO;
-import pers.project.api.security.model.dto.AccountStatusDTO;
-import pers.project.api.security.model.dto.KeyPairDTO;
+import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
+import pers.project.api.security.model.dto.UserAccountStatusDTO;
+import pers.project.api.security.model.dto.UserRegistryDTO;
 import pers.project.api.security.model.entity.UserAccount;
-import pers.project.api.security.model.vo.UserRegistryVO;
+import pers.project.api.security.model.vo.ApiKeyPairVO;
 
 /**
  * 针对表【user_account (用户帐户) 】的数据库操作 Service
@@ -16,32 +16,32 @@ import pers.project.api.security.model.vo.UserRegistryVO;
 public interface UserAccountService extends IService<UserAccount> {
 
     /**
-     * 保存帐户
+     * 保存新帐户
      *
-     * @param userRegistryVO 用户注册 VO
+     * @param userRegistryDTO 用户注册 VO
      */
-    void saveAccount(UserRegistryVO userRegistryVO);
+    void saveNewAccount(UserRegistryDTO userRegistryDTO);
 
     /**
-     * 获取密钥对 DTO
+     * 获取 API 密钥对 VO
      *
      * @param accountId 账户主键
-     * @return 密钥对 DTO
+     * @return API 密钥对 VO
      */
-    KeyPairDTO getKeyPairDTO(String accountId);
+    ApiKeyPairVO getApiKeyPairVO(String accountId);
 
     /**
      * 更新账户状态
      *
      * @param accountStatusDTO 账户状态 DTO
      */
-    void updateAccountStatus(AccountStatusDTO accountStatusDTO);
+    void updateAccountStatus(UserAccountStatusDTO accountStatusDTO);
 
     /**
      * 更新帐户权限
      *
      * @param accountAuthorityDTO 账户权限 DTO
      */
-    void updateAccountAuthority(AccountAuthorityDTO accountAuthorityDTO);
+    void updateAccountAuthority(UserAccountAuthorityDTO accountAuthorityDTO);
 
 }

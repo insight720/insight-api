@@ -17,10 +17,14 @@ import static pers.project.api.security.enumeration.UploadStrategyEnum.COS;
 @RequiredArgsConstructor
 public enum UploadFileEnum {
 
+    AVATAR(COS, "profile/avatar/", "用户的头像");
+
     /**
-     * 头像
+     * 上传策略枚举
+     *
+     * @see UploadFileEnum
      */
-    AVATAR("profile/avatar/", COS);
+    private final UploadStrategyEnum uploadStrategyEnum;
 
     /**
      * 上传目录 URI
@@ -30,10 +34,8 @@ public enum UploadFileEnum {
     private final String directoryUri;
 
     /**
-     * 上传策略枚举
-     *
-     * @see UploadFileEnum
+     * 上传文件的描述
      */
-    private final UploadStrategyEnum uploadStrategyEnum;
+    private final String description;
 
 }

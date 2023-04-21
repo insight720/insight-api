@@ -20,7 +20,7 @@ import java.util.Base64;
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Argon2KeyGenerator {
+public final class Argon2KeyPairGenerator {
 
     /**
      * 密钥字节数组长度

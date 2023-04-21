@@ -1,4 +1,4 @@
-package pers.project.api.security.model.vo;
+package pers.project.api.security.model.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -15,9 +15,9 @@ import pers.project.api.common.validation.constraint.SnowflakeId;
  * @date 2023/03/31
  */
 @Data
-public class UserProfileSettingVO {
+public class UserProfileSettingDTO {
 
-    // region Same with CustomUserDetails
+    // region Only same with CustomUserDetails
     /**
      * 用户资料主键
      */
@@ -33,7 +33,6 @@ public class UserProfileSettingVO {
     private String originalAvatar;
 
     // region Same with UserProfile and CustomUserDetails
-
     /**
      * 昵称
      */
