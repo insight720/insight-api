@@ -50,7 +50,7 @@ public class SecurityServiceImpl implements SecurityService {
     public void sendVerificationCode(VerificationCodeSendingDTO codeSendingDTO) {
         // 根据数据确定验证策略
         String phoneNumber = codeSendingDTO.getPhoneNumber();
-        String email = codeSendingDTO.getEmail();
+        String email = codeSendingDTO.getEmailAddress();
         if (phoneNumber == null && email == null) {
             log.error("Both phone number and email address are null");
             throw new BusinessException(SERVER_ERROR, "服务器错误，验证码发送失败！");
@@ -76,7 +76,7 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public boolean checkVerificationCode(VerificationCodeCheckDTO codeCheckDTO) {
         String phoneNumber = codeCheckDTO.getPhoneNumber();
-        String email = codeCheckDTO.getEmail();
+        String email = codeCheckDTO.getEmailAddress();
         if (phoneNumber == null && email == null) {
             log.error("Both phone number and email address are null");
             throw new BusinessException(SERVER_ERROR, "服务器错误，请联系管理员！");

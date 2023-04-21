@@ -21,7 +21,7 @@ public class LoginUserDTO {
     /**
      * 邮箱
      */
-    private String email;
+    private String emailAddress;
     /**
      * 手机号
      */
@@ -31,9 +31,9 @@ public class LoginUserDTO {
      */
     private String authority;
     /**
-     * 帐户密钥
+     * 密钥 ID
      */
-    private String accountKey;
+    private String secretId;
     /**
      * 账号状态
      */
@@ -81,7 +81,7 @@ public class LoginUserDTO {
     /**
      * IP 属地
      */
-    private String ipOrigin;
+    private String ipLocation;
     /**
      * 上次登录时间
      */

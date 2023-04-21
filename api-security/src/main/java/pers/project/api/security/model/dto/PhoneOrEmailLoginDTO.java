@@ -14,12 +14,21 @@ import lombok.Data;
 @Data
 public class PhoneOrEmailLoginDTO {
 
+    /**
+     * 是否勾选了记住我
+     * <p>
+     * 如果用户勾选了记住我，该字段的值为 "true"，否则为 "false"。
+     */
+    @NotNull
+    @Pattern(regexp = "^(true|false)$")
+    private String rememberMe;
+
     // region Same with VerificationCodeCheckDTO
     /**
      * 邮箱号
      */
     @Email
-    private String email;
+    private String emailAddress;
 
     /**
      * 手机号码（中国国内）

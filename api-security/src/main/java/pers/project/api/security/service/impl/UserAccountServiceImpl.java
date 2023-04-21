@@ -18,8 +18,8 @@ import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
 import pers.project.api.security.model.dto.UserAccountStatusDTO;
 import pers.project.api.security.model.dto.UserRegistryDTO;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
-import pers.project.api.security.model.entity.UserAccount;
-import pers.project.api.security.model.entity.UserProfile;
+import pers.project.api.security.model.po.UserAccountPO;
+import pers.project.api.security.model.po.UserProfilePO;
 import pers.project.api.security.model.vo.ApiKeyPairVO;
 import pers.project.api.security.service.CustomUserDetailsService;
 import pers.project.api.security.service.SecurityService;
@@ -42,7 +42,7 @@ import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHO
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserAccount> implements UserAccountService {
+public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserAccountPO> implements UserAccountService {
 
     private final PasswordEncoder passwordEncoder;
 
@@ -60,29 +60,29 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         validateUserRegistryDTO(userRegistryDTO);
         // 保存用户账户
         String encodedPassword = passwordEncoder.encode(userRegistryDTO.getPassword());
-        UserAccount userAccount = new UserAccount();
-        userAccount.setUsername(userRegistryDTO.getUsername());
-        userAccount.setPassword(encodedPassword);
+        UserAccountPO userAccountPO = new UserAccountPO();
+        userAccountPO.setUsername(userRegistryDTO.getUsername());
+        userAccountPO.setPassword(encodedPassword);
         // phoneNumber 和 email 有一个为 null
-        userAccount.setPhoneNumber(userRegistryDTO.getPhoneNumber());
-        userAccount.setEmail(userRegistryDTO.getEmail());
+        userAccountPO.setPhoneNumber(userRegistryDTO.getPhoneNumber());
+        userAccountPO.setEmailAddress(userRegistryDTO.getEmailAddress());
         // 默认为用户权限
-        userAccount.setAuthority(ROLE_USER);
+        userAccountPO.setAuthority(ROLE_USER);
         // 编程式事务，与 @Transactional 一样具有默认的 propagation 和 isolation
         transactionTemplate.executeWithoutResult(ignored -> {
             try {
-                save(userAccount);
+                save(userAccountPO);
             } catch (Exception e) {
                 // 罕见的情况，比如用户名重复
                 // 抛出异常会在 TransactionTemplate.execute 中执行回滚
-                String message = "Saving account failed, userAccount: " + userAccount;
+                String message = "Saving account failed, userAccount: " + userAccountPO;
                 log.warn(message, e);
                 throw new BusinessException(DATABASE_ERROR, "创建账户失败，请稍后再试！");
             }
             // 创建用户资料
-            UserProfile userProfile = new UserProfile();
-            userProfile.setAccountId(userAccount.getId());
-            userProfileMapper.insert(userProfile);
+            UserProfilePO userProfilePO = new UserProfilePO();
+            userProfilePO.setAccountId(userAccountPO.getId());
+            userProfileMapper.insert(userProfilePO);
         });
     }
 
@@ -97,10 +97,10 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         String accountKey = Argon2KeyPairGenerator.generate(sourceBytes, secureRandom);
         String accessKey = Argon2KeyPairGenerator.generate(sourceBytes, secureRandom);
         // 保存唯一密钥对
-        LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserAccount::getAccountKey, accountKey);
-        updateWrapper.set(UserAccount::getAccessKey, accessKey);
-        updateWrapper.eq(UserAccount::getId, accountId);
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getSecretId, accountKey);
+        updateWrapper.set(UserAccountPO::getSecretKey, accessKey);
+        updateWrapper.eq(UserAccountPO::getId, accountId);
         try {
             update(updateWrapper);
         } catch (Exception e) {
@@ -113,28 +113,28 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         }
         // 更新 Spring Security 上下文中的用户资料
         CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
-        userDetails.setAccountKey(accountKey);
+        userDetails.setSecretId(accountKey);
         userDetailsService.updateLoginUserDetails(userDetails);
         // 返回唯一密钥对
         ApiKeyPairVO apiKeyPairVO = new ApiKeyPairVO();
-        apiKeyPairVO.setAccountKey(accountKey);
-        apiKeyPairVO.setAccessKey(accessKey);
+        apiKeyPairVO.setSecretId(accountKey);
+        apiKeyPairVO.setSecretKey(accessKey);
         return apiKeyPairVO;
     }
 
     @Override
     public void updateAccountStatus(UserAccountStatusDTO accountStatusDTO) {
-        LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserAccount::getAccountStatus, accountStatusDTO.getStatusCode());
-        updateWrapper.eq(UserAccount::getId, accountStatusDTO.getAccountId());
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getAccountStatus, accountStatusDTO.getStatusCode());
+        updateWrapper.eq(UserAccountPO::getId, accountStatusDTO.getAccountId());
         update(updateWrapper);
     }
 
     @Override
     public void updateAccountAuthority(UserAccountAuthorityDTO accountAuthorityDTO) {
-        LambdaUpdateWrapper<UserAccount> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserAccount::getAuthority, accountAuthorityDTO.getAuthority());
-        updateWrapper.eq(UserAccount::getId, accountAuthorityDTO.getAccountId());
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getAuthority, accountAuthorityDTO.getAuthority());
+        updateWrapper.eq(UserAccountPO::getId, accountAuthorityDTO.getAccountId());
         update(updateWrapper);
     }
 
@@ -160,7 +160,7 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         }
         // 检查账户名是否重复
         boolean usernameExists = lambdaQuery()
-                .eq(UserAccount::getUsername, userRegistryDTO.getUsername())
+                .eq(UserAccountPO::getUsername, userRegistryDTO.getUsername())
                 .exists();
         if (usernameExists) {
             throw new BusinessException(REGISTRY_ERROR, "账户名已存在！");
@@ -168,8 +168,8 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         // 检查邮箱或手机号是否已被使用
         boolean isUsingPhone = PHONE.name().equals(userRegistryDTO.getStrategy());
         boolean phoneOrEmailExists = lambdaQuery()
-                .eq(isUsingPhone, UserAccount::getPhoneNumber, userRegistryDTO.getPhoneNumber())
-                .eq(!isUsingPhone, UserAccount::getEmail, userRegistryDTO.getEmail())
+                .eq(isUsingPhone, UserAccountPO::getPhoneNumber, userRegistryDTO.getPhoneNumber())
+                .eq(!isUsingPhone, UserAccountPO::getEmailAddress, userRegistryDTO.getEmailAddress())
                 .exists();
         if (phoneOrEmailExists) {
             String argument = isUsingPhone ? "手机号" : "邮箱";

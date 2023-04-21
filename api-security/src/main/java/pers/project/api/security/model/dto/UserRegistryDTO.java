@@ -46,7 +46,7 @@ public class UserRegistryDTO {
      * 邮箱号
      */
     @Email
-    private String email;
+    private String emailAddress;
 
     /**
      * 手机号码（中国国内）

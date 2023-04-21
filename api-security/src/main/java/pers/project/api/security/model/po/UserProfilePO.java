@@ -1,4 +1,4 @@
-package pers.project.api.security.model.entity;
+package pers.project.api.security.model.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -12,17 +12,17 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 表【user_account (用户帐户) 】的数据 Entity
+ * 表【user_profile (用户资料) 】的数据 Entity
  *
  * @author Luo Fei
- * @date 2023/03/23
+ * @date 2023/03/20
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "user_account")
-public class UserAccount {
+@TableName(value = "user_profile")
+public class UserProfilePO {
 
     /**
      * 主键
@@ -31,44 +31,54 @@ public class UserAccount {
     private String id;
 
     /**
-     * 账户名
+     * 账户主键
      */
-    private String username;
+    private String accountId;
 
     /**
-     * 密码
+     * 头像
      */
-    private String password;
+    private String avatar;
 
     /**
-     * 邮箱
+     * 昵称
      */
-    private String email;
+    private String nickname;
 
     /**
-     * 手机号
+     * 个人网站
      */
-    private String phoneNumber;
+    private String website;
 
     /**
-     * 权限
+     * GitHub
      */
-    private String authority;
+    private String github;
 
     /**
-     * 帐户密钥
+     * Gitee
      */
-    private String accountKey;
+    private String gitee;
 
     /**
-     * 访问密钥
+     * 个人简介
      */
-    private String accessKey;
+    private String biography;
 
     /**
-     * 账号状态
+     * IP 地址
      */
-    private Integer accountStatus;
+    private String ipAddress;
+
+    /**
+     * IP 属地
+     */
+    private String ipLocation;
+
+    /**
+     * 上次登录时间
+     */
+    private LocalDateTime lastLoginTime;
 
     /**
      * 是否删除（1 表示删除，0 表示未删除）

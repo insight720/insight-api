@@ -24,7 +24,7 @@ public class VerificationCodeSendingDTO {
      * 邮箱号
      */
     @Email
-    private String email;
+    private String emailAddress;
 
     /**
      * 验证策略（手机或邮箱）

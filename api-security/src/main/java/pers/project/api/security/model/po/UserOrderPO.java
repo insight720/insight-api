@@ -1,4 +1,4 @@
-package pers.project.api.security.model.entity;
+package pers.project.api.security.model.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "user_order")
-public class UserOrder {
+public class UserOrderPO {
 
     /**
      * 主键

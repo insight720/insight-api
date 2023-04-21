@@ -3,7 +3,7 @@ package pers.project.api.security.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 import pers.project.api.security.model.dto.UserProfileSettingDTO;
-import pers.project.api.security.model.entity.UserProfile;
+import pers.project.api.security.model.po.UserProfilePO;
 
 /**
  * 针对表【user_profile (用户资料) 】的数据库操作 Service
@@ -11,7 +11,7 @@ import pers.project.api.security.model.entity.UserProfile;
  * @author Luo Fei
  * @date 2023/03/20
  */
-public interface UserProfileService extends IService<UserProfile> {
+public interface UserProfileService extends IService<UserProfilePO> {
 
     /**
      * 更新用户资料

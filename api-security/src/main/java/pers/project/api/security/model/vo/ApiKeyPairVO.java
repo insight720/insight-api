@@ -14,8 +14,8 @@ import lombok.Data;
 @Data
 public class ApiKeyPairVO {
 
-    private String accountKey;
+    private String secretId;
 
-    private String accessKey;
+    private String secretKey;
 
 }

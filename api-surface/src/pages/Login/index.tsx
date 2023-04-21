@@ -16,7 +16,7 @@ import Settings from '../../../config/defaultSettings';
 import React, {useState} from 'react';
 import {flushSync} from 'react-dom';
 import RegistryModal from "@/pages/Login/components/RegistryModal";
-import {login, UsernameLoginDTO} from "@/services/hidden/springSecurity";
+import {login} from "@/services/hidden/springSecurity";
 import {history} from "@@/core/history";
 import {getCsrfToken, getVerificationCode} from "@/services/api-security/securityController";
 import {loginByVerificationCode} from "@/services/api-security/userDetailsController";
@@ -112,12 +112,13 @@ const Login: React.FC = () => {
     /**
      * 处理用户名登录
      */
-    const handleUsernameLogin = async (values: UsernameLoginDTO) => {
+    const handleUsernameLogin = async (values: Record<string, any>) => {
         try {
             // 登录
             const urlParams = new URL(window.location.href).searchParams;
             urlParams.append("username", values.username);
             urlParams.append("password", values.password);
+            urlParams.append("remember-me", values.autoLogin);
             const result = await login(urlParams);
             if (result.data) {
                 const defaultLoginSuccessMessage = locale.formatMessage({
@@ -196,7 +197,7 @@ const Login: React.FC = () => {
                     title="Insight API"
                     subTitle={locale.formatMessage({id: 'pages.layouts.userLayout.title'})}
                     initialValues={{
-                        autoLogin: true,
+                        autoLogin: false,
                     }}
                     actions={[
                         <FormattedMessage
@@ -210,10 +211,11 @@ const Login: React.FC = () => {
                         // 根据登录类型进行登录
                         switch (loginType) {
                             case "USERNAME":
-                                await handleUsernameLogin(values as UsernameLoginDTO);
+                                await handleUsernameLogin(values);
                                 break;
                             case "PHONE":
                                 await handlePhoneOrEmailLogin({
+                                    rememberMe: values.autoLogin,
                                     strategy: "PHONE",
                                     phoneNumber: phoneOption + values.phone,
                                     ...values
@@ -221,7 +223,9 @@ const Login: React.FC = () => {
                                 break;
                             case "EMAIL":
                                 await handlePhoneOrEmailLogin({
+                                    rememberMe: values.autoLogin,
                                     strategy: "EMAIL",
+                                    emailAddress: values.email,
                                     ...values
                                 });
                                 break;
@@ -417,7 +421,7 @@ const Login: React.FC = () => {
                                     await getVerificationCode({
                                         // phoneOption 是 +86 前缀
                                         phoneNumber: phoneOption + phone,
-                                        email: undefined,
+                                        emailAddress: undefined,
                                         strategy: loginType
                                     });
                                     message.success("获取验证码成功！");
@@ -506,7 +510,7 @@ const Login: React.FC = () => {
                                     // throw new Error("获取验证码错误！")
                                     await getVerificationCode({
                                         phoneNumber: undefined,
-                                        email: email,
+                                        emailAddress: email,
                                         strategy: loginType
                                     });
                                     message.success('获取验证码成功！');
@@ -520,7 +524,13 @@ const Login: React.FC = () => {
                             marginBottom: 24,
                         }}
                     >
-                        <ProFormCheckbox noStyle name="autoLogin">
+                        <ProFormCheckbox noStyle name="autoLogin" fieldProps={{
+                            onChange: e => {
+                                if (e.target.checked) {
+                                    message.warning("若登录成功，7 天内可自动登录！");
+                                }
+                            }
+                        }}>
                             <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录"/>
                         </ProFormCheckbox>
 

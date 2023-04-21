@@ -1,7 +1,6 @@
 package pers.project.api.security.config;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -17,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -27,9 +27,8 @@ import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.session.data.redis.RedisIndexedSessionRepository;
-import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
+import static com.baomidou.mybatisplus.core.toolkit.StringPool.SLASH;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion;
@@ -45,7 +44,6 @@ import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
  * @see <a href="https://springdoc.cn/spring-security/">
  * Spring Security 中文文档</a>
  */
-@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -74,22 +72,6 @@ public class SpringSecurityConfig {
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(BCryptVersion.$2Y, BCRYPT_STRENGTH);
-    }
-
-    /**
-     * 会话注册表
-     * <p>
-     * Spring Session 的实现无法使用 getAllPrincipals()。
-     *
-     * @see <a href="https://springdoc.cn/spring-security/servlet/authentication/session-management.html#list-authenticated-principals">
-     * SessionRegistry</a>
-     * <p>
-     * <a href="https://docs.spring.io/spring-session/reference/spring-security.html#spring-security-concurrent-sessions">
-     * Spring Security Concurrent Session Control</a>
-     */
-    @Bean
-    public SessionRegistry sessionRegistry(RedisIndexedSessionRepository sessionRepository) {
-        return new SpringSessionBackedSessionRegistry<>(sessionRepository);
     }
 
     /**
@@ -142,14 +124,9 @@ public class SpringSecurityConfig {
         });
     }
 
-
     @Configuration
     @RequiredArgsConstructor
     public static class SecurityFilterChainConfig {
-
-        // region CSRF  防护
-        private static final String CSRF_COOKIE_PATH = "/";
-        // endregion
 
         // region 会话管理
         public static final int MAXIMUM_SESSIONS = 10;
@@ -170,25 +147,27 @@ public class SpringSecurityConfig {
         // endregion
 
         private final SecurityContextRepository securityContextRepository;
-
-        private static final RequestMatcher[] PERMITTED_REQUEST_MATCHERS = {
-                // 用户未登录时允许访问的路径
-        };
+        private final RememberMeServices rememberMeServices;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             // 配置 Spring Security 上下文
             http.securityContext()
                     .securityContextRepository(securityContextRepository);
+            // 配置记住我功能
+            http.rememberMe()
+                    .rememberMeServices(rememberMeServices);
+            // 用户未登录时允许访问的路径
+            RequestMatcher[] permittedRequestMatchers = {
+                    // 写在这里让 IDEA 可以导航到 Controller 方法
+                    antMatcher(GET, "/csrf/token"),
+                    antMatcher(POST, "/account/registry"),
+                    antMatcher(POST, "/details/login"),
+                    antMatcher(POST, "/verification/code")
+            };
             // 配置请求授权
             http.authorizeHttpRequests()
-                    .requestMatchers(new RequestMatcher[] {
-                            // 用户未登录时允许访问的路径
-                            antMatcher(GET, "/csrf/token"),
-                            antMatcher(POST, "/account/registry"),
-                            antMatcher(POST, "/details/login"),
-                            antMatcher(POST, "/verification/code")
-                    })
+                    .requestMatchers(permittedRequestMatchers)
                     .permitAll();
             // TODO: 2023/4/20 配置不生效
             http.authorizeHttpRequests()
@@ -218,6 +197,8 @@ public class SpringSecurityConfig {
         }
 
         /**
+         * CSRF 令牌请求处理程序
+         *
          * @see <a href="https://docs.spring.io/spring-security/reference/5.8/migration/servlet/exploits.html#_i_am_using_angularjs_or_another_javascript_framework">I am using AngularJS or another Javascript framework</a>
          * @see <a href="https://github.com/spring-projects/spring-security/issues/12915">Issue</a>
          */
@@ -231,12 +212,14 @@ public class SpringSecurityConfig {
         }
 
         /**
+         * Cookie CSRF 令牌存储库
+         *
          * @see <a href="https://springdoc.cn/spring-security/servlet/exploits/csrf.html#servlet-csrf-configure">自定义 CsrfTokenRepository</a>
          */
         private CookieCsrfTokenRepository cookieCsrfTokenRepository() {
             CookieCsrfTokenRepository tokenRepository
                     = CookieCsrfTokenRepository.withHttpOnlyFalse();
-            tokenRepository.setCookiePath(CSRF_COOKIE_PATH);
+            tokenRepository.setCookiePath(SLASH);
             return tokenRepository;
         }
 

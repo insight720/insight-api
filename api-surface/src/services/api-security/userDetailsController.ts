@@ -21,6 +21,7 @@ export async function loginByVerificationCode(
 export async function getLoginUserInfo(options?: { [key: string]: any }) {
   return request<API.ResultLoginUserDTO>(`/security/details/user`, {
     method: 'GET',
+    credentials: 'include', // 带上Cookie
     ...(options || {}),
   });
 }

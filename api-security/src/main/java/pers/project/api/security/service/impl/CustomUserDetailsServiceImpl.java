@@ -18,7 +18,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import pers.project.api.common.exception.BusinessException;
@@ -29,17 +32,20 @@ import pers.project.api.security.mapper.UserAccountMapper;
 import pers.project.api.security.mapper.UserProfileMapper;
 import pers.project.api.security.model.dto.PhoneOrEmailLoginDTO;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
-import pers.project.api.security.model.entity.UserAccount;
-import pers.project.api.security.model.entity.UserProfile;
+import pers.project.api.security.model.po.UserAccountPO;
+import pers.project.api.security.model.po.UserProfilePO;
 import pers.project.api.security.service.CustomUserDetailsService;
 import pers.project.api.security.service.SecurityService;
 
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
+import static com.baomidou.mybatisplus.core.toolkit.StringPool.TRUE;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.springframework.session.security.web.authentication.SpringSessionRememberMeServices.REMEMBER_ME_LOGIN_ATTR;
 import static pers.project.api.common.enumeration.ErrorEnum.DATABASE_ERROR;
 import static pers.project.api.common.enumeration.ErrorEnum.LOGIN_ERROR;
+import static pers.project.api.security.config.SpringSessionConfig.SpringSecurityIntegrationConfig.REMEMBER_ME_SESSION_VALIDITY_SECONDS;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
 
 /**
@@ -67,6 +73,8 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     private final Ip2regionSearcher ip2regionSearcher;
 
+    private final RememberMeServices rememberMeServices;
+
     private final SecurityContextRepository securityContextRepository;
 
     @Override
@@ -79,22 +87,22 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
             throw new UsernameNotFoundException(EMPTY);
         }
         // 查询用户账号
-        UserAccount userAccount = getLoginUserAccount(UserAccount::getUsername, username);
-        if (userAccount == null) {
+        UserAccountPO userAccountPO = getLoginUserAccount(UserAccountPO::getUsername, username);
+        if (userAccountPO == null) {
             throw new UsernameNotFoundException(EMPTY);
         }
         // 查询用户资料
-        UserProfile userProfile = getLoginUserProfileByAccountId(userAccount.getId());
-        if (userProfile == null) {
+        UserProfilePO userProfilePO = getLoginUserProfileByAccountId(userAccountPO.getId());
+        if (userProfilePO == null) {
             /*
              * 其他异常也会在 DaoAuthenticationProvider.retrieveUser
              * 中被包装为 InternalAuthenticationServiceException。
              */
-            String message = "UserProfile not found, accountId: " + userAccount.getId();
+            String message = "UserProfile not found, accountId: " + userAccountPO.getId();
             throw new InternalAuthenticationServiceException(message);
         }
         // 复制属性
-        return copyLoginUserProperties(userAccount, userProfile);
+        return copyLoginUserProperties(userAccountPO, userProfilePO);
     }
 
     @Override
@@ -140,29 +148,33 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
             throw new BusinessException(LOGIN_ERROR, "%s或验证码不正确！".formatted(argument));
         }
         // 查询用户账号
-        UserAccount userAccount = isUsingPhone ?
-                getLoginUserAccount(UserAccount::getPhoneNumber, loginDTO.getPhoneNumber())
-                : getLoginUserAccount(UserAccount::getEmail, loginDTO.getEmail());
+        UserAccountPO userAccountPO = isUsingPhone ?
+                getLoginUserAccount(UserAccountPO::getPhoneNumber, loginDTO.getPhoneNumber())
+                : getLoginUserAccount(UserAccountPO::getEmailAddress, loginDTO.getEmailAddress());
         Function<String, BusinessException> getException = message -> {
             log.error(message);
             return new BusinessException(DATABASE_ERROR, "服务器错误，请联系管理员！");
         };
-        if (userAccount == null) {
+        if (userAccountPO == null) {
             String message = "UserAccount not found, phoneNumber: " + loginDTO.getPhoneNumber();
             throw getException.apply(message);
         }
         // 查询用户资料
-        UserProfile userProfile = getLoginUserProfileByAccountId(userAccount.getId());
-        if (userProfile == null) {
-            String message = "UserProfile not found, email: " + loginDTO.getEmail();
+        UserProfilePO userProfilePO = getLoginUserProfileByAccountId(userAccountPO.getId());
+        if (userProfilePO == null) {
+            String message = "UserProfile not found, email: " + loginDTO.getEmailAddress();
             throw getException.apply(message);
         }
         // 复制属性
-        CustomUserDetails userDetails = copyLoginUserProperties(userAccount, userProfile);
-        // 设置用户 IP 信息
+        CustomUserDetails userDetails = copyLoginUserProperties(userAccountPO, userProfilePO);
+        // 更新用户 IP 信息
         updateLoginUserIpInfo(userDetails);
         // 更新登录状态
         updateLoginUserDetails(userDetails);
+        // 是否使用记住我服务
+        if (TRUE.equals(loginDTO.getRememberMe())) {
+            useRememberMeService();
+        }
         // 返回登录用户信息
         LoginUserDTO loginUserDTO = new LoginUserDTO();
         BeanCopierUtils.copy(userDetails, loginUserDTO);
@@ -200,16 +212,16 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
         }
         // 更新数据库会覆盖之前的信息
         LocalDateTime now = LocalDateTime.now();
-        LambdaUpdateChainWrapper<UserProfile> updateWrapper
+        LambdaUpdateChainWrapper<UserProfilePO> updateWrapper
                 = new LambdaUpdateChainWrapper<>(userProfileMapper);
-        updateWrapper.set(UserProfile::getIpAddress, ipAddress)
-                .set(UserProfile::getIpOrigin, ipOrigin)
-                .set(UserProfile::getLastLoginTime, now)
-                .eq(UserProfile::getId, userDetails.getProfileId());
+        updateWrapper.set(UserProfilePO::getIpAddress, ipAddress)
+                .set(UserProfilePO::getIpLocation, ipOrigin)
+                .set(UserProfilePO::getLastLoginTime, now)
+                .eq(UserProfilePO::getId, userDetails.getProfileId());
         updateWrapper.update();
         // 更新传入的 loginUserProfile
         userDetails.setIpAddress(ipAddress);
-        userDetails.setIpOrigin(ipOrigin);
+        userDetails.setIpLocation(ipOrigin);
         userDetails.setLastLoginTime(now);
     }
 
@@ -220,11 +232,11 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
      * @param value  用于查找账户的值（账户名、邮箱、手机号等），与 {@code getter} 对应
      * @return 如果获取到帐户信息，则将其返回，否则返回 {@code null}。
      */
-    private <F, V> UserAccount getLoginUserAccount(SFunction<UserAccount, F> getter, V value) {
-        LambdaQueryWrapper<UserAccount> accountQueryWrapper = new LambdaQueryWrapper<>();
-        accountQueryWrapper.select(UserAccount::getId, UserAccount::getUsername,
-                UserAccount::getPassword, UserAccount::getAuthority, UserAccount::getAccountKey,
-                UserAccount::getAccountStatus);
+    private <F, V> UserAccountPO getLoginUserAccount(SFunction<UserAccountPO, F> getter, V value) {
+        LambdaQueryWrapper<UserAccountPO> accountQueryWrapper = new LambdaQueryWrapper<>();
+        accountQueryWrapper.select(UserAccountPO::getId, UserAccountPO::getUsername,
+                UserAccountPO::getPassword, UserAccountPO::getAuthority, UserAccountPO::getSecretId,
+                UserAccountPO::getAccountStatus);
         accountQueryWrapper.eq(getter, value);
         return userAccountMapper.selectOne(accountQueryWrapper);
     }
@@ -235,30 +247,45 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
      * @param accountId 用户账户 ID
      * @return 如果获取到用户资料，则将其返回，否则返回 {@code null}。
      */
-    private UserProfile getLoginUserProfileByAccountId(String accountId) {
-        LambdaQueryWrapper<UserProfile> profileQueryWrapper = new LambdaQueryWrapper<>();
-        profileQueryWrapper.select(UserProfile::getId, UserProfile::getAvatar,
-                UserProfile::getNickname, UserProfile::getWebsite, UserProfile::getGithub,
-                UserProfile::getGitee, UserProfile::getBiography);
-        profileQueryWrapper.eq(UserProfile::getAccountId, accountId);
+    private UserProfilePO getLoginUserProfileByAccountId(String accountId) {
+        LambdaQueryWrapper<UserProfilePO> profileQueryWrapper = new LambdaQueryWrapper<>();
+        profileQueryWrapper.select(UserProfilePO::getId, UserProfilePO::getAvatar,
+                UserProfilePO::getNickname, UserProfilePO::getWebsite, UserProfilePO::getGithub,
+                UserProfilePO::getGitee, UserProfilePO::getBiography);
+        profileQueryWrapper.eq(UserProfilePO::getAccountId, accountId);
         return userProfileMapper.selectOne(profileQueryWrapper);
     }
 
     /**
      * 复制登录用户属性
      *
-     * @param userAccount 用户账户
-     * @param userProfile 用户资料
+     * @param userAccountPO 用户账户
+     * @param userProfilePO 用户资料
      * @return 自定义 Spring Security 用户详细信息
      */
-    private CustomUserDetails copyLoginUserProperties(UserAccount userAccount, UserProfile userProfile) {
+    private CustomUserDetails copyLoginUserProperties(UserAccountPO userAccountPO, UserProfilePO userProfilePO) {
         CustomUserDetails customUserDetails = new CustomUserDetails();
-        BeanCopierUtils.copy(userAccount, customUserDetails);
-        BeanCopierUtils.copy(userProfile, customUserDetails);
-        customUserDetails.setAccountId(userAccount.getId());
-        customUserDetails.setProfileId(userProfile.getId());
+        BeanCopierUtils.copy(userAccountPO, customUserDetails);
+        BeanCopierUtils.copy(userProfilePO, customUserDetails);
+        customUserDetails.setAccountId(userAccountPO.getId());
+        customUserDetails.setProfileId(userProfilePO.getId());
         customUserDetails.setLastLoginTime(LocalDateTime.now());
         return customUserDetails;
+    }
+
+    /**
+     * 使用 Remember Me 服务
+     * <p>
+     * 在 {@link SecurityContextRepository} 保存 {@code SecurityContext} 后调用，
+     * 用户将使用 Spring Security 得 Remember Me 功能。
+     *
+     * @see AbstractAuthenticationProcessingFilter#successfulAuthentication
+     * @see SpringSessionRememberMeServices#loginSuccess
+     */
+    @SuppressWarnings("all") // 抑制 JavaDoc 警告
+    private void useRememberMeService() {
+        request.setAttribute(REMEMBER_ME_LOGIN_ATTR, true);
+        request.getSession().setMaxInactiveInterval(REMEMBER_ME_SESSION_VALIDITY_SECONDS);
     }
 
 }

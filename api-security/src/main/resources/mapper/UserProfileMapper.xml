@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.project.api.security.mapper.UserProfileMapper">
 
-    <resultMap id="BaseResultMap" type="pers.project.api.security.model.entity.UserProfile">
+    <resultMap id="BaseResultMap" type="pers.project.api.security.model.po.UserProfilePO">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="accountId" column="account_id" jdbcType="BIGINT"/>
         <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
@@ -14,7 +14,7 @@
         <result property="gitee" column="gitee" jdbcType="VARCHAR"/>
         <result property="biography" column="biography" jdbcType="VARCHAR"/>
         <result property="ipAddress" column="ip_address" jdbcType="VARCHAR"/>
-        <result property="ipOrigin" column="ip_origin" jdbcType="VARCHAR"/>
+        <result property="ipLocation" column="ip_location" jdbcType="VARCHAR"/>
         <result property="lastLoginTime" column="last_login_time" jdbcType="TIMESTAMP"/>
         <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -24,7 +24,7 @@
     <sql id="Base_Column_List">
         id,account_id,avatar,nickname,
         website,github,gitee,biography,
-        ip_address,ip_origin,last_login_time,
+        ip_address,ip_location,last_login_time,
         is_deleted,create_time,update_time
     </sql>
 

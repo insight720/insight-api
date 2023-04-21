@@ -3,7 +3,7 @@ package pers.project.api.security.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import pers.project.api.security.mapper.UserOrderMapper;
-import pers.project.api.security.model.entity.UserOrder;
+import pers.project.api.security.model.po.UserOrderPO;
 import pers.project.api.security.service.UserOrderService;
 
 /**
@@ -13,7 +13,7 @@ import pers.project.api.security.service.UserOrderService;
  * @date 2023/03/20
  */
 @Service
-public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder> implements UserOrderService {
+public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrderPO> implements UserOrderService {
 
 }
 

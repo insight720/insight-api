@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
 import pers.project.api.security.model.dto.UserAccountStatusDTO;
 import pers.project.api.security.model.dto.UserRegistryDTO;
-import pers.project.api.security.model.entity.UserAccount;
+import pers.project.api.security.model.po.UserAccountPO;
 import pers.project.api.security.model.vo.ApiKeyPairVO;
 
 /**
@@ -13,7 +13,7 @@ import pers.project.api.security.model.vo.ApiKeyPairVO;
  * @author Luo Fei
  * @date 2023/03/23
  */
-public interface UserAccountService extends IService<UserAccount> {
+public interface UserAccountService extends IService<UserAccountPO> {
 
     /**
      * 保存新帐户

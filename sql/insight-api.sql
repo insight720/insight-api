@@ -79,11 +79,11 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
     `id`             BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
     `username`       VARCHAR(256)           NOT NULL COMMENT '账户名',
     `password`       VARCHAR(512)           NOT NULL COMMENT '密码',
-    `email`          VARCHAR(256)           NULL COMMENT '邮箱',
+    `email_address`  VARCHAR(256)           NULL COMMENT '邮箱',
     `phone_number`   VARCHAR(256)           NULL COMMENT '手机号',
     `authority`      VARCHAR(256)           NOT NULL COMMENT '权限',
-    `account_key`    VARCHAR(512)           NULL COMMENT '帐户密钥',
-    `access_key`     VARCHAR(512)           NULL COMMENT '访问密钥',
+    `secret_id`      VARCHAR(512)           NULL COMMENT '密钥 ID',
+    `secret_key`     VARCHAR(512)           NULL COMMENT '密钥值',
     `account_status` TINYINT  DEFAULT 0     NOT NULL COMMENT '账号状态',
     `is_deleted`     TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
     `create_time`    DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
@@ -93,20 +93,20 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
 DROP TABLE `api-security`.`user_profile`;
 CREATE TABLE IF NOT EXISTS `api-security`.`user_profile`
 (
-    `id`          BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
-    `account_id`  BIGINT UNSIGNED        NOT NULL COMMENT '账户主键',
-    `avatar`      VARCHAR(512)           NULL COMMENT '头像',
-    `nickname`    VARCHAR(256)           NULL COMMENT '昵称',
-    `website`     VARCHAR(256)           NULL COMMENT '个人网站',
-    `github`      VARCHAR(256)           NULL COMMENT 'GitHub',
-    `gitee`       VARCHAR(256)           NULL COMMENT 'Gitee',
-    `biography`   VARCHAR(1024)          NULL COMMENT '个人简介',
-    `ip_address`  VARCHAR(256)           NULL COMMENT 'IP 地址',
-    `ip_origin`   VARCHAR(256)           NULL COMMENT 'IP 属地',
-    `last_login_time`  VARCHAR(256)           NULL COMMENT '上次登陆时间',
-    `is_deleted`  TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
-    `create_time` DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
-    `update_time` DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
+    `id`              BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
+    `account_id`      BIGINT UNSIGNED        NOT NULL COMMENT '账户主键',
+    `avatar`          VARCHAR(512)           NULL COMMENT '头像',
+    `nickname`        VARCHAR(256)           NULL COMMENT '昵称',
+    `website`         VARCHAR(256)           NULL COMMENT '个人网站',
+    `github`          VARCHAR(256)           NULL COMMENT 'GitHub',
+    `gitee`           VARCHAR(256)           NULL COMMENT 'Gitee',
+    `biography`       VARCHAR(1024)          NULL COMMENT '个人简介',
+    `ip_address`      VARCHAR(256)           NULL COMMENT 'IP 地址',
+    `ip_location`     VARCHAR(256)           NULL COMMENT 'IP 属地',
+    `last_login_time` VARCHAR(256)           NULL COMMENT '上次登陆时间',
+    `is_deleted`      TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
+    `create_time`     DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
+    `update_time`     DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
 ) COMMENT '用户资料';
 
 CREATE TABLE IF NOT EXISTS `api-security`.`user_order`

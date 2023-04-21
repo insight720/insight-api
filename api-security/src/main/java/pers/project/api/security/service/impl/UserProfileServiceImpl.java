@@ -15,7 +15,7 @@ import pers.project.api.common.util.transaction.TransactionUtils;
 import pers.project.api.security.execption.UploadContextException;
 import pers.project.api.security.mapper.UserProfileMapper;
 import pers.project.api.security.model.dto.UserProfileSettingDTO;
-import pers.project.api.security.model.entity.UserProfile;
+import pers.project.api.security.model.po.UserProfilePO;
 import pers.project.api.security.service.CustomUserDetailsService;
 import pers.project.api.security.service.UserProfileService;
 import pers.project.api.security.upload.UploadContext;
@@ -33,7 +33,7 @@ import static pers.project.api.security.enumeration.UploadFileEnum.AVATAR;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfile> implements UserProfileService {
+public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfilePO> implements UserProfileService {
 
     private final HttpServletRequest request;
 
@@ -56,14 +56,14 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
             newAvatar = uploadNewAvatar(profileId, avatarFile, originalAvatar);
         }
         // 更新数据库用户资料
-        UserProfile userProfile = new UserProfile();
-        BeanCopierUtils.copy(profileSettingVO, userProfile);
-        userProfile.setId(profileId);
+        UserProfilePO userProfilePO = new UserProfilePO();
+        BeanCopierUtils.copy(profileSettingVO, userProfilePO);
+        userProfilePO.setId(profileId);
         if (setNewAvatar) {
-            userProfile.setAvatar(newAvatar);
+            userProfilePO.setAvatar(newAvatar);
         }
         try {
-            updateById(userProfile);
+            updateById(userProfilePO);
         } catch (Exception e) {
             // SQL 错误
             String message = "UserProfile setting failed, profile: " + profileSettingVO;
