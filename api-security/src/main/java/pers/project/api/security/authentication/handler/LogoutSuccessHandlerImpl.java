@@ -1,10 +1,9 @@
-package pers.project.api.security.web.authentication;
+package pers.project.api.security.authentication.handler;
 
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -22,7 +21,6 @@ import java.nio.charset.StandardCharsets;
  * @see <a href="https://springdoc.cn/spring-security/servlet/authentication/logout.html#jc-logout-success-handler">
  * LogoutSuccessHandler</a>
  */
-@Slf4j
 @Component
 public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
 

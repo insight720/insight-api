@@ -19,6 +19,8 @@ import pers.project.api.common.util.ResultUtils;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static pers.project.api.common.enumeration.ErrorEnum.PARAM_ERROR;
+
 /**
  * 异常处理程序自动配置类
  *
@@ -39,7 +41,7 @@ public class ExceptionHandlerAutoConfig {
             log.warn("服务异常: {}", exception.getMessage());
             log.warn("服务异常 URI: {}", request.getRequestURI());
         }
-        return ResultUtils.failure(exception.getErrorEnum(), exception.getMessage());
+        return ResultUtils.failure(exception.getCode(), exception.getMessage());
     }
 
     // region 参数验证
@@ -56,7 +58,7 @@ public class ExceptionHandlerAutoConfig {
         String content = Arrays.stream(message.split(","))
                 .map(s -> s.trim().substring(s.indexOf('.') + 1))
                 .collect(Collectors.joining(", "));
-        return ResultUtils.failure(ErrorEnum.PARAM_ERROR, message);
+        return ResultUtils.failure(PARAM_ERROR, message);
     }
 
     @ExceptionHandler(value = BindException.class)
@@ -71,7 +73,7 @@ public class ExceptionHandlerAutoConfig {
                 .collect(Collectors.joining(", "));
         log.warn("参数验证异常: {}", message);
         log.warn("参数验证异常 URI: {}", request.getRequestURI());
-        return ResultUtils.failure(ErrorEnum.PARAM_ERROR, message);
+        return ResultUtils.failure(PARAM_ERROR, message);
     }
 
     // endregion

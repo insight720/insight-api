@@ -1,4 +1,4 @@
-package pers.project.api.security.config;
+package pers.project.api.security.config.context;
 
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pers.project.api.security.properties.UploadContextProperties;
+import pers.project.api.security.config.property.UploadContextProperties;
 
 /**
  * 上传上下文配置类

@@ -16,7 +16,7 @@ public interface VerificationContext {
      *
      * @param contextInfo  上下文信息（如手机号、邮箱号等）
      * @param strategyEnum 验证策略枚举
-     * @throws VerificationContextException 如果发送出现错误
+     * @throws VerificationContextException 发送出现错误
      */
     void sendCredential(String contextInfo, VerificationStrategyEnum strategyEnum) throws VerificationContextException;
 
@@ -26,7 +26,7 @@ public interface VerificationContext {
      * @param contextInfo 上下文信息（如手机号、邮箱号等）
      * @param credential  凭据
      * @return 如果验证通过，则返回 {@code true}，否则返回 {@code false}。
-     * @throws VerificationContextException 如果验证出现错误
+     * @throws VerificationContextException 验证出现错误
      */
     boolean verifyCredential(String contextInfo, String credential,
                              VerificationStrategyEnum strategyEnum) throws VerificationContextException;

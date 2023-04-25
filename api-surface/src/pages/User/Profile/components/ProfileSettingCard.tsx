@@ -1,6 +1,6 @@
 import {FooterToolbar, ProCard, ProForm, ProFormText, ProFormTextArea,} from '@ant-design/pro-components';
 import React, {useState} from "react";
-import {Button, message, Upload, UploadFile} from "antd";
+import {Button, message, Upload} from "antd";
 import {UploadOutlined} from "@ant-design/icons";
 import {RcFile} from "antd/es/upload";
 import {setProfile} from "@/services/hidden/userProfileController";
@@ -45,7 +45,6 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
      * 资料设置表单提交
      */
     const submitSettingForm = async (fields: any) => {
-        console.log(avatarFileList);
         // 将空字符串替换为 null（空字符串无法通过后端参数校验）
         Object.keys(fields).forEach(key => {
             if (fields[key] === "") {
@@ -61,7 +60,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
             message.error("你没有修改任何资料！");
             return false;
         }
-        message.loading('修改中');
+        message.loading("修改中");
         try {
             await setProfile(avatarFileList[0], {
                 profileId: currentUser?.profileId,
@@ -85,7 +84,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
             return true;
         } catch (error: any) {
             message.destroy();
-            message.error(error.message || "用户资料修改失败，请稍后再试！");
+            message.error(error.message || "用户资料修改失败，请稍后再试");
             return false;
         }
     };
@@ -97,11 +96,11 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
         // 头像大小和内容检查
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
         if (!isJpgOrPng) {
-            message.error('您只能上传 JPG 或 PNG 文件！');
+            message.error("您只能上传 JPG 或 PNG 文件");
         }
         const isLt7M = file.size / 1024 / 1024 < 7;
         if (!isLt7M) {
-            message.error('图像必须小于 7 MB！');
+            message.error("图像必须小于 7 MB");
         }
         console.log(file);
         // 暂存头像文件，提交表单时一起发送给后端
@@ -115,7 +114,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
     /**
      * 点击删除上传的头像
      */
-    const onAvatarRemove = (file: UploadFile) => {
+    const onAvatarRemove = () => {
         // 清除新上传头像的文件
         setAvatarFileList([])
     };
@@ -127,14 +126,14 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                 submitter={{
                     render: (_, dom) =>
                         <FooterToolbar>{dom}</FooterToolbar>,
-                    onReset: (value) => {
+                    onReset: () => {
                         // 重置时清除新上传头像的文件
                         setAvatarFileList([])
                     }
                 }}
                 onFinish={async (firmFields) => {
                     // 提交设置表单
-                    submitSettingForm(firmFields)
+                    await submitSettingForm(firmFields)
                 }}
             >
 
@@ -156,7 +155,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                                  rules={[
                                      {
                                          pattern: /^\S.{1,23}\S$/,
-                                         message: "昵称必须为 3 到 25 个字符，且不能仅含空白字符",
+                                         message: "昵称长度为 3 至 25 个字符，且不能仅含空白字符",
                                      },
                                  ]}/>
 
@@ -167,8 +166,8 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                     <ProFormText width="md" tooltip="个人网站可以是你的博客" name='website'
                                  label="个人网站" fieldProps={{defaultValue: currentUser?.website}}
                                  rules={[{
-                                     pattern: /^(https?):\/\/((([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.){1,126}([a-z]|[a-z][a-z0-9\-]*[a-z0-9]))(:\d{1,5})?(\/.*)?$/i,
-                                     message: '请输入有效的 URL 地址，包括 http/https 协议头'
+                                     type: "url",
+                                     message: '请输入有效的 URL 地址'
                                  }]}/>
 
                 </ProForm.Group>

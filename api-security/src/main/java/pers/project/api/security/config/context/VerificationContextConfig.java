@@ -1,4 +1,4 @@
-package pers.project.api.security.config;
+package pers.project.api.security.config.context;
 
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.ses.v20201002.SesClient;
@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pers.project.api.security.properties.VerificationContextProperties;
+import pers.project.api.security.config.property.VerificationContextProperties;
 
 /**
  * 验证上下文配置

@@ -13,16 +13,16 @@ import pers.project.api.common.enumeration.ErrorEnum;
 @Getter
 public class BusinessException extends RuntimeException {
 
-    private final ErrorEnum errorEnum;
+    private final String code;
 
     public BusinessException(ErrorEnum errorEnum) {
         super(errorEnum.getMessage());
-        this.errorEnum = errorEnum;
+        this.code = errorEnum.getCode();
     }
 
     public BusinessException(ErrorEnum errorEnum, String message) {
         super(message);
-        this.errorEnum = errorEnum;
+        this.code = errorEnum.getCode();
     }
 
 }

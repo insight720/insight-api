@@ -1,10 +1,8 @@
 package pers.project.api.security.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dreamlu.mica.ip2region.core.Ip2regionSearcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,11 +33,7 @@ import static pers.project.api.security.enumeration.UploadFileEnum.AVATAR;
 @RequiredArgsConstructor
 public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfilePO> implements UserProfileService {
 
-    private final HttpServletRequest request;
-
     private final UploadContext uploadContext;
-
-    private final Ip2regionSearcher ip2regionSearcher;
 
     private final CustomUserDetailsService userDetailsService;
 
@@ -79,7 +73,6 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         }
         userDetailsService.updateLoginUserDetails(userDetails);
     }
-
 
     /**
      * 上传新头像

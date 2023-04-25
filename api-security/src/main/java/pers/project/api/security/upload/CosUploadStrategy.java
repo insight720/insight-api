@@ -11,8 +11,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import pers.project.api.security.config.property.UploadContextProperties;
 import pers.project.api.security.execption.UploadContextException;
-import pers.project.api.security.properties.UploadContextProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

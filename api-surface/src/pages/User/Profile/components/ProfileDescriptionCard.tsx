@@ -58,7 +58,7 @@ const ProfileDescriptionCard: React.FC<ProfileDescriptionCardProps> = (props: Pr
                 </ProDescriptions.Item>
 
                 <ProDescriptions.Item label="IP 属地">
-                    {currentUser?.ipOrigin || <Typography.Text italic>未获取到 IP 属地信息</Typography.Text>}
+                    {currentUser?.ipLocation || <Typography.Text italic>未获取到 IP 属地信息</Typography.Text>}
                 </ProDescriptions.Item>
 
                 <ProDescriptions.Item label="上次登录时间">

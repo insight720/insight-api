@@ -7,18 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * MyBatis Plus 配置
+ * Mybatis-Plus 配置类
  *
- * @author yupi
+ * @author Luo Fei
+ * @date 2023/04/25
  */
 @Configuration
 public class MyBatisPlusConfig {
 
-    /**
-     * 拦截器配置
-     *
-     * @return
-     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -26,4 +22,5 @@ public class MyBatisPlusConfig {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }
+
 }

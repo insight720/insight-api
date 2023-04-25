@@ -14,7 +14,7 @@ import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.service.SecurityService;
 
 /**
- * Security 模块控制器
+ * Security 控制器
  *
  * @author Luo Fei
  * @date 2023/03/24

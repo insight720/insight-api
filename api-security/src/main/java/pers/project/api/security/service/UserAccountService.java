@@ -1,11 +1,11 @@
 package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import pers.project.api.security.model.dto.AccountVerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
 import pers.project.api.security.model.dto.UserAccountStatusDTO;
 import pers.project.api.security.model.dto.UserRegistryDTO;
 import pers.project.api.security.model.po.UserAccountPO;
-import pers.project.api.security.model.vo.ApiKeyPairVO;
 
 /**
  * 针对表【user_account (用户帐户) 】的数据库操作 Service
@@ -16,19 +16,29 @@ import pers.project.api.security.model.vo.ApiKeyPairVO;
 public interface UserAccountService extends IService<UserAccountPO> {
 
     /**
-     * 保存新帐户
+     * 创建新帐户
      *
      * @param userRegistryDTO 用户注册 VO
      */
-    void saveNewAccount(UserRegistryDTO userRegistryDTO);
+    void createNewAccount(UserRegistryDTO userRegistryDTO);
 
     /**
-     * 获取 API 密钥对 VO
+     * 生成 API 密钥
      *
-     * @param accountId 账户主键
-     * @return API 密钥对 VO
+     * @param accountCodeCheckDTO 账户验证码检查 DTO
+     * @return {@code secretKey} 密钥值
      */
-    ApiKeyPairVO getApiKeyPairVO(String accountId);
+    String generateApiKey(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
+
+    /**
+     * 获取 {@code secretKey}
+     *
+     * @param accountCodeCheckDTO 账户验证码检查 DTO
+     * @return {@code secretKey} 密钥值
+     */
+    String getSecretKey(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
+
+
 
     /**
      * 更新账户状态

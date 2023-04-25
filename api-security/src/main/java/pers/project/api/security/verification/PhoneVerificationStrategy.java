@@ -6,8 +6,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import pers.project.api.security.execption.VerificationContextException;
 
+import static pers.project.api.security.config.property.VerificationContextProperties.PhoneProperties;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
-import static pers.project.api.security.properties.VerificationContextProperties.PhoneProperties;
 
 /**
  * 手机验证策略

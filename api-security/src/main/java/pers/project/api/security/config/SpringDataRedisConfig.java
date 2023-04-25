@@ -8,13 +8,13 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import pers.project.api.common.handler.CustomFastJsonRedisSerializer;
 
 /**
- * Redis 配置类
+ * Spring Data Redis 配置类
  *
  * @author Luo Fei
- * @date 2023/04/16
+ * @date 2023/04/25
  */
 @Configuration
-public class RedisConfig {
+public class SpringDataRedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {

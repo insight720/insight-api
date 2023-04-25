@@ -1,9 +1,8 @@
-import {ModalForm, ProFormCaptcha, ProFormText,} from '@ant-design/pro-components';
+import {ModalForm, ProFormCaptcha,} from '@ant-design/pro-components';
 import React, {useState} from "react";
-import {Alert, DrawerProps, Form, message, Tabs, Typography} from "antd";
+import {DrawerProps, Form, message, Tabs} from "antd";
 import {FormattedMessage, useIntl} from "@@/exports";
 import {LockOutlined} from "@ant-design/icons";
-import {CheckboxValueType} from "antd/es/checkbox/Group";
 
 /**
  * 验证码模态框属性
@@ -15,24 +14,12 @@ export type CaptchaModalProps = {
     // 开启函数
     onOpenChange?: (visible: boolean) => void;
 
-    // 提示消息
-    tipMessage?: string
-};
+    // 设置密钥
+    setSecretKey?: (secretKey: string) => void;
 
-const CaptchaMessage: React.FC<{
-    content: string;
-}> = ({content}) => {
-    return (
-        <Alert
-            style={{
-                marginBottom: 24,
-            }}
-            message={content}
-            type="error"
-            showIcon
-        />
-    );
-};
+    // 提示消息
+    tipMessage?: React.ReactNode;
+}
 
 /**
  * 验证码模态框
@@ -44,47 +31,35 @@ const CaptchaModal: React.FC<CaptchaModalProps> = (props: CaptchaModalProps) => 
     // 表单数据
     const [form] = Form.useForm<{ name: string; company: string }>();
 
-    // 身份验证信息类型
-    const [authMsgType, setAuthMsgType] = useState<string>('account');
+    // 身份验证类型
+    const [authType, setAuthType] = useState<string>('PHONE');
 
     // 提示消息
     const {tipMessage} = props;
 
-    const options = [
-        {label: 'Apple', value: 'Apple'},
-        {label: 'Pear', value: 'Pear'},
-        {label: 'Orange', value: 'Orange'},
-    ];
+    // 设置密钥
+    const {setSecretKey} = props;
 
-    const optionsWithDisabled = [
-        {label: 'Apple', value: 'Apple'},
-        {label: 'Pear', value: 'Pear'},
-        {label: 'Orange', value: 'Orange', disabled: false},
-    ];
-
-    const onChange = (checkedValues: CheckboxValueType[]) => {
-        console.log('checked = ', checkedValues);
-    };
-
-    const plainOptions = ['Apple', 'Pear', 'Orange'];
+    // 是否应该显示密钥
+    const [shouldShowKey, setShouldKey] = useState<boolean>(false);
 
     /**
-     * 注册表单提交
+     * 验证码表单提交
      */
-    const onFinish = async (fields: any) => {
-        const hide = message.loading('注册中');
+    const onFinish = async (values: any) => {
+        message.loading("验证中");
         try {
-            // await register({
-            //     username: fields.username,
-            //     password: fields.password,
-            //     confirmedPassword: fields.confirmedPassword
-            // });
-            hide();
-            message.success('注册成功');
+            const isUsingPhone = (authType === "PHONE");
+            values.verificaionCode
+            if (shouldShowKey) {
+                setSecretKey?.("");
+            }
+            message.destroy();
+            message.success('验证成功');
             return true;
         } catch (error: any) {
-            hide();
-            message.error(error.message || '注册失败，请重试！');
+            message.destroy();
+            message.error(error.message || '验证失败，请重试');
             return false;
         }
     };
@@ -105,40 +80,37 @@ const CaptchaModal: React.FC<CaptchaModalProps> = (props: CaptchaModalProps) => 
             autoFocusFirstInput
             modalProps={{
                 destroyOnClose: true,
-                onCancel: () => console.log('run'),
             }}
             submitTimeout={2000}
             onFinish={onFinish}
         >
 
             <Tabs
-                activeKey={authMsgType}
-                onChange={setAuthMsgType}
+                activeKey={authType}
+                onChange={setAuthType}
                 centered
                 items={[
                     {
-                        key: 'email',
+                        key: "PHONE",
                         label: locale.formatMessage({
-                            id: 'pages.login.emailLogin.tab',
-                            defaultMessage: '邮箱号验证',
+                            id: 'Mobile phone number verification',
+                            defaultMessage: '手机号验证',
                         }),
                     },
                     {
-                        key: 'mobile',
+                        key: "EMAIL",
                         label: locale.formatMessage({
-                            id: 'dadadada',
-                            defaultMessage: '手机号验证',
+                            id: 'Email address verification',
+                            defaultMessage: '邮箱号验证',
                         }),
                     },
                 ]}
             />
-            <ProFormText>
-                <Typography.Text strong>
-                    {tipMessage}
-                </Typography.Text>
-            </ProFormText>
+
+            {tipMessage}
 
             <ProFormCaptcha
+                name="verificationCode"
                 fieldProps={{
                     size: 'large',
                     prefix: <LockOutlined/>,
@@ -162,7 +134,6 @@ const CaptchaModal: React.FC<CaptchaModalProps> = (props: CaptchaModalProps) => 
                         defaultMessage: '获取验证码',
                     });
                 }}
-                name="captcha"
                 rules={[
                     {
                         required: true,

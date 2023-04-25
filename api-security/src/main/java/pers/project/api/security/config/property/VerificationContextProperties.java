@@ -1,4 +1,4 @@
-package pers.project.api.security.properties;
+package pers.project.api.security.config.property;
 
 import com.tencentcloudapi.ses.v20201002.models.SendEmailRequest;
 import com.tencentcloudapi.ses.v20201002.models.Template;

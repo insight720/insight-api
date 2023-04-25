@@ -1,8 +1,7 @@
 package pers.project.api.security.crypto;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.*;
 
@@ -19,11 +18,14 @@ import java.security.*;
  * 种子数据取自 {@code AbstractDrbg.SeederHolder#seeder}，并且不会自动更新种子。
  *
  * @author Luo Fei
- * @date 2023/04/05
+ * @date 2023/04/25
  */
-@Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SecureRandomFactory {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecureRandomFactory.class);
+
+    private SecureRandomFactory() {
+    }
 
     /**
      * RNG (Random Number Generator) 算法
@@ -81,11 +83,11 @@ public final class SecureRandomFactory {
             Provider provider = Security.getProvider(providerName);
             if (provider != null) {
                 random = SecureRandom.getInstance(algorithm, params, provider);
-                if (log.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     String message = """
                             Security algorithm %s was found from provider %s. [For SecureRandom] %s
                             """.formatted(random.getAlgorithm(), random.getProvider(), random);
-                    log.debug(message);
+                    logger.debug(message);
                 }
             } else {
                 random = SecureRandom.getInstance(algorithm);
@@ -93,7 +95,7 @@ public final class SecureRandomFactory {
                         Security provider %s was not found, but algorithm %s \
                         was found from another provider %s. [For SecureRandom] %s
                         """.formatted(providerName, algorithm, random.getProvider(), random);
-                log.warn(message);
+                logger.warn(message);
             }
         } catch (NoSuchAlgorithmException e) {
             random = new SecureRandom();
@@ -101,7 +103,7 @@ public final class SecureRandomFactory {
                     Security algorithm %s could not be found from %s or any other providers, \
                     and default algorithm is %s that provided by %s. [For SecureRandom] %s
                     """.formatted(algorithm, providerName, random.getAlgorithm(), random.getProvider(), random);
-            log.error(message);
+            logger.error(message);
         }
         return random;
     }

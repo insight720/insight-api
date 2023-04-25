@@ -1,19 +1,19 @@
-package pers.project.api.security.web.authentication;
+package pers.project.api.security.authentication.handler;
 
 import com.alibaba.fastjson2.JSON;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static pers.project.api.common.enumeration.ErrorEnum.AUTHENTICATION_ERROR;
+import static pers.project.api.common.enumeration.ErrorEnum.LOGIN_ERROR;
 
 /**
  * Spring Security 身份验证入口点
@@ -30,11 +30,12 @@ import static pers.project.api.common.enumeration.ErrorEnum.AUTHENTICATION_ERROR
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.getWriter().write(JSON.toJSONString(ResultUtils.failure(AUTHENTICATION_ERROR)));
+        Result<Object> result = ResultUtils.failure(LOGIN_ERROR, "用户未登录");
+        response.getWriter().write(JSON.toJSONString(result));
     }
 
 }

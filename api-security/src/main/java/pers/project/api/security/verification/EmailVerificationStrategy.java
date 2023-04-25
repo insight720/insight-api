@@ -10,8 +10,8 @@ import pers.project.api.security.execption.VerificationContextException;
 
 import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ONE;
 import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
+import static pers.project.api.security.config.property.VerificationContextProperties.EmailProperties;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.EMAIL;
-import static pers.project.api.security.properties.VerificationContextProperties.EmailProperties;
 
 /**
  * 邮件验证策略

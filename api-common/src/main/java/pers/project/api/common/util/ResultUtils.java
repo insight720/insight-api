@@ -17,7 +17,6 @@ public abstract class ResultUtils {
     /**
      * Success return with nothing.
      *
-     * @param <T> data type
      * @return Result
      */
     public static Result<Void> success() {
@@ -61,6 +60,10 @@ public abstract class ResultUtils {
      */
     public static <T> Result<T> failure(ErrorEnum errorEnum, String message) {
         return new Result<>(errorEnum.getCode(), message, null);
+    }
+
+    public static <T> Result<T> failure(String code, String message) {
+        return new Result<>(code, message, null);
     }
 
     public static boolean isFailure(Object o) {

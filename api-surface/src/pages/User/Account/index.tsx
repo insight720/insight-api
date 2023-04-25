@@ -8,10 +8,6 @@ import AuthenticationCard from "@/pages/User/Account/components/AuthenticationCa
  * 用户账户
  */
 const UserAccount: React.FC = () => {
-
-    // 加载中图标状态
-    const [loading, setLoading] = useState(false);
-
     // tab 标签选择状态
     const [tabType, setTabType] = useState('authorization');
 
@@ -34,7 +30,6 @@ const UserAccount: React.FC = () => {
             }}
         >
             <PageContainer
-                loading={loading}
                 header={{
                     title: '账户设置',
                     ghost: true,

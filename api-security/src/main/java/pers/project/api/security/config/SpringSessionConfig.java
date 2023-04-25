@@ -3,6 +3,7 @@ package pers.project.api.security.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.session.config.annotation.web.http.SpringHttpSessionConfiguration;
 import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
@@ -53,6 +54,19 @@ public class SpringSessionConfig {
          * Remember Me 功能的 Session 有效时间（单位：秒）
          */
         public static final int REMEMBER_ME_SESSION_VALIDITY_SECONDS = 7 * 24 * 60 * 60;
+
+        /**
+         * HTTP 会话事件的发布者
+         * <p>
+         * 暴露为 Spring Bean 来保持对会话生命周期事件的更新。
+         *
+         * @see <a href="https://springdoc.cn/spring-security/servlet/authentication/session-management.html#ns-concurrent-sessions">
+         * Session 的并发控制</a>
+         */
+        @Bean
+        public HttpSessionEventPublisher httpSessionEventPublisher() {
+            return new HttpSessionEventPublisher();
+        }
 
         /**
          * 会话注册表

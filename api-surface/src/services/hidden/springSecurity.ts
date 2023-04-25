@@ -14,6 +14,18 @@ export async function login(params: URLSearchParams, options?: { [key: string]: 
     });
 }
 
+/** Spring Security 的验证码登录接口 POST /security/verification/code/login */
+export async function verificationCodeLogin(params: URLSearchParams, options?: { [key: string]: any }) {
+    return request<API.ResultLoginUserDTO>(`/security/verification/code/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        data: params,
+        ...(options || {}),
+    });
+}
+
 /** Spring Security 的注销接口（因为配置了 CSRF 防护，所以请求方法必须是 POST）POST /security/logout */
 export async function logout(options?: { [key: string]: any }) {
     return request<API.ResultVoid>(`/security/logout`, {
