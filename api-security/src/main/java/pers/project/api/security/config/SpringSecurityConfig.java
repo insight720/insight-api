@@ -238,7 +238,8 @@ public class SpringSecurityConfig {
                     // 写在这里让 IDEA 可以导航到 Controller 方法
                     antMatcher(GET, "/csrf/token"),
                     antMatcher(POST, "/account/registry"),
-                    antMatcher(POST, "/verification/code")
+                    antMatcher(POST, "/verification/code"),
+                    antMatcher("/test")
             };
             // 配置请求授权
             http.authorizeHttpRequests()

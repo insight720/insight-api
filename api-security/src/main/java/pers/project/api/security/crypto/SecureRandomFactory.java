@@ -56,7 +56,7 @@ public final class SecureRandomFactory {
     /**
      * 创建默认的 {@code SecureRandom}
      * <p>
-     * 此方法的存在是为了显式设置参数并支持调试，使用它与使用 {@code new SecureRandom()} 几乎完全相同，
+     * 此方法的存在是为了显式设置参数并支持调试，使用它与使用 {@code new SecureRandom()} 几乎完全相同。
      *
      * @return 默认的 {@code SecureRandom}
      * @see SecureRandom#SecureRandom()

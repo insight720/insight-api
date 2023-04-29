@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import pers.project.api.common.validation.constraint.ContainedIn;
 
 /**
  * 手机或邮箱登录的 DTO
@@ -20,7 +21,7 @@ public class PhoneOrEmailLoginDTO {
      * 如果用户勾选了记住我，该字段的值为 "true"，否则为 "false"。
      */
     @NotNull
-    @Pattern(regexp = "^(true|false)$")
+    @ContainedIn(values = {"true", "false"})
     private String rememberMe;
 
     // region Same with VerificationCodeCheckDTO
@@ -40,7 +41,7 @@ public class PhoneOrEmailLoginDTO {
      * 验证策略（手机或邮箱）
      */
     @NotNull
-    @Pattern(regexp = "^(PHONE|EMAIL)$")
+    @ContainedIn(values = {"PHONE", "EMAIL"})
     private String strategy;
 
     /**

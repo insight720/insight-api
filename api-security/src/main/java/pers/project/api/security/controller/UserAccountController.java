@@ -2,14 +2,13 @@ package pers.project.api.security.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.model.dto.AccountVerificationCodeCheckDTO;
-import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
-import pers.project.api.security.model.dto.UserAccountStatusDTO;
+import pers.project.api.security.model.dto.ApiKeyStatusDTO;
+import pers.project.api.security.model.dto.NonAdminAuthorityDTO;
 import pers.project.api.security.model.dto.UserRegistryDTO;
 import pers.project.api.security.service.UserAccountService;
 
@@ -45,19 +44,16 @@ public class UserAccountController {
         return ResultUtils.success(secretKey);
     }
 
-
-    @PutMapping("/status")
-    public Result<Void> modifyAccountStatus(@Valid @RequestBody UserAccountStatusDTO accountStatusDTO) {
-        userAccountService.updateAccountStatus(accountStatusDTO);
+    @PutMapping("/api/key/status")
+    public Result<Void> modifyApiKeyStatus(@Valid @RequestBody ApiKeyStatusDTO apiKeyStatusDTO) {
+        userAccountService.updateApiKeyStatus(apiKeyStatusDTO);
         return ResultUtils.success();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PutMapping("/authority")
-    public Result<Void> modifyAccountAuthority(@Valid @RequestBody UserAccountAuthorityDTO accountAuthorityDTO) {
-        userAccountService.updateAccountAuthority(accountAuthorityDTO);
+    @PutMapping("/non/admin/authority")
+    public Result<Void> modifyNonAdminAuthority(@Valid @RequestBody NonAdminAuthorityDTO authorityDTO) {
+        userAccountService.updateNonAdminAuthority(authorityDTO);
         return ResultUtils.success();
     }
-
 
 }

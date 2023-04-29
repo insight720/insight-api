@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -19,7 +18,6 @@ import pers.project.api.security.verification.VerificationContext;
 
 import java.util.function.Supplier;
 
-import static com.baomidou.mybatisplus.core.toolkit.StringPool.COMMA;
 import static pers.project.api.common.enumeration.ErrorEnum.SERVER_ERROR;
 import static pers.project.api.common.enumeration.ErrorEnum.VERIFICATION_CODE_ERROR;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.EMAIL;
@@ -94,7 +92,7 @@ public class SecurityServiceImpl implements SecurityService {
             supplierForInvalidCode = () -> new BusinessException(VERIFICATION_CODE_ERROR, "验证码错误");
         }
         String identifier = determineVerificationIdentifier(supplierForIllegalState,
-                codeCheckDTO.getEmailAddress(), codeCheckDTO.getEmailAddress());
+                codeCheckDTO.getPhoneNumber(), codeCheckDTO.getEmailAddress());
         VerificationStrategyEnum strategyEnum = VerificationStrategyEnum.valueOf(codeCheckDTO.getStrategy());
         boolean isValid;
         try {
@@ -109,16 +107,33 @@ public class SecurityServiceImpl implements SecurityService {
         return strategyEnum;
     }
 
+    /**
+     * 确定验证标识符（手机号或邮箱地址）。
+     *
+     * @param supplierForIllegalState 当验证标识符无效时，使用此供应程序生成异常。
+     * @param identifiers             验证标识符的可变参数列表。
+     * @return 如果验证标识符有效，则返回验证标识符；否则抛出异常。
+     * @throws E 如果验证标识符无效，则抛出 {@code supplierForIllegalState} 生成的异常。
+     */
     private <E extends RuntimeException> String determineVerificationIdentifier(Supplier<E> supplierForIllegalState,
                                                                                 String... identifiers) {
         String identifier = ObjectUtils.firstNonNull(identifiers);
         if (identifier == null) {
-            log.warn("All verification identifiers are null: {}", StringUtils.join(identifiers, COMMA));
+            log.warn("All verification identifiers are null");
             throw supplierForIllegalState.get();
         }
         return identifier;
     }
 
+    /**
+     * 验证验证码是否有效。
+     *
+     * @param identifier    验证标识符，可以是电话号码或电子邮件地址。
+     * @param verificationCode 验证码。
+     * @param strategyEnum  发送验证码的策略。
+     * @return 如果验证码是有效的，则返回 {@code true}；否则返回 {@code false}。
+     * @throws VerificationContextException 当验证过程出现错误时，会抛出此异常。
+     */
     private boolean isValidVerificationCode(String identifier,
                                             String verificationCode,
                                             VerificationStrategyEnum strategyEnum)
@@ -133,6 +148,13 @@ public class SecurityServiceImpl implements SecurityService {
         return isValid;
     }
 
+    /**
+     * 记录验证上下文异常的日志。
+     *
+     * @param identifier    验证标识符，可以是电话号码或电子邮件地址。
+     * @param strategyEnum  发送验证码的策略。
+     * @param e             验证上下文异常。
+     */
     private void warnVerificationContextException(String identifier,
                                                   VerificationStrategyEnum strategyEnum,
                                                   Exception e) {

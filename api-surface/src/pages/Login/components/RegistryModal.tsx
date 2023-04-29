@@ -43,11 +43,13 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
             await register({
                 username: fields.username,
                 password: fields.password,
-                emailAddress: isUsingEmail ? fields.email : undefined,
-                phoneNumber: !isUsingEmail ? phoneOption + fields.mobile : undefined,
-                strategy: isUsingEmail ? "EMAIL" : "PHONE",
                 confirmedPassword: fields.confirmedPassword,
-                verificationCode: fields.captcha
+                codeCheckDTO: {
+                    emailAddress: isUsingEmail ? fields.email : undefined,
+                    phoneNumber: !isUsingEmail ? phoneOption + fields.mobile : undefined,
+                    strategy: isUsingEmail ? "EMAIL" : "PHONE",
+                    verificationCode: fields.captcha
+                }
             });
             message.destroy();
             message.success('注册成功');
@@ -196,16 +198,21 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
                             }
                         ]}
                         onGetCaptcha={async () => {
-                            // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
-                            // throw new Error("获取验证码错误")
-                            const phoneNumber = phoneOption
-                                + form.getFieldValue("phone");
-                            await getVerificationCode({
-                                phoneNumber: phoneNumber,
-                                emailAddress: undefined,
-                                strategy: registryType
-                            });
-                            message.success("获取验证码成功！");
+                            try {
+                                const phoneNumber = phoneOption
+                                    + form.getFieldValue("phone");
+                                await getVerificationCode({
+                                    phoneNumber: phoneNumber,
+                                    emailAddress: undefined,
+                                    strategy: registryType
+                                });
+                                message.success("获取验证码成功");
+                            } catch (error: any) {
+                                message.error(error.message || "获取验证码失败");
+                                // 让等待状态结束
+                                throw error;
+                            }
+
                         }}
                     />
                 </>
@@ -295,14 +302,18 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
                             }
                         ]}
                         onGetCaptcha={async () => {
-                            // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
-                            // throw new Error("获取验证码错误")
-                            await getVerificationCode({
-                                phoneNumber: undefined,
-                                emailAddress: form.getFieldValue("email"),
-                                strategy: registryType
-                            });
-                            message.success("获取验证码成功");
+                            try {
+                                await getVerificationCode({
+                                    phoneNumber: undefined,
+                                    emailAddress: form.getFieldValue("email"),
+                                    strategy: registryType
+                                });
+                                message.success("获取验证码成功");
+                            } catch (error: any) {
+                                message.error(error.message || "获取验证码失败");
+                                // 让等待状态结束
+                                throw error;
+                            }
                         }}
                     />
                 </>

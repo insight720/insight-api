@@ -227,9 +227,6 @@ const Login: React.FC = () => {
                                     ...values
                                 });
                                 break;
-                            default:
-                                // 不应该发生
-                                message.error("登录类型错误，请联系管理员");
                         }
                     }}
                 >
@@ -413,15 +410,19 @@ const Login: React.FC = () => {
                                 ]}
                                 phoneName="phone"
                                 onGetCaptcha={async (phone) => {
-                                    // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
-                                    // throw new Error("获取验证码错误")
-                                    await getVerificationCode({
-                                        // phoneOption 是 +86 前缀
-                                        phoneNumber: phoneOption + phone,
-                                        emailAddress: undefined,
-                                        strategy: loginType
-                                    });
-                                    message.success("获取验证码成功");
+                                    try {
+                                        await getVerificationCode({
+                                            // phoneOption 是 +86 前缀
+                                            phoneNumber: phoneOption + phone,
+                                            emailAddress: undefined,
+                                            strategy: loginType
+                                        });
+                                        message.success("获取验证码成功");
+                                    } catch (error: any) {
+                                        message.error(error.message || "获取验证码失败");
+                                        // 让等待状态结束
+                                        throw error;
+                                    }
                                 }}
                             />
                         </>
@@ -508,14 +509,18 @@ const Login: React.FC = () => {
                                 ]}
                                 phoneName="email"
                                 onGetCaptcha={async (email) => {
-                                    // 如果需要失败会 throw 一个错误出来，onGetCaptcha 会自动停止
-                                    // throw new Error("获取验证码错误！")
-                                    await getVerificationCode({
-                                        phoneNumber: undefined,
-                                        emailAddress: email,
-                                        strategy: loginType
-                                    });
-                                    message.success("获取验证码成功");
+                                    try {
+                                        await getVerificationCode({
+                                            phoneNumber: undefined,
+                                            emailAddress: email,
+                                            strategy: loginType
+                                        });
+                                        message.success("获取验证码成功");
+                                    } catch (error: any) {
+                                        message.error(error.message || "获取验证码失败");
+                                        // 让等待状态结束
+                                        throw error;
+                                    }
                                 }}
                             />
                         </>

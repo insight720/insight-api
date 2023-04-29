@@ -2,26 +2,42 @@
 /* eslint-disable */
 import {request} from '@umijs/max';
 
-/** 此处后端没有提供注释 GET /account/${param0}/key */
-export async function getNewApiKeyPair(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getNewApiKeyPairParams,
+/** 此处后端没有提供注释 PUT /account/api/key/status */
+export async function modifyApiKeyStatus(
+  body: API.ApiKeyStatusDTO,
   options?: { [key: string]: any },
 ) {
-  const { accountId: param0, ...queryParams } = params;
-  return request<API.ResultApiKeyPairVO>(`/security/account/${param0}/key`, {
-    method: 'GET',
-    params: { ...queryParams },
+  return request<API.ResultVoid>(`/security/account/api/key/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }
 
-/** 此处后端没有提供注释 PUT /account/authority */
-export async function modifyAccountAuthority(
-  body: API.UserAccountAuthorityDTO,
+/** 此处后端没有提供注释 POST /account/new/api/key */
+export async function getNewApiKey(
+  body: API.AccountVerificationCodeCheckDTO,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResultVoid>(`/security/account/authority`, {
+  return request<API.ResultString>(`/security/account/new/api/key`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 此处后端没有提供注释 PUT /account/non/admin/authority */
+export async function modifyNonAdminAuthority(
+  body: API.NonAdminAuthorityDTO,
+  options?: { [key: string]: any },
+) {
+  return request<API.ResultVoid>(`/security/account/non/admin/authority`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -43,13 +59,13 @@ export async function register(body: API.UserRegistryDTO, options?: { [key: stri
   });
 }
 
-/** 此处后端没有提供注释 PUT /account/status */
-export async function modifyAccountStatus(
-  body: API.UserAccountStatusDTO,
+/** 此处后端没有提供注释 POST /account/secret/key */
+export async function viewSecretKey(
+  body: API.AccountVerificationCodeCheckDTO,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResultVoid>(`/security/account/status`, {
-    method: 'PUT',
+  return request<API.ResultString>(`/security/account/secret/key`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },

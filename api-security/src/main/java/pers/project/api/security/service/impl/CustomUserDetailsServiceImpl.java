@@ -29,6 +29,7 @@ import pers.project.api.common.model.security.CustomUserDetails;
 import pers.project.api.common.util.bean.BeanCopierUtils;
 import pers.project.api.common.validation.validator.SensitiveWordValidator;
 import pers.project.api.security.authentication.VerificationCodeAuthenticationToken;
+import pers.project.api.security.enumeration.AccountStatusEnum;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.PrincipalNotFoundException;
 import pers.project.api.security.mapper.UserAccountMapper;
@@ -38,9 +39,14 @@ import pers.project.api.security.model.po.UserProfilePO;
 import pers.project.api.security.service.CustomUserDetailsService;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static com.baomidou.mybatisplus.core.toolkit.StringPool.COMMA;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.splitByWholeSeparator;
 import static pers.project.api.common.enumeration.ErrorEnum.LOGIN_ERROR;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
 
@@ -134,7 +140,7 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
             log.warn("Invalid strategy: {}", strategy);
             throw new PrincipalNotFoundException(EMPTY);
         }
-        // 校验请求参数
+        // 校验请求参数（在此校验的原因是注解校验抛出的不会被全局异常处理器捕获）
         boolean isUsingPhone = PHONE.equals(strategyEnum);
         boolean isValid = isUsingPhone ?
                 PHONE_NUMBER_PATTERN.matcher(loginIdentifier).matches()
@@ -235,9 +241,9 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
      */
     private <F, V> UserAccountPO getLoginUserAccount(SFunction<UserAccountPO, F> getter, V value) {
         LambdaQueryWrapper<UserAccountPO> accountQueryWrapper = new LambdaQueryWrapper<>();
-        accountQueryWrapper.select(UserAccountPO::getId, UserAccountPO::getUsername,
-                UserAccountPO::getPassword, UserAccountPO::getAuthority, UserAccountPO::getSecretId,
-                UserAccountPO::getAccountStatus);
+        accountQueryWrapper.select(UserAccountPO::getId, UserAccountPO::getUsername, UserAccountPO::getPassword,
+                UserAccountPO::getEmailAddress, UserAccountPO::getPhoneNumber, UserAccountPO::getAuthority,
+                UserAccountPO::getSecretId, UserAccountPO::getAccountStatus);
         accountQueryWrapper.eq(getter, value);
         return userAccountMapper.selectOne(accountQueryWrapper);
     }
@@ -276,6 +282,15 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
         BeanCopierUtils.copy(userProfilePO, customUserDetails);
         customUserDetails.setAccountId(userAccountPO.getId());
         customUserDetails.setProfileId(userProfilePO.getId());
+        // 将账户权限转为权限集合
+        Set<String> athroritySet = Arrays.stream(splitByWholeSeparator
+                        (userAccountPO.getAuthority(), COMMA))
+                .collect(Collectors.toUnmodifiableSet());
+        customUserDetails.setAuthoritySet(athroritySet);
+        // 将账户状态转为枚举名称
+        AccountStatusEnum statusEnum = AccountStatusEnum.getEnumByStatusCode
+                (userAccountPO.getAccountStatus());
+        customUserDetails.setAccountStatus(statusEnum.name());
         return customUserDetails;
     }
 

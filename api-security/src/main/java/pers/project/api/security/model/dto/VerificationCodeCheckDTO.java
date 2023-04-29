@@ -4,9 +4,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import pers.project.api.common.validation.constraint.ContainedIn;
 
 /**
  * 验证码检查 DTO
+ * <p>
+ * 可作为其他 DTO 的字段。
  *
  * @author Luo Fei
  * @date 2023/04/20
@@ -30,7 +33,7 @@ public class VerificationCodeCheckDTO {
      * 验证策略（手机或邮箱）
      */
     @NotNull
-    @Pattern(regexp = "^(PHONE|EMAIL)$")
+    @ContainedIn(values = {"PHONE", "EMAIL"})
     private String strategy;
 
     /**

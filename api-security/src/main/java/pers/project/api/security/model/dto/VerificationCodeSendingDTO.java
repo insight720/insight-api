@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import pers.project.api.common.validation.constraint.ContainedIn;
 
 /**
  * 验证码发送 DTO
@@ -30,7 +31,7 @@ public class VerificationCodeSendingDTO {
      * 验证策略（手机或邮箱）
      */
     @NotNull
-    @Pattern(regexp = "^(PHONE|EMAIL)$")
+    @ContainedIn(values = {"PHONE", "EMAIL"})
     private String strategy;
 
 }

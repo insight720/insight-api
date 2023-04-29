@@ -8,9 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.security.CustomUserDetails;
 import pers.project.api.security.crypto.SecureRandomFactory;
+import pers.project.api.security.enumeration.AccountStatusEnum;
+import pers.project.api.security.enumeration.AcountAuthorityEnum;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.mapper.UserAccountMapper;
 import pers.project.api.security.mapper.UserProfileMapper;
@@ -23,9 +26,9 @@ import pers.project.api.security.service.UserAccountService;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Set;
 
 import static pers.project.api.common.enumeration.ErrorEnum.*;
-import static pers.project.api.security.constant.AuthorityConst.ROLE_USER;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
 
 
@@ -70,7 +73,7 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         userAccountPO.setPhoneNumber(codeCheckDTO.getPhoneNumber());
         userAccountPO.setEmailAddress(codeCheckDTO.getEmailAddress());
         // 默认为用户权限
-        userAccountPO.setAuthority(ROLE_USER);
+        userAccountPO.setAuthority(AcountAuthorityEnum.ROLE_USER.name());
         // 编程式事务，与 @Transactional 一样具有默认的 propagation 和 isolation
         transactionTemplate.executeWithoutResult(ignored -> {
             try {
@@ -99,9 +102,9 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         // 安全随机数作为密钥源字节数组
         byte[] secretIdBytes = new byte[SECRET_ID_BYTE_LENGTH];
         byte[] secretKeyBytes = new byte[SECRET_KEY_BYTE_LENGTH];
+        secureRandom.nextBytes(secretIdBytes);
         secureRandom.nextBytes(secretKeyBytes);
-        secureRandom.nextBytes(secretKeyBytes);
-        // 使用 Argon2 哈希算法生成唯一密钥
+        // 使用 Base64 编码为可读的字符串
         String secretId = BASE64_ENCODER.encodeToString(secretIdBytes);
         String secretKey = BASE64_ENCODER.encodeToString(secretKeyBytes);
         // 保存唯一密钥对
@@ -149,19 +152,54 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     }
 
     @Override
-    public void updateAccountStatus(UserAccountStatusDTO accountStatusDTO) {
+    public void updateApiKeyStatus(ApiKeyStatusDTO apiKeyStatusDTO) {
+        // 检查验证码是否合法
+        VerificationCodeCheckDTO codeCheckDTO = apiKeyStatusDTO.getCodeCheckDTO();
+        securityService.checkVerificationCode(codeCheckDTO, null);
+        // 检查密钥状态是否合法
+        AccountStatusEnum originalStatus
+                = AccountStatusEnum.valueOf(apiKeyStatusDTO.getOriginalStatus());
+        AccountStatusEnum targetStatus
+                = AccountStatusEnum.valueOf(apiKeyStatusDTO.getTargetStatus());
+        // 要修改的状态与原状态相同
+        if (originalStatus == targetStatus) {
+            // 前端已校验
+            throw new BusinessException(PARAM_ERROR, "参数错误，修改密钥状态失败");
+        }
+        // 修改 API 密钥状态
         LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserAccountPO::getAccountStatus, accountStatusDTO.getStatusCode());
-        updateWrapper.eq(UserAccountPO::getId, accountStatusDTO.getAccountId());
+        Integer targetStatusCode = targetStatus.statusCode();
+        updateWrapper.set(UserAccountPO::getAccountStatus, targetStatusCode);
+        updateWrapper.eq(UserAccountPO::getId, apiKeyStatusDTO.getAccountId());
         update(updateWrapper);
+        // 更新 Session 中的账户状态
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setAccountStatus(targetStatus.name());
+        userDetailsService.updateLoginUserDetails(userDetails);
     }
 
     @Override
-    public void updateAccountAuthority(UserAccountAuthorityDTO accountAuthorityDTO) {
+    public void updateNonAdminAuthority(NonAdminAuthorityDTO authorityDTO) {
+        // 检查修改的状态是否合法
+        Set<String> originalAuthoritySet = authorityDTO.getOriginalAuthoritySet();
+        Set<String> targetAuthoritySet = authorityDTO.getTargetAuthoritySet();
+        // 要修改的权限和原权限相同
+        boolean isSameAuthority = (originalAuthoritySet.size() == targetAuthoritySet.size())
+                                  && originalAuthoritySet.containsAll(targetAuthoritySet);
+        if (isSameAuthority) {
+            // 前端已校验
+            throw new BusinessException(PARAM_ERROR, "参数错误，修改权限失败");
+        }
+        // 不同权限以 , 分隔后存储于 authority 列中
+        String newAuthority = StringUtils.collectionToCommaDelimitedString(targetAuthoritySet);
         LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserAccountPO::getAuthority, accountAuthorityDTO.getAuthority());
-        updateWrapper.eq(UserAccountPO::getId, accountAuthorityDTO.getAccountId());
+        updateWrapper.set(UserAccountPO::getAuthority, newAuthority);
+        updateWrapper.eq(UserAccountPO::getId, authorityDTO.getAccountId());
         update(updateWrapper);
+        // 更新 Session 中的账户权限
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setAuthoritySet(targetAuthoritySet);
+        userDetailsService.updateLoginUserDetails(userDetails);
     }
 
     /**

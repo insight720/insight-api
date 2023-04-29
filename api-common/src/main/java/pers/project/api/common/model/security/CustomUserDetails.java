@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -25,6 +27,21 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
+
+    /**
+     * 账号状态
+     * <p>
+     * 字符串形式表示。
+     */
+    String accountStatus;
+
+    /**
+     * 权限
+     * <p>
+     * 与 {@link CustomUserDetails#getAuthorities()} 的返回值不同，
+     * 直接以字符串形式表示。这样可以简化 JSON 序列化及权限数据使用过程。
+     */
+    Set<String> authoritySet;
 
     // region Same with UserAccount
     /**
@@ -43,18 +60,12 @@ public class CustomUserDetails implements UserDetails {
      * 手机号
      */
     private String phoneNumber;
-    /**
-     * 权限
-     */
-    private String authority;
+
     /**
      * 密钥 ID
      */
     private String secretId;
-    /**
-     * 账号状态
-     */
-    private Integer accountStatus;
+
     // endregion
 
     /**
@@ -107,7 +118,10 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new CustomizedGrantedAuthority(authority));
+        Assert.notNull(authoritySet, "The authorities must be not null");
+        return authoritySet.stream()
+                .map(CustomGrantedAuthority::new)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

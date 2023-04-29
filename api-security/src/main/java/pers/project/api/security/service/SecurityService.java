@@ -45,7 +45,7 @@ public interface SecurityService {
      * @throws IllegalStateException 未知状态错误
      * @see VerificaionCodeAuthenticationProvider#additionalAuthenticationChecks
      */
-    // Suppress JavaDoc Warnings
+    // Suppress warnings for JavaDoc
     @SuppressWarnings("all")
     boolean checkLoginVerificationCode(String loginIdentifier, String verificationCode, String strategy);
 

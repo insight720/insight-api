@@ -1,8 +1,10 @@
 package pers.project.api.common.model.dto;
 
 import lombok.Data;
+import pers.project.api.common.model.security.CustomUserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * 登录用户 DTO
@@ -12,6 +14,21 @@ import java.time.LocalDateTime;
  */
 @Data
 public class LoginUserDTO {
+
+    /**
+     * 账号状态
+     * <p>
+     * 字符串形式表示。
+     */
+    String accountStatus;
+
+    /**
+     * 权限
+     * <p>
+     * 与 {@link CustomUserDetails#getAuthorities()} 的返回值不同，
+     * 直接以字符串形式表示。这样可以简化 JSON 序列化及权限数据使用过程。
+     */
+    Set<String> authoritySet;
 
     // region Same with UserAccount
     /**
@@ -27,17 +44,9 @@ public class LoginUserDTO {
      */
     private String phoneNumber;
     /**
-     * 权限
-     */
-    private String authority;
-    /**
      * 密钥 ID
      */
     private String secretId;
-    /**
-     * 账号状态
-     */
-    private Integer accountStatus;
     // endregion
 
     /**

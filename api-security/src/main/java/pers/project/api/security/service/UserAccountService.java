@@ -2,8 +2,8 @@ package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import pers.project.api.security.model.dto.AccountVerificationCodeCheckDTO;
-import pers.project.api.security.model.dto.UserAccountAuthorityDTO;
-import pers.project.api.security.model.dto.UserAccountStatusDTO;
+import pers.project.api.security.model.dto.ApiKeyStatusDTO;
+import pers.project.api.security.model.dto.NonAdminAuthorityDTO;
 import pers.project.api.security.model.dto.UserRegistryDTO;
 import pers.project.api.security.model.po.UserAccountPO;
 
@@ -38,20 +38,18 @@ public interface UserAccountService extends IService<UserAccountPO> {
      */
     String getSecretKey(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
 
-
+    /**
+     * 更新 API 密钥状态
+     *
+     * @param apiKeyStatusDTO API 密钥状态 DTO（包含验证码检查 DTO）
+     */
+    void updateApiKeyStatus(ApiKeyStatusDTO apiKeyStatusDTO);
 
     /**
-     * 更新账户状态
+     * 更新非管理员权限
      *
-     * @param accountStatusDTO 账户状态 DTO
+     * @param authorityDTO 非管理权限 DTO
      */
-    void updateAccountStatus(UserAccountStatusDTO accountStatusDTO);
-
-    /**
-     * 更新帐户权限
-     *
-     * @param accountAuthorityDTO 账户权限 DTO
-     */
-    void updateAccountAuthority(UserAccountAuthorityDTO accountAuthorityDTO);
+    void updateNonAdminAuthority(NonAdminAuthorityDTO authorityDTO);
 
 }

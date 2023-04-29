@@ -18,6 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
+.fastRequest
 
 ### NetBeans ###
 /nbproject/private/
@@ -46,3 +47,4 @@ build/
 /api-provider/src/main/resources/application-prod.yaml
 /api-security/src/main/resources/application-dev.yaml
 /api-security/src/main/resources/application-prod.yaml
+/.fastRequest/
