@@ -77,8 +77,8 @@ DROP TABLE IF EXISTS `api-security`.`user_account`;
 CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
 (
     `id`             BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
-    `username`       VARCHAR(256)           NOT NULL COMMENT '账户名',
-    `password`       VARCHAR(512)           NOT NULL COMMENT '密码',
+    `username`       VARCHAR(256)           NULL COMMENT '账户名',
+    `password`       VARCHAR(512)           NULL COMMENT '密码',
     `email_address`  VARCHAR(256)           NULL COMMENT '邮箱',
     `phone_number`   VARCHAR(256)           NULL COMMENT '手机号',
     `authority`      VARCHAR(256)           NOT NULL COMMENT '权限',

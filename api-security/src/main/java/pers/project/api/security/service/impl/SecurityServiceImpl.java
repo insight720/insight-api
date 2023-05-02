@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -16,6 +15,8 @@ import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.verification.VerificationContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static pers.project.api.common.enumeration.ErrorEnum.SERVER_ERROR;
@@ -99,7 +100,7 @@ public class SecurityServiceImpl implements SecurityService {
             isValid = isValidVerificationCode(identifier, codeCheckDTO.getVerificationCode(), strategyEnum);
         } catch (VerificationContextException e) {
             warnVerificationContextException(identifier, strategyEnum, e);
-            throw supplierForInvalidCode.get();
+            throw supplierForIllegalState.get();
         }
         if (!isValid) {
             throw supplierForInvalidCode.get();
@@ -117,20 +118,26 @@ public class SecurityServiceImpl implements SecurityService {
      */
     private <E extends RuntimeException> String determineVerificationIdentifier(Supplier<E> supplierForIllegalState,
                                                                                 String... identifiers) {
-        String identifier = ObjectUtils.firstNonNull(identifiers);
-        if (identifier == null) {
-            log.warn("All verification identifiers are null");
+
+        List<String> nonNullIdentifiers = new ArrayList<>(2);
+        for (String identifier : identifiers) {
+            if (identifier != null) {
+                nonNullIdentifiers.add(identifier);
+            }
+        }
+        if (nonNullIdentifiers.size() != 1) {
+            log.warn("There is not only one identifier that is not null");
             throw supplierForIllegalState.get();
         }
-        return identifier;
+        return nonNullIdentifiers.get(0);
     }
 
     /**
      * 验证验证码是否有效。
      *
-     * @param identifier    验证标识符，可以是电话号码或电子邮件地址。
+     * @param identifier       验证标识符，可以是电话号码或电子邮件地址。
      * @param verificationCode 验证码。
-     * @param strategyEnum  发送验证码的策略。
+     * @param strategyEnum     发送验证码的策略。
      * @return 如果验证码是有效的，则返回 {@code true}；否则返回 {@code false}。
      * @throws VerificationContextException 当验证过程出现错误时，会抛出此异常。
      */
@@ -151,9 +158,9 @@ public class SecurityServiceImpl implements SecurityService {
     /**
      * 记录验证上下文异常的日志。
      *
-     * @param identifier    验证标识符，可以是电话号码或电子邮件地址。
-     * @param strategyEnum  发送验证码的策略。
-     * @param e             验证上下文异常。
+     * @param identifier   验证标识符，可以是电话号码或电子邮件地址。
+     * @param strategyEnum 发送验证码的策略。
+     * @param e            验证上下文异常。
      */
     private void warnVerificationContextException(String identifier,
                                                   VerificationStrategyEnum strategyEnum,

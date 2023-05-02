@@ -8,13 +8,13 @@ import pers.project.api.common.validation.constraint.SnowflakeId;
 import pers.project.api.security.enumeration.AccountStatusEnum;
 
 /**
- * API 密钥状态 DTO
+ * API 密钥状态修改 DTO
  *
  * @author Luo Fei
  * @date 2023/04/06
  */
 @Data
-public class ApiKeyStatusDTO {
+public class ApiKeyStatusModificationDTO {
 
     /**
      * 账户主键
@@ -23,26 +23,18 @@ public class ApiKeyStatusDTO {
     private String accountId;
 
     /**
-     * 原来的状态
+     * 新状态
      *
-     * @see AccountStatusEnum#statusCode()
+     * @see AccountStatusEnum
      */
     @NotNull
     @ContainedIn(values = {"NORMAL_KEY_AVAILABLE", "NORMAL_KEY_UNAVAILABLE"})
-    private String originalStatus;
-
-    /**
-     * 目标状态
-     *
-     * @see AccountStatusEnum#statusCode()
-     */
-    @NotNull
-    @ContainedIn(values = {"NORMAL_KEY_AVAILABLE", "NORMAL_KEY_UNAVAILABLE"})
-    private String targetStatus;
+    private String newStatus;
 
     /**
      * 验证码检查 DTO
      */
+    @NotNull
     @Valid
     private VerificationCodeCheckDTO codeCheckDTO;
 

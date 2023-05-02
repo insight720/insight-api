@@ -137,7 +137,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                 }}
             >
 
-                <ProForm.Group title="头像和昵称" align="center" tooltip="你可以选择喜欢的头像和昵称">
+                <ProForm.Group title="头像和昵称" align="center" tooltip="你可以选择喜欢的头像和昵称。">
 
                     <Upload
                         fileList={avatarFileList}
@@ -150,7 +150,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
                         </Button>
                     </Upload>
 
-                    <ProFormText width="md" tooltip="账户名是唯一的，但昵称可能重复" name="nickname"
+                    <ProFormText width="md" tooltip="账户名是唯一的，但昵称可能重复。" name="nickname"
                                  label="用户昵称" fieldProps={{defaultValue: currentUser?.nickname}}
                                  rules={[
                                      {
@@ -161,9 +161,9 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
 
                 </ProForm.Group>
 
-                <ProForm.Group title="开发者信息" tooltip="以开发者身份拥有的信息">
+                <ProForm.Group title="开发者信息" tooltip="以开发者身份拥有的信息。">
 
-                    <ProFormText width="md" tooltip="个人网站可以是你的博客" name='website'
+                    <ProFormText width="md" tooltip="个人网站可以是你的博客。" name='website'
                                  label="个人网站" fieldProps={{defaultValue: currentUser?.website}}
                                  rules={[{
                                      type: "url",
@@ -174,14 +174,14 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
 
                 <ProFormGroup>
 
-                    <ProFormText width="md" tooltip="你的 Github 主页" name='github'
+                    <ProFormText width="md" tooltip="你的 Github 主页。" name='github'
                                  label="Github 地址" fieldProps={{defaultValue: currentUser?.github}}
                                  rules={[{
                                      pattern: /^https?:\/\/(www\.)?github\.com\/[\w-]+(\/)?$/,
                                      message: "请输入有效的 Github 链接"
                                  }]}/>
 
-                    <ProFormText width="md" tooltip="你的 Gitee 主页" name="gitee"
+                    <ProFormText width="md" tooltip="你的 Gitee 主页。" name="gitee"
                                  label="Gitee 地址" fieldProps={{defaultValue: currentUser?.gitee}}
                                  rules={[{
                                      pattern: /^https?:\/\/(www\.)?gitee\.com\/[\w-]+(\/)?$/,
@@ -192,7 +192,7 @@ const ProfileSettingCard: React.FC<ProfileSettingCardProps> = (props: ProfileSet
 
                 <ProForm.Group title={"其他信息"}>
 
-                    <ProFormTextArea name="biography" width="xl" tooltip="其他你想提供的个人信息" label="个人简介"
+                    <ProFormTextArea name="biography" width="xl" tooltip="其他你想提供的个人信息。" label="个人简介"
                                      fieldProps={{
                                          defaultValue: currentUser?.biography,
                                          showCount: true,

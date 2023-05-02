@@ -2,7 +2,7 @@ import {PageContainer} from '@ant-design/pro-components';
 import React, {useState} from "react";
 import AccountAuthorizationCard from "@/pages/User/Account/components/AccountAuthorizationCard";
 import {useModel} from "@@/exports";
-import AuthenticationCard from "@/pages/User/Account/components/AuthenticationCard";
+import AccountAuthenticationCard from "@/pages/User/Account/components/AccountAuthenticationCard";
 
 /**
  * 用户账户
@@ -67,7 +67,9 @@ const UserAccount: React.FC = () => {
                 }
                 {
                     tabType == 'authentication'
-                    && <AuthenticationCard currentUser={currentUser}/>
+                    && <AccountAuthenticationCard currentUser={currentUser}
+                                                  setInitialState={setInitialState}
+                                                  fetchUserInfo={fetchUserInfo}/>
                 }
             </PageContainer>
 

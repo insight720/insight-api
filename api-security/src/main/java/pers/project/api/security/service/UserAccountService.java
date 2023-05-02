@@ -1,10 +1,7 @@
 package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import pers.project.api.security.model.dto.AccountVerificationCodeCheckDTO;
-import pers.project.api.security.model.dto.ApiKeyStatusDTO;
-import pers.project.api.security.model.dto.NonAdminAuthorityDTO;
-import pers.project.api.security.model.dto.UserRegistryDTO;
+import pers.project.api.security.model.dto.*;
 import pers.project.api.security.model.po.UserAccountPO;
 
 /**
@@ -18,9 +15,9 @@ public interface UserAccountService extends IService<UserAccountPO> {
     /**
      * 创建新帐户
      *
-     * @param userRegistryDTO 用户注册 VO
+     * @param userAccountRegistryDTO 用户注册 DTO
      */
-    void createNewAccount(UserRegistryDTO userRegistryDTO);
+    void createNewAccount(UserAccountRegistryDTO userAccountRegistryDTO);
 
     /**
      * 生成 API 密钥
@@ -41,15 +38,57 @@ public interface UserAccountService extends IService<UserAccountPO> {
     /**
      * 更新 API 密钥状态
      *
-     * @param apiKeyStatusDTO API 密钥状态 DTO（包含验证码检查 DTO）
+     * @param modificationDTO API 密钥状态修改 DTO（包含验证码检查 DTO）
      */
-    void updateApiKeyStatus(ApiKeyStatusDTO apiKeyStatusDTO);
+    void updateApiKeyStatus(ApiKeyStatusModificationDTO modificationDTO);
 
     /**
      * 更新非管理员权限
      *
-     * @param authorityDTO 非管理权限 DTO
+     * @param authorityDTO 非管理权限修改 DTO
      */
-    void updateNonAdminAuthority(NonAdminAuthorityDTO authorityDTO);
+    void updateNonAdminAuthority(NonAdminAuthorityModificationDTO authorityDTO);
+
+    /**
+     * 更新用户名
+     *
+     * @param modificationDTO 账户名修改 DTO（包括验证码检查 DTO)
+     */
+    void updateUsername(UsernameModificationDTO modificationDTO);
+
+    /**
+     * 更新用户名和密码
+     *
+     * @param settingDTO 用户名和密码设置 DTO
+     */
+    void updateUsernameAndPassword(UsernameAndPasswordSettingDTO settingDTO);
+
+    /**
+     * 更新密码
+     *
+     * @param modificationDTO 密码修改 DTO
+     */
+    void updatePassword(PasswordModificationDTO modificationDTO);
+
+    /**
+     * 删除账户
+     *
+     * @param accountCodeCheckDTO 账户验证码检查 DTO
+     */
+    void removeAccount(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
+
+    /**
+     * 保存手机号或邮箱
+     *
+     * @param accountCodeCheckDTO 账户验证码检查 DTO
+     */
+    void savePhoneNumberOrEmailAddress(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
+
+    /**
+     * 删除手机号或邮箱
+     *
+     * @param accountCodeCheckDTO
+     */
+    void removePhoneNumberOrEmailAddress(AccountVerificationCodeCheckDTO accountCodeCheckDTO);
 
 }

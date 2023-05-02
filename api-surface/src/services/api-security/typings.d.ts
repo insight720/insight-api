@@ -1,14 +1,13 @@
 declare namespace API {
   type AccountVerificationCodeCheckDTO = {
     accountId?: string;
-    codeCheckDTO?: VerificationCodeCheckDTO;
+    codeCheckDTO: VerificationCodeCheckDTO;
   };
 
-  type ApiKeyStatusDTO = {
+  type ApiKeyStatusModificationDTO = {
     accountId?: string;
-    originalStatus: string;
-    targetStatus: string;
-    codeCheckDTO?: VerificationCodeCheckDTO;
+    newStatus: string;
+    codeCheckDTO: VerificationCodeCheckDTO;
   };
 
   type LoginUserDTO = {
@@ -31,10 +30,16 @@ declare namespace API {
     lastLoginTime?: string;
   };
 
-  type NonAdminAuthorityDTO = {
+  type NonAdminAuthorityModificationDTO = {
     accountId?: string;
-    originalAuthoritySet: string[];
-    targetAuthoritySet: string[];
+    newAuthoritySet: string[];
+  };
+
+  type PasswordModificationDTO = {
+    accountId?: string;
+    originalPassword?: string;
+    newPassword: string;
+    codeCheckDTO?: VerificationCodeCheckDTO;
   };
 
   type ResultLoginUserDTO = {
@@ -55,6 +60,25 @@ declare namespace API {
     data?: Record<string, any>;
   };
 
+  type UserAccountRegistryDTO = {
+    username: string;
+    password: string;
+    codeCheckDTO: VerificationCodeCheckDTO;
+  };
+
+  type UsernameAndPasswordSettingDTO = {
+    accountId?: string;
+    newUsername: string;
+    newPassword: string;
+    codeCheckDTO: VerificationCodeCheckDTO;
+  };
+
+  type UsernameModificationDTO = {
+    accountId?: string;
+    newUsername: string;
+    codeCheckDTO: VerificationCodeCheckDTO;
+  };
+
   type UserProfileSettingDTO = {
     profileId?: string;
     originalAvatar?: string;
@@ -63,13 +87,6 @@ declare namespace API {
     github?: string;
     gitee?: string;
     biography?: string;
-  };
-
-  type UserRegistryDTO = {
-    username: string;
-    password: string;
-    confirmedPassword: string;
-    codeCheckDTO?: VerificationCodeCheckDTO;
   };
 
   type VerificationCodeCheckDTO = {

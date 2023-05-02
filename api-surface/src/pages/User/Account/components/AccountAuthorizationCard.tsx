@@ -1,17 +1,18 @@
 import {ModalForm, ProCard, ProForm, ProFormCaptcha, ProFormText,} from '@ant-design/pro-components';
 import React, {useState} from "react";
 import {Button, Checkbox, Form, message, Space, Tabs, Typography} from "antd";
+
+import {flushSync} from "react-dom";
+import {LockOutlined} from "@ant-design/icons";
+import {FormattedMessage, useIntl} from "@@/exports";
+import {getVerificationCode} from "@/services/api-security/securityController";
+import {CheckboxChangeEvent} from "antd/es/checkbox";
 import {
     getNewApiKey,
     modifyApiKeyStatus,
     modifyNonAdminAuthority,
     viewSecretKey
 } from "@/services/api-security/userAccountController";
-import {flushSync} from "react-dom";
-import {LockOutlined} from "@ant-design/icons";
-import {FormattedMessage, useIntl} from "@@/exports";
-import {getVerificationCode} from "@/services/api-security/securityController";
-import {CheckboxChangeEvent} from "antd/es/checkbox";
 
 /**
  * 用户账户授权卡属性
@@ -100,7 +101,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
     );
 
     // 新建密钥的提示消息
-    const newKeyTpiMessage: React.ReactNode = (
+    const newKeyTipMessage: React.ReactNode = (
         <Typography.Text>
             请注意，
             <Typography.Text strong>
@@ -176,6 +177,15 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
         ROLE_USER = "ROLE_USER",
         ROLE_TEST = "ROLE_TEST",
         ROLE_ADMIN = "ROLE_ADMIN"
+    }
+
+    /**
+     * 权限描述枚举
+     */
+    enum AuthorityDescriptionEnum {
+        ROLE_USER = "用户",
+        ROLE_TEST = "测试",
+        ROLE_ADMIN = "管理员"
     }
 
     /**
@@ -282,8 +292,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
         message.loading("修改密钥状态中");
         try {
             await modifyApiKeyStatus({
-                originalStatus: originalStatus || "",
-                targetStatus: targetApiKeyStatus || "",
+                newStatus: targetApiKeyStatus || "",
                 accountId: currentUser?.accountId,
                 codeCheckDTO: {
                     phoneNumber: isUsingPhone ? currentUser?.phoneNumber : undefined,
@@ -338,8 +347,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
         try {
             await modifyNonAdminAuthority({
                 accountId: currentUser?.accountId,
-                originalAuthoritySet: currentUser?.authoritySet || [],
-                targetAuthoritySet: targetAuthoritySet
+                newAuthoritySet: targetAuthoritySet
             });
             // 刷新用户信息
             await flushUserInfo();
@@ -417,14 +425,15 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                             </Typography.Text>
                             ，而非使用平台开放 API 接口的权限。所有用户都可以使用平台开放的 API 接口。
                             <Typography.Text strong>
-                                一个平台使用者可以同时拥有多个权限，但暂不支持自主选择管理员权限
-                            </Typography.Text>。
+                                一个平台使用者可以同时拥有多个权限，此时会使用其中的最高权限
+                            </Typography.Text>
+                            。暂不支持自主选择管理员权限。
                         </Typography.Text>
                         <br/>
                         <br/>
                         <Checkbox value={AuthorityEnum.ROLE_USER} checked={authorityChecked.ROLE_USER}
                                   onChange={handleAuthorityCheckboxChange(AuthorityEnum.ROLE_USER)}>
-                            <Typography.Text strong>用户</Typography.Text>
+                            <Typography.Text strong><Typography.Text strong>用户</Typography.Text></Typography.Text>
                         </Checkbox>
                         <Typography.Text type={"secondary"}
                                          strong>能访问个人页面，并可进行用户可自主决定的操作。</Typography.Text>
@@ -506,7 +515,8 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                 />
 
                 {tipMessage}
-
+                <br/>
+                <br/>
                 <ProFormCaptcha
                     name="verificationCode"
                     fieldProps={{
@@ -623,7 +633,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
 
                     <Button size={"middle"} type="default"
                             onClick={() => {
-                                setTipMessage(newKeyTpiMessage);
+                                setTipMessage(newKeyTipMessage);
                                 setVerificationFinish(OnFinishTypeEnum.GET_NEW_API_KEY);
                                 handleCaptchaModalOpen(true);
                             }}>
@@ -663,7 +673,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
             </ProForm.Group>
 
             <br/>
-
+            {}
             <ProForm.Group title={"账户权限"} tooltip={"指用户账户在后台管理系统中具备的操作权限。"}/>
 
             <ProForm.Group align={"start"} size={"large"}>
@@ -671,7 +681,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                 <ProFormText tooltip="包括用户、测试、管理员。普通用户仅支持同时拥有用户和测试两种权限。"
                              label="权限">
                     <Typography.Text strong>
-                        用户
+                        {currentUser?.authoritySet?.map((authority: string | number) => (AuthorityDescriptionEnum as any)[authority]).join(', ')}
                     </Typography.Text>
                 </ProFormText>
 

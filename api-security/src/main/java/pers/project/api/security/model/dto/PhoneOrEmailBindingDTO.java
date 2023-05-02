@@ -6,16 +6,16 @@ import lombok.Data;
 import pers.project.api.common.validation.constraint.SnowflakeId;
 
 /**
- * 账户验证码检查 DTO
+ * 手机或电子邮件绑定 DTO
  *
  * @author Luo Fei
- * @date 2023/04/24
+ * @date 2023/05/02
  */
 @Data
-public class AccountVerificationCodeCheckDTO {
+public class PhoneOrEmailBindingDTO {
 
     /**
-     * 用户账户主键
+     * 账户主键
      */
     @SnowflakeId
     private String accountId;

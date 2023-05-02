@@ -2,9 +2,12 @@ package pers.project.api.security.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,6 +29,7 @@ import pers.project.api.security.service.UserAccountService;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.Set;
 
 import static pers.project.api.common.enumeration.ErrorEnum.*;
@@ -57,21 +61,25 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
 
     private final SecurityService securityService;
 
+    private final SessionRegistry sessionRegistry;
+
     private final TransactionTemplate transactionTemplate;
 
     @Override
-    public void createNewAccount(UserRegistryDTO userRegistryDTO) {
+    public void createNewAccount(UserAccountRegistryDTO userAccountRegistryDTO) {
         // 校验注册数据
-        validateUserRegistryDTO(userRegistryDTO);
+        VerificationStrategyEnum strategyEnum = validateUserRegistryDTO(userAccountRegistryDTO);
         // 保存用户账户
-        String encodedPassword = passwordEncoder.encode(userRegistryDTO.getPassword());
+        String encodedPassword = passwordEncoder.encode(userAccountRegistryDTO.getPassword());
         UserAccountPO userAccountPO = new UserAccountPO();
-        userAccountPO.setUsername(userRegistryDTO.getUsername());
+        userAccountPO.setUsername(userAccountRegistryDTO.getUsername());
         userAccountPO.setPassword(encodedPassword);
         // phoneNumber 和 email 有一个为 null
-        VerificationCodeCheckDTO codeCheckDTO = userRegistryDTO.getCodeCheckDTO();
-        userAccountPO.setPhoneNumber(codeCheckDTO.getPhoneNumber());
-        userAccountPO.setEmailAddress(codeCheckDTO.getEmailAddress());
+        VerificationCodeCheckDTO codeCheckDTO = userAccountRegistryDTO.getCodeCheckDTO();
+        switch (strategyEnum) {
+            case PHONE -> userAccountPO.setPhoneNumber(codeCheckDTO.getPhoneNumber());
+            case EMAIL -> userAccountPO.setEmailAddress(codeCheckDTO.getEmailAddress());
+        }
         // 默认为用户权限
         userAccountPO.setAuthority(AcountAuthorityEnum.ROLE_USER.name());
         // 编程式事务，与 @Transactional 一样具有默认的 propagation 和 isolation
@@ -152,25 +160,17 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     }
 
     @Override
-    public void updateApiKeyStatus(ApiKeyStatusDTO apiKeyStatusDTO) {
+    public void updateApiKeyStatus(ApiKeyStatusModificationDTO modificationDTO) {
         // 检查验证码是否合法
-        VerificationCodeCheckDTO codeCheckDTO = apiKeyStatusDTO.getCodeCheckDTO();
+        VerificationCodeCheckDTO codeCheckDTO = modificationDTO.getCodeCheckDTO();
         securityService.checkVerificationCode(codeCheckDTO, null);
-        // 检查密钥状态是否合法
-        AccountStatusEnum originalStatus
-                = AccountStatusEnum.valueOf(apiKeyStatusDTO.getOriginalStatus());
-        AccountStatusEnum targetStatus
-                = AccountStatusEnum.valueOf(apiKeyStatusDTO.getTargetStatus());
-        // 要修改的状态与原状态相同
-        if (originalStatus == targetStatus) {
-            // 前端已校验
-            throw new BusinessException(PARAM_ERROR, "参数错误，修改密钥状态失败");
-        }
         // 修改 API 密钥状态
+        AccountStatusEnum targetStatus
+                = AccountStatusEnum.valueOf(modificationDTO.getNewStatus());
         LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
         Integer targetStatusCode = targetStatus.statusCode();
         updateWrapper.set(UserAccountPO::getAccountStatus, targetStatusCode);
-        updateWrapper.eq(UserAccountPO::getId, apiKeyStatusDTO.getAccountId());
+        updateWrapper.eq(UserAccountPO::getId, modificationDTO.getAccountId());
         update(updateWrapper);
         // 更新 Session 中的账户状态
         CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
@@ -179,18 +179,9 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     }
 
     @Override
-    public void updateNonAdminAuthority(NonAdminAuthorityDTO authorityDTO) {
-        // 检查修改的状态是否合法
-        Set<String> originalAuthoritySet = authorityDTO.getOriginalAuthoritySet();
-        Set<String> targetAuthoritySet = authorityDTO.getTargetAuthoritySet();
-        // 要修改的权限和原权限相同
-        boolean isSameAuthority = (originalAuthoritySet.size() == targetAuthoritySet.size())
-                                  && originalAuthoritySet.containsAll(targetAuthoritySet);
-        if (isSameAuthority) {
-            // 前端已校验
-            throw new BusinessException(PARAM_ERROR, "参数错误，修改权限失败");
-        }
+    public void updateNonAdminAuthority(NonAdminAuthorityModificationDTO authorityDTO) {
         // 不同权限以 , 分隔后存储于 authority 列中
+        Set<String> targetAuthoritySet = authorityDTO.getNewAuthoritySet();
         String newAuthority = StringUtils.collectionToCommaDelimitedString(targetAuthoritySet);
         LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(UserAccountPO::getAuthority, newAuthority);
@@ -202,30 +193,178 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         userDetailsService.updateLoginUserDetails(userDetails);
     }
 
+    @Override
+    public void updateUsername(UsernameModificationDTO modificationDTO) {
+        // 检查验证码是否合法
+        VerificationCodeCheckDTO codeCheckDTO = modificationDTO.getCodeCheckDTO();
+        securityService.checkVerificationCode(codeCheckDTO, null);
+        // 检查用户名是否重复
+        String newUsername = modificationDTO.getNewUsername();
+        throwExceptionIfUsernameDuplicate(newUsername);
+        // 修改用户名
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getUsername, newUsername);
+        updateWrapper.eq(UserAccountPO::getId, modificationDTO.getAccountId());
+        try {
+            update(updateWrapper);
+        } catch (Exception e) {
+            // 罕见的情况，比如用户名重复
+            log.warn("""
+                    Update username failed, accountId: %s, newUsername: %s
+                    """.formatted(modificationDTO.getAccountId(), newUsername), e);
+            throw new BusinessException(DATABASE_ERROR, "修改用户名失败，请稍后再试");
+        }
+        // 更新 Session 中的用户名
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setUsername(newUsername);
+        userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
+    @Override
+    public void updateUsernameAndPassword(UsernameAndPasswordSettingDTO settingDTO) {
+        // 检查验证码是否合法
+        VerificationCodeCheckDTO codeCheckDTO = settingDTO.getCodeCheckDTO();
+        securityService.checkVerificationCode(codeCheckDTO, null);
+        // 检查用户名是否重复
+        String newUsername = settingDTO.getNewUsername();
+        throwExceptionIfUsernameDuplicate(newUsername);
+        // 修改用户名和密码
+        String encodedNewPassword = passwordEncoder.encode(settingDTO.getNewPassword());
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getUsername, newUsername);
+        updateWrapper.set(UserAccountPO::getPassword, encodedNewPassword);
+        updateWrapper.eq(UserAccountPO::getId, settingDTO.getAccountId());
+        try {
+            update(updateWrapper);
+        } catch (Exception e) {
+            // 罕见的情况，比如用户名重复
+            log.warn("""
+                    Update username and password failed, accountId: %s, newUsername: %s
+                    """.formatted(settingDTO.getAccountId(), newUsername), e);
+            throw new BusinessException(DATABASE_ERROR, "设置用户名和密码失败，请稍后再试");
+        }
+        // 更新 Session 中的用户名和密码
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setUsername(newUsername);
+        userDetails.setPassword(encodedNewPassword);
+        userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
+    @Override
+    public void updatePassword(PasswordModificationDTO modificationDTO) {
+        VerificationCodeCheckDTO codeCheckDTO = modificationDTO.getCodeCheckDTO();
+        if (codeCheckDTO != null) {
+            // 检查验证码是否合法
+            securityService.checkVerificationCode(codeCheckDTO, null);
+        } else {
+            // 检查原密码是否正确
+            CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+            if (!passwordEncoder.matches
+                    (modificationDTO.getOriginalPassword(), userDetails.getPassword())) {
+                throw new BusinessException(PASSWORD_ERROR, "密码错误");
+            }
+        }
+        // 修改密码
+        String encodedNewPassword = passwordEncoder.encode(modificationDTO.getNewPassword());
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserAccountPO::getPassword, encodedNewPassword);
+        updateWrapper.eq(UserAccountPO::getId, modificationDTO.getAccountId());
+        update(updateWrapper);
+        // 更新 Session 中的密码
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        userDetails.setPassword(encodedNewPassword);
+        userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
+    @Override
+    public void removeAccount(AccountVerificationCodeCheckDTO accountCodeCheckDTO) {
+        VerificationCodeCheckDTO codeCheckDTO = accountCodeCheckDTO.getCodeCheckDTO();
+        String accountId = accountCodeCheckDTO.getAccountId();
+        if (codeCheckDTO != null) {
+            // 检查验证码是否合法
+            securityService.checkVerificationCode(codeCheckDTO, null);
+        }
+        // 逻辑删除账户
+        removeById(accountId);
+        // 下线当前用户
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        List<SessionInformation> sessions = sessionRegistry.getAllSessions(userDetails, false);
+        for (SessionInformation session : sessions) {
+            session.expireNow();
+        }
+    }
+
+    @Override
+    public void savePhoneNumberOrEmailAddress(AccountVerificationCodeCheckDTO accountCodeCheckDTO) {
+        // 检查验证码是否合法
+        VerificationCodeCheckDTO codeCheckDTO = accountCodeCheckDTO.getCodeCheckDTO();
+        VerificationStrategyEnum strategyEnum = securityService.checkVerificationCode(codeCheckDTO, null);
+        // 根据绑定的内容修改数据
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        SFunction<UserAccountPO, String> getter;
+        String fieldValue;
+        switch (strategyEnum) {
+            case PHONE -> {
+                getter = UserAccountPO::getPhoneNumber;
+                fieldValue = codeCheckDTO.getPhoneNumber();
+                userDetails.setPhoneNumber(fieldValue);
+            }
+            case EMAIL -> {
+                getter = UserAccountPO::getEmailAddress;
+                fieldValue = codeCheckDTO.getEmailAddress();
+                userDetails.setEmailAddress(fieldValue);
+            }
+            default -> throw new IllegalStateException("Should never get here");
+        }
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(getter, fieldValue);
+        updateWrapper.eq(UserAccountPO::getId, accountCodeCheckDTO.getAccountId());
+        update(updateWrapper);
+        // 更新 Session 中的手机号或邮箱地址
+        userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
+    @Override
+    public void removePhoneNumberOrEmailAddress(AccountVerificationCodeCheckDTO accountCodeCheckDTO) {
+        // 检查验证码是否合法
+        VerificationCodeCheckDTO codeCheckDTO = accountCodeCheckDTO.getCodeCheckDTO();
+        VerificationStrategyEnum strategyEnum = securityService.checkVerificationCode(codeCheckDTO, null);
+        // 根据绑定的内容修改数据
+        CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
+        SFunction<UserAccountPO, String> getter;
+        switch (strategyEnum) {
+            case PHONE -> {
+                getter = UserAccountPO::getPhoneNumber;
+                userDetails.setPhoneNumber(null);
+            }
+            case EMAIL -> {
+                getter = UserAccountPO::getEmailAddress;
+                userDetails.setEmailAddress(null);
+            }
+            default -> throw new IllegalStateException("Should never get here");
+        }
+        LambdaUpdateWrapper<UserAccountPO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(getter, null);
+        updateWrapper.eq(UserAccountPO::getId, accountCodeCheckDTO.getAccountId());
+        update(updateWrapper);
+        // 更新 Session 中的手机号或邮箱地址
+        userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
     /**
      * 验证用户注册 DTO
      *
-     * @param userRegistryDTO 用户注册 DTO
-     * @throws BusinessException 校验失败
+     * @param userAccountRegistryDTO 用户注册 DTO
+     * @return 验证策略枚举（帮助基于策略的程序）
+     * @throws BusinessException 业务异常（带有提示信息）
      */
-    private void validateUserRegistryDTO(UserRegistryDTO userRegistryDTO) {
-        // 确认密码一致
-        boolean isConfirmed = userRegistryDTO.getPassword()
-                .equals(userRegistryDTO.getConfirmedPassword());
-        if (!isConfirmed) {
-            throw new BusinessException(REGISTRY_ERROR, "你输入的两个密码不一致");
-        }
+    private VerificationStrategyEnum validateUserRegistryDTO(UserAccountRegistryDTO userAccountRegistryDTO) {
         // 检查验证码
-        VerificationCodeCheckDTO codeCheckDTO = userRegistryDTO.getCodeCheckDTO();
+        VerificationCodeCheckDTO codeCheckDTO = userAccountRegistryDTO.getCodeCheckDTO();
         VerificationStrategyEnum strategyEnum
                 = securityService.checkVerificationCode(codeCheckDTO, null);
         // 检查账户名是否重复
-        boolean usernameExists = lambdaQuery()
-                .eq(UserAccountPO::getUsername, userRegistryDTO.getUsername())
-                .exists();
-        if (usernameExists) {
-            throw new BusinessException(REGISTRY_ERROR, "账户名已存在");
-        }
+        throwExceptionIfUsernameDuplicate(userAccountRegistryDTO.getUsername());
         // 检查邮箱或手机号是否已被使用
         boolean isUsingPhone = PHONE.equals(strategyEnum);
         boolean phoneOrEmailExists = isUsingPhone ?
@@ -234,6 +373,22 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         if (phoneOrEmailExists) {
             String argument = isUsingPhone ? "手机号" : "邮箱";
             throw new BusinessException(REGISTRY_ERROR, "%s 已被使用".formatted(argument));
+        }
+        return strategyEnum;
+    }
+
+    /**
+     * 如果用户名已经存在，则抛出 {@code BusinessException}。
+     *
+     * @param username 要检查是否已经存在中的用户名
+     * @throws BusinessException 如果用户名已经存在
+     */
+    private void throwExceptionIfUsernameDuplicate(String username) {
+        boolean usernameExists = lambdaQuery()
+                .eq(UserAccountPO::getUsername, username)
+                .exists();
+        if (usernameExists) {
+            throw new BusinessException(REGISTRY_ERROR, "账户名已存在");
         }
     }
 

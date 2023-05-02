@@ -43,7 +43,6 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
             await register({
                 username: fields.username,
                 password: fields.password,
-                confirmedPassword: fields.confirmedPassword,
                 codeCheckDTO: {
                     emailAddress: isUsingEmail ? fields.email : undefined,
                     phoneNumber: !isUsingEmail ? phoneOption + fields.mobile : undefined,

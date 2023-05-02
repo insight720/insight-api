@@ -74,7 +74,12 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         String codeKey = keyPrefix + contextInfo;
         String redisVerificationCode = (String) valueOperations.get(codeKey);
-        return userVerificationCode.equals(redisVerificationCode);
+        boolean isValid = userVerificationCode.equals(redisVerificationCode);
+        // 验证成功后立刻删除 Redis 存储的验证码
+        if (isValid) {
+            redisTemplate.delete(codeKey);
+        }
+        return isValid;
     }
 
 }
