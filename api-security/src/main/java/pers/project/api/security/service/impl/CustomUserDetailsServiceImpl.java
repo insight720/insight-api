@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.dto.LoginUserDTO;
 import pers.project.api.common.model.security.CustomUserDetails;
-import pers.project.api.common.util.bean.BeanCopierUtils;
+import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.validation.validator.SensitiveWordValidator;
 import pers.project.api.security.authentication.VerificationCodeAuthenticationToken;
 import pers.project.api.security.enumeration.AccountStatusEnum;

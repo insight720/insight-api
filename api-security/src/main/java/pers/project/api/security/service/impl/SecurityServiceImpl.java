@@ -1,6 +1,7 @@
 package pers.project.api.security.service.impl;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
@@ -8,8 +9,15 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import pers.project.api.common.exception.BusinessException;
+import pers.project.api.common.model.Result;
+import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.UserApiDigestPageQuery;
+import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
+import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
+import pers.project.api.security.feign.FacadeFeignClient;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.service.SecurityService;
@@ -38,6 +46,8 @@ public class SecurityServiceImpl implements SecurityService {
     private static final String DEFAULT_CSRF_PARAMETER_NAME = "_csrf";
 
     private final VerificationContext verificationContext;
+
+    private final FacadeFeignClient facadeFeignClient;
 
     @Override
     public void loadDeferredCsrfToken(HttpServletRequest request) {
@@ -106,6 +116,26 @@ public class SecurityServiceImpl implements SecurityService {
             throw supplierForInvalidCode.get();
         }
         return strategyEnum;
+    }
+
+    @Override
+    public UserApiDigestPageVO getUserApiDigestPageVO(UserApiDigestPageQuery pageQuery) {
+        Result<UserApiDigestPageVO> pageResult
+                = facadeFeignClient.getUserApiDigestPageResult(pageQuery);
+        if (ResultUtils.isFailure(pageResult)) {
+            throw new BusinessException(SERVER_ERROR, "Feign 调用失败");
+        }
+        return pageResult.getData();
+    }
+
+    @Override
+    public UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(@Valid UserApiFormatAndQuantityUsageQuery query) {
+        Result<UserApiFormatAndQuantityUsageVO> formatAndQuantityUsageResult
+                = facadeFeignClient.userApiFormatAndQuantityUsageResult(query);
+        if (ResultUtils.isFailure(formatAndQuantityUsageResult)) {
+            throw new BusinessException(SERVER_ERROR, "Feign 调用失败");
+        }
+        return formatAndQuantityUsageResult.getData();
     }
 
     /**

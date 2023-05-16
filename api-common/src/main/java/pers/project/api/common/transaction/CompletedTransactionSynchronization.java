@@ -1,6 +1,7 @@
-package pers.project.api.common.util.transaction;
+package pers.project.api.common.transaction;
 
 import org.springframework.transaction.support.TransactionSynchronization;
+import pers.project.api.common.util.TransactionUtils;
 
 /**
  * 完成后事务同步

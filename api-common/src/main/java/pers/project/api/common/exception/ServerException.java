@@ -16,13 +16,13 @@ public class ServerException extends RuntimeException {
     private final String code;
 
     public ServerException(ErrorEnum errorEnum) {
-        super(errorEnum.getMessage());
-        this.code = errorEnum.getCode();
+        super(errorEnum.message());
+        this.code = errorEnum.code();
     }
 
     public ServerException(ErrorEnum errorEnum, String message) {
         super(message);
-        this.code = errorEnum.getCode();
+        this.code = errorEnum.code();
     }
 
 }

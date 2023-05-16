@@ -73,6 +73,12 @@ export default [
         icon: 'smile',
         component: './Welcome',
     },
+    // {
+    //     path: '/welcome',
+    //     name: '可用接口',
+    //     icon: 'smile',
+    //     component: './Welcome',
+    // },
     // 错误页
     {
         path: '*',
@@ -107,17 +113,15 @@ export default [
             {
                 name: '我的接口',
                 icon: 'table',
-                path: '/user/api_info',
-                component: './User/ApiInfo',
+                path: '/user/api/digest',
+                component: './User/MyApi',
             },
-            {
-                name: '查看接口',
-                icon: 'simple',
-                // 参数 id
-                path: '/user/api_info/:id',
-                component: './User/Api',
-                hideInMenu: true
-            },
+            // {
+            //     name: '我的订单',
+            //     icon: 'table',
+            //     path: '/user/order',
+            //     component: './User/MyOrder',
+            // },
         ],
     },
     // 管理员页面
@@ -136,18 +140,24 @@ export default [
                 name: 'sub-page',
                 component: './Admin',
             },
-            {
-                name: '接口管理',
-                icon: 'table',
-                path: '/admin/api_info',
-                component: './Admin/ApiInfo',
-            },
+            // {
+            //     name: '接口管理',
+            //     icon: 'table',
+            //     path: '/admin/api_analysis',
+            //     component: './Admin/ApiAnalysis',
+            // },
             {
                 name: '接口分析',
                 icon: 'table',
                 path: '/admin/api_analysis',
                 component: './Admin/ApiAnalysis',
             },
+            // {
+            //     name: '用户管理',
+            //     icon: 'table',
+            //     path: '/admin/api_analysis',
+            //     component: './Admin/ApiAnalysis',
+            // },
         ],
     },
 ];

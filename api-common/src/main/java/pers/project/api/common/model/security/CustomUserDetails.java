@@ -43,7 +43,7 @@ public class CustomUserDetails implements UserDetails {
      */
     Set<String> authoritySet;
 
-    // region Same with UserAccount
+    // region Same with UserAccountPO
     /**
      * 账号
      */
@@ -73,7 +73,7 @@ public class CustomUserDetails implements UserDetails {
      */
     private String profileId;
 
-    // region Same with UserProfile
+    // region Same with UserProfilePO
     /**
      * 账户主键
      */

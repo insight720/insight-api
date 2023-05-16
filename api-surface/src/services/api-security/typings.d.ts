@@ -54,6 +54,18 @@ declare namespace API {
     data?: string;
   };
 
+  type ResultUserApiDigestPageVO = {
+    code?: string;
+    message?: string;
+    data?: UserApiDigestPageVO;
+  };
+
+  type ResultUserApiFormatAndQuantityUsageVO = {
+    code?: string;
+    message?: string;
+    data?: UserApiFormatAndQuantityUsageVO;
+  };
+
   type ResultVoid = {
     code?: string;
     message?: string;
@@ -64,6 +76,52 @@ declare namespace API {
     username: string;
     password: string;
     codeCheckDTO: VerificationCodeCheckDTO;
+  };
+
+  type UserApiDigestPageQuery = {
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    method?: number[];
+    url?: string;
+    apiStatus?: number[];
+    createTime?: string[];
+    updateTime?: string[];
+    size?: number;
+    current?: number;
+  };
+
+  type UserApiDigestPageVO = {
+    total?: number;
+    digestVOList?: UserApiDigestVO[];
+  };
+
+  type UserApiDigestVO = {
+    digestId?: string;
+    apiName?: string;
+    description?: string;
+    method?: number;
+    url?: string;
+    apiStatus?: number;
+    createTime?: string;
+    updateTime?: string;
+  };
+
+  type UserApiFormatAndQuantityUsageQuery = {
+    accountId?: string;
+    digestId?: string;
+  };
+
+  type UserApiFormatAndQuantityUsageVO = {
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    total?: number;
+    failure?: number;
+    stock?: number;
+    usageStatus?: number;
   };
 
   type UsernameAndPasswordSettingDTO = {

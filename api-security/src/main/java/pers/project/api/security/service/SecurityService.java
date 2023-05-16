@@ -3,6 +3,10 @@ package pers.project.api.security.service;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import pers.project.api.common.exception.BusinessException;
+import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.UserApiDigestPageQuery;
+import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.security.authentication.VerificaionCodeAuthenticationProvider;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
@@ -62,5 +66,22 @@ public interface SecurityService {
      */
     VerificationStrategyEnum checkVerificationCode(VerificationCodeCheckDTO codeCheckDTO,
                                                    Supplier<BusinessException> supplierForInvalidCode);
+
+    /**
+     * 基于提供的 {@code UserApiDigestPageQuery}，返回一个 {@code UserApiDigestPageVO} 对象。
+     *
+     * @param pageQuery 用户 API 摘要分页 Query
+     * @return 用户 API 摘要页面 DTO
+     */
+    UserApiDigestPageVO getUserApiDigestPageVO(UserApiDigestPageQuery pageQuery);
+
+    /**
+     * 基于提供的 {@code query}，返回一个 {@code UserApiFormatAndQuantityUsageVO} 对象，
+     * 该对象包含了对应 API 的格式和计数用法的使用情况信息。
+     *
+     * @param query 账户主键和 API 摘要主键 Query
+     * @return 用户 API 格式和计数用法 VO
+     */
+    UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(UserApiFormatAndQuantityUsageQuery query);
 
 }

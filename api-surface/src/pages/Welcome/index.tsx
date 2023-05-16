@@ -8,7 +8,7 @@ import React from 'react';
  * @param param0
  * @returns
  */
-const InfoCard: React.FC<{
+export const InfoCard: React.FC<{
     title: string;
     index: number;
     desc: string;

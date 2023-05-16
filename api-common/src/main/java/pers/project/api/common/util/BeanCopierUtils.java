@@ -1,10 +1,11 @@
-package pers.project.api.common.util.bean;
+package pers.project.api.common.util;
 
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.cglib.core.Converter;
+import pers.project.api.common.bean.IgnoreNullConverter;
 
 
 /**

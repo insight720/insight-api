@@ -4,7 +4,7 @@ import {LinkOutlined} from '@ant-design/icons';
 import type {Settings as LayoutSettings} from '@ant-design/pro-components';
 import {SettingDrawer} from '@ant-design/pro-components';
 import type {RunTimeLayoutConfig} from '@umijs/max';
-import {history, Link} from '@umijs/max';
+import {history} from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import {requestConfig} from './requestConfig';
 import React from 'react';
@@ -13,6 +13,7 @@ import {InitialState} from "@/typings";
 import {message} from "antd";
 import {getCsrfToken} from "@/services/api-security/securityController";
 import {getLoginUserInfo} from "@/services/api-security/userDetailsController";
+import {Link} from "umi";
 
 
 /**

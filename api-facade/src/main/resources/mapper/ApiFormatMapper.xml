@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.project.api.facade.mapper.ApiFormatMapper">
 
-    <resultMap id="BaseResultMap" type="pers.project.api.facade.model.entity.ApiFormat">
+    <resultMap id="BaseResultMap" type="pers.project.api.facade.model.po.ApiFormatPo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="digestId" column="digest_id" jdbcType="BIGINT"/>
             <result property="requestParam" column="request_param" jdbcType="VARCHAR"/>

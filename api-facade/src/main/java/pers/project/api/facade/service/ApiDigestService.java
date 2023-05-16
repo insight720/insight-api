@@ -1,14 +1,14 @@
 package pers.project.api.facade.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import pers.project.api.facade.model.entity.ApiDigest;
+import pers.project.api.facade.model.po.ApiDigestPo;
 
 /**
  * 针对表【api_digest (接口摘要) 】的数据库操作 Service
  *
  * @author Luo Fei
- * @date 2023/03/20
+ * @date 2023/05/04
  */
-public interface ApiDigestService extends IService<ApiDigest> {
+public interface ApiDigestService extends IService<ApiDigestPo> {
 
 }

@@ -15,13 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * FastJson 自动配置类
@@ -49,14 +47,16 @@ public class FastJsonAutoConfig {
         @Resource
         private FastJsonConfig fastJsonConfig;
 
-        @Override
-        public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        @Bean
+        @Order(Ordered.HIGHEST_PRECEDENCE)
+        @ConditionalOnMissingBean
+        public FastJsonHttpMessageConverter fastJsonHttpMessageConverter() {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
             converter.setDefaultCharset(StandardCharsets.UTF_8);
             converter.setSupportedMediaTypes
                     (Collections.singletonList(MediaType.APPLICATION_JSON));
             converter.setFastJsonConfig(fastJsonConfig);
-            converters.add(0, converter);
+            return converter;
         }
 
         @Override

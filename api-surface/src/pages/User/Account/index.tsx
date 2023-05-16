@@ -60,13 +60,13 @@ const UserAccount: React.FC = () => {
                 onTabChange={(key) => setTabType(key)}
             >
                 {
-                    tabType == 'authorization'
+                    tabType === 'authorization'
                     && <AccountAuthorizationCard currentUser={currentUser}
                                                  setInitialState={setInitialState}
                                                  fetchUserInfo={fetchUserInfo}/>
                 }
                 {
-                    tabType == 'authentication'
+                    tabType === 'authentication'
                     && <AccountAuthenticationCard currentUser={currentUser}
                                                   setInitialState={setInitialState}
                                                   fetchUserInfo={fetchUserInfo}/>

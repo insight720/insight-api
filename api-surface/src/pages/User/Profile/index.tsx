@@ -58,13 +58,13 @@ const UserProfile: React.FC = () => {
                 onTabChange={(key) => setTabType(key)}
             >
                 {
-                    tabType == 'setting' &&
+                    tabType === 'setting' &&
                     <ProfileSettingCard currentUser={currentUser}
                                         fetchUserInfo={fetchUserInfo}
                                         setInitialState={setInitialState}/>
                 }
                 {
-                    tabType == 'description' &&
+                    tabType === 'description' &&
                     <ProfileDescriptionCard currentUser={currentUser}/>
                 }
             </PageContainer>

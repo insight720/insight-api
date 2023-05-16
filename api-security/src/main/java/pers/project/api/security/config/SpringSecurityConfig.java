@@ -239,7 +239,7 @@ public class SpringSecurityConfig {
                     antMatcher(GET, "/csrf/token"),
                     antMatcher(POST, "/account/registry"),
                     antMatcher(POST, "/verification/code"),
-                    antMatcher("/test")
+                    antMatcher("/test"),
             };
             // 配置请求授权
             http.authorizeHttpRequests()

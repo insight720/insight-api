@@ -35,6 +35,12 @@
         <dependency>
             <groupId>pers.project.api</groupId>
             <artifactId>api-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-webflux</artifactId>
+                </exclusion>
+            </exclusions>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

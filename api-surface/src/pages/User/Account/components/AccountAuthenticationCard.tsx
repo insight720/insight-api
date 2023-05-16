@@ -44,27 +44,29 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const {setInitialState} = props;
 
         // 验证码模态框开关
-        const [captchaModalOpen, handleCaptchaModalOpen] = useState<boolean>(false);
+        const [captchaModalOpen, handleCaptchaModalOpen]
+            = useState<boolean>(false);
 
         // 提示消息（用于身份验证模态框）
-        const [tipMessage, setTipMessage] = useState<React.ReactNode>();
+        const [tipMessage, setTipMessage]
+            = useState<React.ReactNode>();
 
         // 国际化
         const locale = useIntl();
 
         // 表单数据
-        const [form] = Form.useForm<{ name: string; company: string }>();
+        const [form]
+            = Form.useForm<{ name: string; company: string }>();
 
         // 验证模态框调用的函数
         const [verificationFinish, setVerificationFinish]
             = useState<OnFinishTypeEnum>();
 
         // 手机号前缀选项（如 +86）
-        const [phoneOption, setPhoneOption] = useState<string>("+86")
+        const [phoneOption, setPhoneOption]
+            = useState<string>("+86")
 
-        /**
-         * 有密码的验证码模态框选项卡选项
-         */
+        // 有密码的验证码模态框选项卡选项
         const passwordItems = [
             {
                 key: 'PASSWORD',
@@ -89,9 +91,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
             },
         ];
 
-        /**
-         * 没有密码的验证码模态框选项卡选项
-         */
+        // 没有密码的验证码模态框选项卡选项
         const nonPasswordItems = [
             {
                 key: "PHONE",
@@ -109,9 +109,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
             },
         ];
 
-        /**
-         * 只有邮箱的验证码模态框选项卡选项
-         */
+        // 只有邮箱的验证码模态框选项卡选项
         const emailItems = [
             {
                 key: "EMAIL",
@@ -122,9 +120,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
             },
         ];
 
-        /**
-         * 只有手机的验证码模态框选项卡选项
-         */
+        // 只有手机的验证码模态框选项卡选项
         const phoneItems = [
             {
                 key: "PHONE",
@@ -135,9 +131,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
             },
         ];
 
-        /**
-         * 无需验证的验证码模态框选项卡选项
-         */
+        // 无需验证的验证码模态框选项卡选项
         const noItems = [
             {
                 key: "NO",
@@ -151,24 +145,6 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         // 验证模态框的选项卡选项
         const [verificationTabItems, setVerificationTabItems]
             = useState<{ key: string; label: string; }[]>();
-
-        /**
-         * 验证码模态框 onFinish 的类型
-         */
-        enum OnFinishTypeEnum {
-            // 修改用户名
-            MODIFY_USERNAME = 1,
-            // 设置用户名和密码
-            SET_USERNAME_AND_PASSWORD = 2,
-            // 修改用户名密码
-            MODIFY_PASSWORD = 3,
-            // 删除账户
-            DELETE_ACCOUNT = 4,
-            // 绑定手机或邮箱
-            BIND_PHONE_OR_EMAIL_ON_FINISH = 5,
-            // 解绑手机或邮箱
-            UNBIND_PHONE_OR_EMAIL_ON_FINISH = 6
-        }
 
         // 身份验证策略
         const [authStrategy, setAuthStrategy]
@@ -198,7 +174,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         function determineAuthStrategy() {
             const phoneNumber = currentUser?.phoneNumber;
             const emailAddress = currentUser?.emailAddress;
-            const isUsingPhone = (authStrategy == "PHONE");
+            const isUsingPhone = (authStrategy === "PHONE");
             if (isUsingPhone && !phoneNumber) {
                 message.error("你没有绑定手机号")
                 return null;
@@ -330,13 +306,13 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const modifyUsernameOnFinish = async (values: any) => {
             // 检查用户是否绑定信息
             const isUsingPhone = determineAuthStrategy();
-            if (isUsingPhone == null) {
+            if (isUsingPhone === null) {
                 return false;
             }
             // 检查要修改的账户名是否与原账户名相同
             const originalUsername = currentUser?.username;
             const newUsername = values.newUsername;
-            if (originalUsername == newUsername) {
+            if (originalUsername === newUsername) {
                 message.error("修改的账户名与原账户名相同");
                 return false;
             }
@@ -370,7 +346,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const setUsernameAndPasswordOnFinish = async (values: any) => {
             // 检查用户是否绑定信息
             const isUsingPhone = determineAuthStrategy();
-            if (isUsingPhone == null) {
+            if (isUsingPhone === null) {
                 return false;
             }
             const originalUsername = currentUser?.username;
@@ -410,13 +386,13 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const modifyPasswordOnFinish = async (values: any) => {
             // @ts-ignored
             const modificationDTO: API.PasswordModificationDTO = {};
-            if (authStrategy == "PASSWORD") {
+            if (authStrategy === "PASSWORD") {
                 // 设置原来的密码
                 modificationDTO.originalPassword = values.originalPassword;
             } else {
                 // 检查用户是否绑定信息
                 const isUsingPhone = determineAuthStrategy();
-                if (isUsingPhone == null) {
+                if (isUsingPhone === null) {
                     return false;
                 }
                 // 设置验证码信息
@@ -450,10 +426,10 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const deleteAccountOnFinish = async (values: any) => {
             // @ts-ignored
             const accountCodeCheckDTO: API.AccountVerificationCodeCheckDTO = {};
-            if (authStrategy != "NO") {
+            if (authStrategy !== "NO") {
                 // 检查用户是否绑定信息
                 const isUsingPhone = determineAuthStrategy();
-                if (isUsingPhone == null) {
+                if (isUsingPhone === null) {
                     return false;
                 }
                 accountCodeCheckDTO.codeCheckDTO = {
@@ -487,7 +463,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
          * 绑定手机或邮箱的提交函数
          */
         const bindPhoneOrEmailOnFinish = async (values: any) => {
-            const isUsingPhone = (authStrategy == "PHONE");
+            const isUsingPhone = (authStrategy === "PHONE");
             if (isUsingPhone && currentUser?.phoneNumber) {
                 message.error("系统错误，你已绑定手机号");
                 return false;
@@ -525,7 +501,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const unbindPhoneOrEmailOnFinish = async (values: any) => {
             // 检查用户是否绑定信息
             const isUsingPhone = determineAuthStrategy();
-            if (isUsingPhone == null) {
+            if (isUsingPhone === null) {
                 return false;
             }
             if (isUsingPhone && !currentUser?.emailAddress) {
@@ -566,7 +542,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const defaultOnGetCaptcha = async () => {
             // 检查用户是否绑定信息
             const isUsingPhone = determineAuthStrategy();
-            if (isUsingPhone == null) {
+            if (isUsingPhone === null) {
                 throw new Error();
             }
             try {
@@ -588,7 +564,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
          */
         const bindPhoneOrEmailOnGetCaptcha = async () => {
             // 绑定邮箱或手机
-            const isUsingPhone = (authStrategy == "PHONE");
+            const isUsingPhone = (authStrategy === "PHONE");
             if (isUsingPhone && currentUser?.phoneNumber) {
                 message.error("系统错误，你已绑定手机号");
                 throw new Error();
@@ -616,7 +592,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
         const unbindPhoneOrEmailOnGetCaptcha = async () => {
             // 检查用户是否绑定信息
             const isUsingPhone = determineAuthStrategy();
-            if (isUsingPhone == null) {
+            if (isUsingPhone === null) {
                 throw new Error();
             }
             if (isUsingPhone && !currentUser?.emailAddress) {
@@ -640,6 +616,24 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                 throw error;
             }
         };
+
+        /**
+         * 验证码模态框 onFinish 的类型
+         */
+        enum OnFinishTypeEnum {
+            // 修改用户名
+            MODIFY_USERNAME = 1,
+            // 设置用户名和密码
+            SET_USERNAME_AND_PASSWORD = 2,
+            // 修改用户名密码
+            MODIFY_PASSWORD = 3,
+            // 删除账户
+            DELETE_ACCOUNT = 4,
+            // 绑定手机或邮箱
+            BIND_PHONE_OR_EMAIL_ON_FINISH = 5,
+            // 解绑手机或邮箱
+            UNBIND_PHONE_OR_EMAIL_ON_FINISH = 6
+        }
 
         return (
             <><ModalForm<{
@@ -686,8 +680,9 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                 {tipMessage}
                 <br/>
                 <br/>
-                {(verificationFinish == OnFinishTypeEnum.MODIFY_USERNAME
-                        || verificationFinish == OnFinishTypeEnum.SET_USERNAME_AND_PASSWORD) &&
+
+                {(verificationFinish === OnFinishTypeEnum.MODIFY_USERNAME
+                        || verificationFinish === OnFinishTypeEnum.SET_USERNAME_AND_PASSWORD) &&
                     <ProFormText
                         name="newUsername"
                         label={locale.formatMessage({
@@ -716,7 +711,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                     />
                 }
 
-                {authStrategy == "PHONE" && verificationFinish == OnFinishTypeEnum.BIND_PHONE_OR_EMAIL_ON_FINISH
+                {authStrategy === "PHONE" && verificationFinish === OnFinishTypeEnum.BIND_PHONE_OR_EMAIL_ON_FINISH
                     && <ProFormText
                         width={374}
                         addonBefore={
@@ -763,7 +758,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                         ]}
                     />}
 
-                {authStrategy == "EMAIL" && verificationFinish == OnFinishTypeEnum.BIND_PHONE_OR_EMAIL_ON_FINISH
+                {authStrategy === "EMAIL" && verificationFinish === OnFinishTypeEnum.BIND_PHONE_OR_EMAIL_ON_FINISH
                     && <ProFormText
                         fieldProps={{
                             size: 'large',
@@ -800,7 +795,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                         ]}
                     />}
 
-                {authStrategy == "PASSWORD" &&
+                {authStrategy === "PASSWORD" &&
                     <ProFormText.Password
                         name="originalPassword"
                         label={locale.formatMessage({
@@ -833,8 +828,10 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                         ]}
                     />
                 }
-                {(verificationFinish == OnFinishTypeEnum.MODIFY_PASSWORD || verificationFinish == OnFinishTypeEnum.SET_USERNAME_AND_PASSWORD) &&
-                    <ProFormText.Password
+
+                {(verificationFinish === OnFinishTypeEnum.MODIFY_PASSWORD
+                        || verificationFinish === OnFinishTypeEnum.SET_USERNAME_AND_PASSWORD)
+                    && <ProFormText.Password
                         name="newPassword"
                         label={locale.formatMessage({
                             id: 'new password',
@@ -867,7 +864,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                     />
                 }
 
-                {authStrategy != "PASSWORD" && authStrategy != "NO" &&
+                {authStrategy !== "PASSWORD" && authStrategy !== "NO" &&
                     <ProFormCaptcha
                         name="verificationCode"
                         fieldProps={{
@@ -942,6 +939,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                                 {currentUser?.username || "你还没有账户名，可点击设置账户名"}
                             </Typography.Text>
                         </ProFormText>
+
                         {currentUser?.username
                             && <Button size={"middle"} type="default"
                                        onClick={async () => {
@@ -953,6 +951,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                                        }}>
                                 修改账户名
                             </Button>}
+
                         {!currentUser?.username
                             && <Button size={"middle"} type="default"
                                        onClick={async () => {
@@ -967,6 +966,7 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                     </Space>
 
                     <ProFormText label={"其他设置"} tooltip={"在此处可以修改其他的账户设置信息。"}>
+
                         <Space align={"center"} size={"large"}>
                             {currentUser?.username &&
                                 <Button size={"middle"} type="default"
@@ -1048,8 +1048,8 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                                            onClick={async () => {
                                                setAuthStrategy("EMAIL");
                                                setVerificationTabItems(emailItems);
-                                               setTipMessage(bindEmailAddressTipMessage)
-                                               setVerificationFinish(OnFinishTypeEnum.BIND_PHONE_OR_EMAIL_ON_FINISH);
+                                               setTipMessage(unbindEmailAddressTipMessage)
+                                               setVerificationFinish(OnFinishTypeEnum.UNBIND_PHONE_OR_EMAIL_ON_FINISH);
                                                handleCaptchaModalOpen(true);
                                            }}>
                                     解绑邮箱
@@ -1070,22 +1070,30 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
 
 
                     <ProForm.Group size={"large"} title={"第三方登录"} align={"baseline"}
-                                   tooltip={"其他信息"}>
-                        <ProFormText>QQ</ProFormText>
+                                   tooltip={"第三方登录是指用户可以通过使用其已有的第三方账号（如 QQ、WeChat 等）直接登录到本网站，" +
+                                       "而无需再次注册。这种方式可以减少用户注册流程的繁琐性和时间成本，给用户带来更好的使用体验。"}>
                         <Space size={"large"} align={"center"}>
-                            <Button size={"middle"} type="default" disabled={true}>修改</Button>
-                            <Button size={"middle"} type="default">绑定</Button>
+                            <Typography.Text>
+                                QQ：
+                                <Typography.Text strong>
+                                    {true ? "已绑定" : "未绑定"}
+                                </Typography.Text>
+                            </Typography.Text>
+                            <Button size={"middle"} type="default">解绑</Button>
                         </Space>
-                        <ProFormText>微信</ProFormText>
                         <Space size={"large"} align={"center"}>
-                            <Button type="default" disabled={true}>修改</Button>
-                            <Button type="default">绑定</Button>
+                            <Typography.Text>
+                                微信：
+                                <Typography.Text strong>
+                                    {false ? "已绑定" : "未绑定"}
+                                </Typography.Text>
+                            </Typography.Text>
+                            <Button size={"middle"} type="default">绑定</Button>
                         </Space>
                     </ProForm.Group>
                 </ProCard>
             </>
         );
-    }
-;
+    };
 
 export default AccountAuthenticationCard;

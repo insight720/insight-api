@@ -10,6 +10,39 @@ export async function getCsrfToken(options?: { [key: string]: any }) {
   });
 }
 
+/** 此处后端没有提供注释 POST /user/api/digest/page */
+export async function viewUserApiDigestPage(
+  body: API.UserApiDigestPageQuery,
+  options?: { [key: string]: any },
+) {
+  return request<API.ResultUserApiDigestPageVO>(`/security/user/api/digest/page`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 此处后端没有提供注释 POST /user/api/format/and/quantity/usage */
+export async function viewUserApiFormatAndQuantityUsage(
+  body: API.UserApiFormatAndQuantityUsageQuery,
+  options?: { [key: string]: any },
+) {
+  return request<API.ResultUserApiFormatAndQuantityUsageVO>(
+    `/security/user/api/format/and/quantity/usage`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: body,
+      ...(options || {}),
+    },
+  );
+}
+
 /** 此处后端没有提供注释 POST /verification/code */
 export async function getVerificationCode(
   body: API.VerificationCodeSendingDTO,

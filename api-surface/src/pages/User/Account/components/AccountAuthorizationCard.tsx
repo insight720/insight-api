@@ -196,7 +196,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
     function determineAuthStrategy() {
         const phoneNumber = currentUser?.phoneNumber;
         const emailAddress = currentUser?.emailAddress;
-        const isUsingPhone = (authStrategy == "PHONE");
+        const isUsingPhone = (authStrategy === "PHONE");
         if (isUsingPhone && !phoneNumber) {
             message.error("你没有绑定手机号")
             return null;
@@ -214,7 +214,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
     const viewSecretKeyOnCaptchaFinish = async (values: any) => {
         // 检查用户是否绑定信息
         const isUsingPhone = determineAuthStrategy();
-        if (isUsingPhone == null) {
+        if (isUsingPhone === null) {
             return false;
         }
         message.loading("获取密钥中");
@@ -246,7 +246,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
     const getNewApiKeyOnFinish = async (values: any) => {
         // 检查用户是否绑定信息
         const isUsingPhone = determineAuthStrategy();
-        if (isUsingPhone == null) {
+        if (isUsingPhone === null) {
             return false;
         }
         message.loading("创建新密钥中");
@@ -280,7 +280,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
     const modifyApiKeyStatusOnFinish = async (values: any) => {
         // 检查用户是否绑定信息
         const isUsingPhone = determineAuthStrategy();
-        if (isUsingPhone == null) {
+        if (isUsingPhone === null) {
             return false;
         }
         const originalStatus = currentUser?.accountStatus;
@@ -331,7 +331,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
         const targetAuthoritySet = Object.keys(authorityChecked)
             .filter(key => authorityChecked[key])
             .map(key => key);
-        if (targetAuthoritySet.length == 0) {
+        if (targetAuthoritySet.length === 0) {
             message.error("至少拥有一个权限");
             return false;
         }
@@ -416,7 +416,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                     ]}
                 />
 
-                {authorityTabKey == "CHECK" &&
+                {authorityTabKey === "CHECK" &&
                     <>
                         <Typography.Text>
                             权限是指
@@ -565,7 +565,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                     onGetCaptcha={async () => {
                         // 检查用户是否绑定信息
                         const isUsingPhone = determineAuthStrategy();
-                        if (isUsingPhone == null) {
+                        if (isUsingPhone === null) {
                             throw new Error();
                         }
                         try {
@@ -658,13 +658,13 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                                 handleCaptchaModalOpen(true);
                                 setVerificationFinish(OnFinishTypeEnum.MODIFY_API_KEY_STATUS)
                             }}>
-                        {currentUser?.accountStatus == ApiKeyStatusEnum.NORMAL_KEY_UNAVAILABLE ? "启用" : "禁用"}
+                        {currentUser?.accountStatus === ApiKeyStatusEnum.NORMAL_KEY_UNAVAILABLE ? "启用" : "禁用"}
                     </Button>
 
                     <Typography.Text>
                         状态：
                         <Typography.Text strong>
-                            {currentUser?.accountStatus == ApiKeyStatusEnum.NORMAL_KEY_UNAVAILABLE ? "已禁用" : "已启用"}
+                            {currentUser?.accountStatus === ApiKeyStatusEnum.NORMAL_KEY_UNAVAILABLE ? "已禁用" : "已启用"}
                         </Typography.Text>
                     </Typography.Text>
 

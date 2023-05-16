@@ -1,4 +1,4 @@
-package pers.project.api.common.util.bean;
+package pers.project.api.common.bean;
 
 import org.springframework.cglib.core.Converter;
 import org.springframework.util.Assert;
