@@ -11,6 +11,7 @@
             <result property="description" column="description" jdbcType="VARCHAR"/>
             <result property="method" column="method" jdbcType="TINYINT"/>
             <result property="url" column="url" jdbcType="VARCHAR"/>
+            <result property="usageType" column="usage_type" jdbcType="VARCHAR"/>
             <result property="apiStatus" column="api_status" jdbcType="TINYINT"/>
             <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -18,10 +19,9 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,account_id,api_name,
-        description,method,url,
-        api_status,is_deleted,create_time,
-        update_time
+        id,account_id,api_name,description,
+        method,url,usage_type,api_status,
+        is_deleted,create_time,update_time
     </sql>
 
 </mapper>

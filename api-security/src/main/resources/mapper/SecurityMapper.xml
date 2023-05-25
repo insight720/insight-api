@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.project.api.security.mapper.SecurityMapper">
+
+    <select id="countUserAdminVOs" resultType="java.lang.Long">
+        SELECT COUNT(*) AS total
+        FROM `api-security`.user_account AS `account`
+        JOIN
+        (SELECT `profile`.account_id, `profile`.nickname, `profile`.website, `profile`.github,
+        `profile`.gitee, `profile`.biography, `profile`.ip_address, `profile`.ip_location,
+        `profile`.is_deleted, `profile`.create_time, `profile`.update_time
+        FROM `api-security`.user_profile AS `profile`
+        <where>
+            <if test="pageQuery.accountId != null">
+                `profile`.account_id = #{pageQuery.accountId}
+            </if>
+            <if test="pageQuery.nickname != null">
+                `profile`.nickname LIKE CONCAT('%', #{pageQuery.nickname}, '%')
+            </if>
+            <if test="pageQuery.website != null">
+                `profile`.website LIKE CONCAT('%', #{pageQuery.website}, '%')
+            </if>
+            <if test="pageQuery.github != null">
+                `profile`.github LIKE CONCAT('%', #{pageQuery.github}, '%')
+            </if>
+            <if test="pageQuery.gitee != null">
+                `profile`.gitee LIKE CONCAT('%', #{pageQuery.gitee}, '%')
+            </if>
+            <if test="pageQuery.biography != null">
+                `profile`.biography LIKE CONCAT('%', #{pageQuery.biography}, '%')
+            </if>
+            <if test="pageQuery.ipAddress != null">
+                `profile`.ip_address LIKE CONCAT('%', #{pageQuery.ipAddress}, '%')
+            </if>
+            <if test="pageQuery.ipLocation != null">
+                `profile`.ip_location LIKE CONCAT('%', #{pageQuery.ipLocation}, '%')
+            </if>
+            <if test="pageQuery.lastLoginTimeRange != null">
+                `profile`.last_login_time &gt;= #{pageQuery.lastLoginTimeRange[0]}
+                AND `profile`.last_login_time &lt;= #{pageQuery.lastLoginTimeRange[1]}
+            </if>
+            <if test="pageQuery.isDeleted != null">
+                `profile`.is_deleted = #{pageQuery.isDeleted}
+            </if>
+            <if test="pageQuery.createTimeRange != null">
+                `profile`.create_time &gt;= #{pageQuery.createTimeRange[0]}
+                AND `profile`.create_time &lt;= #{pageQuery.createTimeRange[1]}
+            </if>
+            <if test="pageQuery.profileUpdateTimeRange != null">
+                `profile`.update_time &gt;= #{pageQuery.profileUpdateTimeRange[0]}
+                AND `profile`.update_time &lt;= #{pageQuery.profileUpdateTimeRange[1]}
+            </if>
+        </where>
+        LIMIT ${(pageQuery.current - 1) * pageQuery.size}, #{pageQuery.size}
+        ) AS sub_profile
+        ON `account`.id = sub_profile.account_id
+        <where>
+            <if test="pageQuery.username != null">
+                `account`.username LIKE CONCAT('%', #{pageQuery.username}, '%')
+            </if>
+            <if test="pageQuery.emailAddress != null">
+                `account`.email_address LIKE CONCAT('%', #{pageQuery.emailAddress}, '%')
+            </if>
+            <if test="pageQuery.phoneNumber != null">
+                `account`.phone_number LIKE CONCAT('%', #{pageQuery.phoneNumber}, '%')
+            </if>
+            <if test="pageQuery.authoritySet != null">
+                `account`.authority IN
+                <foreach collection="pageQuery.authoritySet" item="authority" separator="," open="(" close=")">
+                    #{authority}
+                </foreach>
+            </if>
+            <if test="pageQuery.secretId != null">
+                `account`.secret_id LIKE CONCAT('%', #{pageQuery.secretId}, '%')
+            </if>
+            <if test="pageQuery.secretKey != null">
+                `account`.secret_key LIKE CONCAT('%', #{pageQuery.secretKey}, '%')
+            </if>
+            <if test="pageQuery.accountStatusSet != null">
+                `account`.account_status IN
+                <foreach collection="pageQuery.accountStatusSet" item="accountStatus" separator="," open="(" close=")">
+                    #{accountStatus}
+                </foreach>
+            </if>
+            <if test="pageQuery.accountUpdateTimeRange != null">
+                `account`.update_time &gt;= #{pageQuery.accountUpdateTimeRange[0]}
+                AND `account`.update_time &lt;= #{pageQuery.accountUpdateTimeRange[1]}
+            </if>
+        </where>
+    </select>
+
+    <select id="listUserAdminVOs" resultType="pers.project.api.common.model.vo.UserAdminVO">
+        SELECT
+        `account`.username, `account`.email_address, `account`.phone_number,
+        `account`.authority, `account`.secret_id, `account`.secret_key,
+        `account`.account_status, `account`.secret_id, `account`.secret_key,
+        `account`.update_time AS account_update_time, `profile`.account_id,
+        `profile`.nickname, `profile`.id AS profile_id, `profile`.website,
+        `profile`.github, `profile`.gitee, `profile`.biography,
+        `profile`.ip_address, `profile`.ip_location, `profile`.is_deleted,
+        `profile`.create_time, `profile`.update_time AS profile_update_time
+        FROM `api-security`.user_account AS `account`
+        JOIN
+        (SELECT *
+        FROM `api-security`.user_profile
+        <where>
+            <if test="pageQuery.accountId != null">
+                `profile`.account_id = #{pageQuery.accountId}
+            </if>
+            <if test="pageQuery.nickname != null">
+                `profile`.nickname LIKE CONCAT('%', #{pageQuery.nickname}, '%')
+            </if>
+            <if test="pageQuery.website != null">
+                `profile`.website LIKE CONCAT('%', #{pageQuery.website}, '%')
+            </if>
+            <if test="pageQuery.github != null">
+                `profile`.github LIKE CONCAT('%', #{pageQuery.github}, '%')
+            </if>
+            <if test="pageQuery.gitee != null">
+                `profile`.gitee LIKE CONCAT('%', #{pageQuery.gitee}, '%')
+            </if>
+            <if test="pageQuery.biography != null">
+                `profile`.biography LIKE CONCAT('%', #{pageQuery.biography}, '%')
+            </if>
+            <if test="pageQuery.ipAddress != null">
+                `profile`.ip_address LIKE CONCAT('%', #{pageQuery.ipAddress}, '%')
+            </if>
+            <if test="pageQuery.ipLocation != null">
+                `profile`.ip_location LIKE CONCAT('%', #{pageQuery.ipLocation}, '%')
+            </if>
+            <if test="pageQuery.lastLoginTimeRange != null">
+                `profile`.last_login_time &gt;= #{pageQuery.lastLoginTimeRange[0]}
+                AND `profile`.last_login_time &lt;= #{pageQuery.lastLoginTimeRange[1]}
+            </if>
+            <if test="pageQuery.isDeleted != null">
+                `profile`.is_deleted = #{pageQuery.isDeleted}
+            </if>
+            <if test="pageQuery.createTimeRange != null">
+                `profile`.create_time &gt;= #{pageQuery.createTimeRange[0]}
+                AND `profile`.create_time &lt;= #{pageQuery.createTimeRange[1]}
+            </if>
+            <if test="pageQuery.profileUpdateTimeRange != null">
+                `profile`.update_time &gt;= #{pageQuery.profileUpdateTimeRange[0]}
+                AND `profile`.update_time &lt;= #{pageQuery.profileUpdateTimeRange[1]}
+            </if>
+        </where>
+        LIMIT ${(pageQuery.current - 1) * pageQuery.size}, #{pageQuery.size}
+        ) AS `profile`
+        ON `account`.id = `profile`.account_id
+        <where>
+            <if test="pageQuery.username != null">
+                `account`.username LIKE CONCAT('%', #{pageQuery.username}, '%')
+            </if>
+            <if test="pageQuery.emailAddress != null">
+                `account`.email_address LIKE CONCAT('%', #{pageQuery.emailAddress}, '%')
+            </if>
+            <if test="pageQuery.phoneNumber != null">
+                `account`.phone_number LIKE CONCAT('%', #{pageQuery.phoneNumber}, '%')
+            </if>
+            <if test="pageQuery.authoritySet != null">
+                `account`.authority IN
+                <foreach collection="pageQuery.authoritySet" item="authority" separator="," open="(" close=")">
+                    #{authority}
+                </foreach>
+            </if>
+            <if test="pageQuery.secretId != null">
+                `account`.secret_id LIKE CONCAT('%', #{pageQuery.secretId}, '%')
+            </if>
+            <if test="pageQuery.secretKey != null">
+                `account`.secret_key LIKE CONCAT('%', #{pageQuery.secretKey}, '%')
+            </if>
+            <if test="pageQuery.accountStatusSet != null">
+                `account`.account_status IN
+                <foreach collection="pageQuery.accountStatusSet" item="accountStatus" separator="," open="(" close=")">
+                    #{accountStatus}
+                </foreach>
+            </if>
+            <if test="pageQuery.accountUpdateTimeRange != null">
+                `account`.update_time &gt;= #{pageQuery.accountUpdateTimeRange[0]}
+                AND `account`.update_time &lt;= #{pageQuery.accountUpdateTimeRange[1]}
+            </if>
+        </where>
+    </select>
+
+</mapper>

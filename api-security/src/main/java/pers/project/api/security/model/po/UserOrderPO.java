@@ -36,6 +36,11 @@ public class UserOrderPO {
     private String orderSn;
 
     /**
+     * 订单描述
+     */
+    private String description;
+
+    /**
      * 账户主键
      */
     private String accountId;
@@ -53,7 +58,7 @@ public class UserOrderPO {
     /**
      * 接口用法类型
      */
-    private Integer usageType;
+    private String usageType;
 
     /**
      * 订单状态

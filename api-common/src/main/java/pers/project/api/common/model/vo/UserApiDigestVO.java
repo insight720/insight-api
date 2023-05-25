@@ -39,6 +39,11 @@ public class UserApiDigestVO {
     private String url;
 
     /**
+     * 接口用法类型
+     */
+    private String usageType;
+
+    /**
      * 接口状态
      */
     private Integer apiStatus;

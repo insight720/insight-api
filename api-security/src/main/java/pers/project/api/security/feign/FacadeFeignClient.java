@@ -3,13 +3,14 @@ package pers.project.api.security.feign;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.ApiAdminPageVO;
+import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 
 /**
@@ -26,8 +27,12 @@ public interface FacadeFeignClient {
     Result<UserApiDigestPageVO> getUserApiDigestPageResult
             (@Valid @RequestBody UserApiDigestPageQuery pageQuery);
 
-    @GetMapping("/user/api/format/and/quantity/usage/result")
-    Result<UserApiFormatAndQuantityUsageVO> userApiFormatAndQuantityUsageResult
+    @PostMapping("/user/api/format/and/quantity/usage/result")
+    Result<UserApiFormatAndQuantityUsageVO> getUserApiFormatAndQuantityUsageResult
             (@Valid @RequestBody UserApiFormatAndQuantityUsageQuery query);
+
+    @PostMapping("/api/admin/page/result")
+    Result<ApiAdminPageVO> getApiAdminPageResult
+            (@Valid @RequestBody ApiAdminPageQuery pageQuery);
 
 }

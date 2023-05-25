@@ -9,16 +9,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.ApiAdminPageQuery;
+import pers.project.api.common.model.query.UserAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.ApiAdminPageVO;
+import pers.project.api.common.model.vo.UserAdminPageVO;
+import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.service.SecurityService;
 
 /**
- * Security 控制器
+ * Security 模块控制器
  *
  * @author Luo Fei
  * @date 2023/03/24
@@ -55,6 +59,20 @@ public class SecurityController {
         UserApiFormatAndQuantityUsageVO formatAndQuantityUsageVO
                 = securityService.getUserApiFormatAndQuantityUsageVO(query);
         return ResultUtils.success(formatAndQuantityUsageVO);
+    }
+
+    @PostMapping("/user/admin/page")
+    public Result<UserAdminPageVO> viewUserAdminPage
+            (@Valid @RequestBody UserAdminPageQuery pageQuery) {
+        UserAdminPageVO pageVO = securityService.getUserAdminPageVO(pageQuery);
+        return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/api/admin/page")
+    public Result<ApiAdminPageVO> viewApiAdminPage
+            (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
+        ApiAdminPageVO pageVO = securityService.getApiAdminPageVO(pageQuery);
+        return ResultUtils.success(pageVO);
     }
 
 }

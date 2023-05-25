@@ -42,6 +42,11 @@ public class UserApiDigestPageQuery {
     private String url;
 
     /**
+     * 接口用法类型集合
+     */
+    private Set<String> usageType;
+
+    /**
      * 接口状态集合
      */
     private Set<Integer> apiStatus;

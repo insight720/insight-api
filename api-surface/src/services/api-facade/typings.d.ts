@@ -1,4 +1,84 @@
 declare namespace API {
+  type ApiAdminPageQuery = {
+    size?: number;
+    current?: number;
+    usageTypeSet?: string[];
+    digestUpdateTimeRange?: string[];
+    formatId?: string;
+    methodSet?: number[];
+    formatUpdateTimeRange?: string[];
+    apiStatusSet?: number[];
+    createTimeRange?: string;
+    isDeleted?: number;
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    url?: string;
+    digestId?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+  };
+
+  type ApiAdminPageVO = {
+    total?: number;
+    apiAdminVOList?: ApiAdminVO[];
+  };
+
+  type ApiAdminVO = {
+    digestUpdateTime?: string;
+    formatId?: string;
+    formatUpdateTime?: string;
+    apiName?: string;
+    description?: string;
+    method?: number;
+    url?: string;
+    usageType?: string;
+    apiStatus?: number;
+    digestId?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    isDeleted?: number;
+    createTime?: string;
+  };
+
+  type ApiDigestPageQuery = {
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    methodSet?: number[];
+    url?: string;
+    usageTypeSet?: string[];
+    apiStatusSet?: number[];
+    createTime?: string[];
+    updateTime?: string[];
+    size?: number;
+    current?: number;
+  };
+
+  type ApiDigestPageVO = {
+    total?: number;
+    digestVOList?: ApiDigestVO[];
+  };
+
+  type ApiDigestVO = {
+    usageTypeSet?: string[];
+    digestId?: string;
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    method?: number;
+    url?: string;
+    apiStatus?: number;
+    createTime?: string;
+    updateTime?: string;
+  };
+
   type ApiInfoAddRequest = {
     name?: string;
     description?: string;
@@ -7,23 +87,6 @@ declare namespace API {
     requestHeader?: string;
     responseHeader?: string;
     method?: string;
-  };
-
-  type ApiInfoData = {
-    id?: number;
-    name?: string;
-    description?: string;
-    url?: string;
-    requestParams?: string;
-    requestHeader?: string;
-    responseHeader?: string;
-    status?: number;
-    method?: string;
-    userId?: number;
-    createTime?: string;
-    updateTime?: string;
-    isDelete?: number;
-    totalNum?: number;
   };
 
   type ApiInfoEntity = {
@@ -125,45 +188,117 @@ declare namespace API {
     pages?: number;
   };
 
-  type ResponseApiInfoEntity = {
-    code?: number;
+  type ResultApiAdminPageVO = {
+    code?: string;
+    message?: string;
+    data?: ApiAdminPageVO;
+  };
+
+  type ResultApiDigestPageVO = {
+    code?: string;
+    message?: string;
+    data?: ApiDigestPageVO;
+  };
+
+  type ResultApiInfoEntity = {
+    code?: string;
+    message?: string;
     data?: ApiInfoEntity;
-    message?: string;
   };
 
-  type ResponseBoolean = {
-    code?: number;
+  type ResultBoolean = {
+    code?: string;
+    message?: string;
     data?: boolean;
-    message?: string;
   };
 
-  type ResponseListApiInfoData = {
-    code?: number;
-    data?: ApiInfoData[];
+  type ResultListApiInfoEntity = {
+    code?: string;
     message?: string;
-  };
-
-  type ResponseListApiInfoEntity = {
-    code?: number;
     data?: ApiInfoEntity[];
-    message?: string;
   };
 
-  type ResponseLong = {
-    code?: number;
+  type ResultLong = {
+    code?: string;
+    message?: string;
     data?: number;
-    message?: string;
   };
 
-  type ResponseObject = {
-    code?: number;
+  type ResultObject = {
+    code?: string;
+    message?: string;
     data?: Record<string, any>;
-    message?: string;
   };
 
-  type ResponsePageApiInfoEntity = {
-    code?: number;
-    data?: PageApiInfoEntity;
+  type ResultPageApiInfoEntity = {
+    code?: string;
     message?: string;
+    data?: PageApiInfoEntity;
+  };
+
+  type ResultUserApiDigestPageVO = {
+    code?: string;
+    message?: string;
+    data?: UserApiDigestPageVO;
+  };
+
+  type ResultUserApiFormatAndQuantityUsageVO = {
+    code?: string;
+    message?: string;
+    data?: UserApiFormatAndQuantityUsageVO;
+  };
+
+  type ResultVoid = {
+    code?: string;
+    message?: string;
+    data?: Record<string, any>;
+  };
+
+  type UserApiDigestPageQuery = {
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    method?: number[];
+    url?: string;
+    usageType?: string[];
+    apiStatus?: number[];
+    createTime?: string[];
+    updateTime?: string[];
+    size?: number;
+    current?: number;
+  };
+
+  type UserApiDigestPageVO = {
+    total?: number;
+    digestVOList?: UserApiDigestVO[];
+  };
+
+  type UserApiDigestVO = {
+    digestId?: string;
+    apiName?: string;
+    description?: string;
+    method?: number;
+    url?: string;
+    usageType?: string;
+    apiStatus?: number;
+    createTime?: string;
+    updateTime?: string;
+  };
+
+  type UserApiFormatAndQuantityUsageQuery = {
+    accountId?: string;
+    digestId?: string;
+  };
+
+  type UserApiFormatAndQuantityUsageVO = {
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    total?: number;
+    failure?: number;
+    stock?: number;
+    usageStatus?: number;
   };
 }

@@ -148,13 +148,13 @@ export default defineConfig({
               projectName: 'swagger',
             },
         */
-/*        {
+        {
             requestLibPath: "import { request } from '@umijs/max'",
             schemaPath: "http://localhost:8123/facade/v3/api-docs",
             mock: false,
             projectName: 'api-facade',
             apiPrefix: "'/facade'",
-        },*/
+        },
         {
             requestLibPath: "import { request } from '@umijs/max'",
             schemaPath: "http://localhost:7529/security/v3/api-docs",

@@ -29,13 +29,6 @@ import java.util.stream.Collectors;
 public class CustomUserDetails implements UserDetails {
 
     /**
-     * 账号状态
-     * <p>
-     * 字符串形式表示。
-     */
-    String accountStatus;
-
-    /**
      * 权限
      * <p>
      * 与 {@link CustomUserDetails#getAuthorities()} 的返回值不同，
@@ -60,11 +53,14 @@ public class CustomUserDetails implements UserDetails {
      * 手机号
      */
     private String phoneNumber;
-
     /**
      * 密钥 ID
      */
     private String secretId;
+    /**
+     * 账号状态
+     */
+    private Integer accountStatus;
 
     // endregion
 

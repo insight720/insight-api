@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import { request } from '@umijs/max';
+import {request} from '@umijs/max';
 
 /** 此处后端没有提供注释 GET /userApiInfo/invokeCount */
 export async function invokeCount(
@@ -8,7 +8,7 @@ export async function invokeCount(
   params: API.invokeCountParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseBoolean>(`/facade/userApiInfo/invokeCount`, {
+  return request<API.ResultBoolean>(`/facade/userApiInfo/invokeCount`, {
     method: 'GET',
     params: {
       ...params,

@@ -10,7 +10,7 @@
         <result property="accountId" column="account_id" jdbcType="BIGINT"/>
         <result property="digestId" column="digest_id" jdbcType="BIGINT"/>
         <result property="usageId" column="usage_id" jdbcType="BIGINT"/>
-        <result property="usageType" column="usage_type" jdbcType="TINYINT"/>
+        <result property="usageType" column="usage_type" jdbcType="VARCHAR"/>
         <result property="orderStatus" column="order_status" jdbcType="TINYINT"/>
         <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>

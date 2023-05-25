@@ -1,9 +1,13 @@
 package pers.project.api.facade.service;
 
-import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.ApiAdminPageVO;
+import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
+import pers.project.api.facade.model.query.ApiDigestPageQuery;
+import pers.project.api.facade.model.vo.ApiDigestPageVO;
 
 /**
  * Facade 模块 Service
@@ -29,5 +33,23 @@ public interface FacadeService {
      * @return 用户 API 格式和计数用法 VO
      */
     UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(UserApiFormatAndQuantityUsageQuery query);
+
+    /**
+     * 基于提供的 {@code ApiDigestPageQuery}，返回一个 {@code ApiDigestPageVO} 对象。
+     *
+     * @param pageQuery API 摘要分页 Query
+     * @return API 摘要页面 VO
+     */
+    ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery);
+
+
+    /**
+     * 基于提供的 {@code ApiAdminPageQuery}，返回一个 {@code ApiAdminPageVO} 对象，
+     * 该对象包含了 API 管理页面所需展示的信息。
+     *
+     * @param pageQuery 包含分页信息和查询条件的 API 管理页面 Query
+     * @return API 管理页面 VO
+     */
+    ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
 
 }

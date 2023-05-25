@@ -1,10 +1,10 @@
 // @ts-ignore
 /* eslint-disable */
-import { request } from '@umijs/max';
+import {request} from '@umijs/max';
 
 /** 此处后端没有提供注释 POST /add */
 export async function addApiInfo(body: API.ApiInfoAddRequest, options?: { [key: string]: any }) {
-  return request<API.ResponseLong>(`/facade/add`, {
+  return request<API.ResultLong>(`/facade/add`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ export async function addApiInfo(body: API.ApiInfoAddRequest, options?: { [key: 
 
 /** 此处后端没有提供注释 POST /delete */
 export async function deleteApiInfo(body: API.DeleteRequest, options?: { [key: string]: any }) {
-  return request<API.ResponseBoolean>(`/facade/delete`, {
+  return request<API.ResultBoolean>(`/facade/delete`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export async function getApiInfoById(
   params: API.getApiInfoByIdParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseApiInfoEntity>(`/facade/get`, {
+  return request<API.ResultApiInfoEntity>(`/facade/get`, {
     method: 'GET',
     params: {
       ...params,
@@ -47,7 +47,7 @@ export async function getApiInfo(
   params: API.getApiInfoParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseApiInfoEntity>(`/facade/getApiInfo`, {
+  return request<API.ResultApiInfoEntity>(`/facade/getApiInfo`, {
     method: 'GET',
     params: {
       ...params,
@@ -61,7 +61,7 @@ export async function invokeApiInfo(
   body: API.ApiInfoInvokeRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseObject>(`/facade/invoke`, {
+  return request<API.ResultObject>(`/facade/invoke`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export async function listApiInfo(
   params: API.listApiInfoParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseListApiInfoEntity>(`/facade/list`, {
+  return request<API.ResultListApiInfoEntity>(`/facade/list`, {
     method: 'GET',
     params: {
       ...params,
@@ -94,7 +94,7 @@ export async function listApiInfoByPage(
   params: API.listApiInfoByPageParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponsePageApiInfoEntity>(`/facade/list/page`, {
+  return request<API.ResultPageApiInfoEntity>(`/facade/list/page`, {
     method: 'GET',
     params: {
       ...params,
@@ -107,7 +107,7 @@ export async function listApiInfoByPage(
 
 /** 此处后端没有提供注释 POST /offline */
 export async function offlineApiInfo(body: API.IdRequest, options?: { [key: string]: any }) {
-  return request<API.ResponseBoolean>(`/facade/offline`, {
+  return request<API.ResultBoolean>(`/facade/offline`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ export async function offlineApiInfo(body: API.IdRequest, options?: { [key: stri
 
 /** 此处后端没有提供注释 POST /online */
 export async function onlineApiInfo(body: API.IdRequest, options?: { [key: string]: any }) {
-  return request<API.ResponseBoolean>(`/facade/online`, {
+  return request<API.ResultBoolean>(`/facade/online`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export async function updateApiInfo(
   body: API.ApiInfoUpdateRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.ResponseBoolean>(`/facade/update`, {
+  return request<API.ResultBoolean>(`/facade/update`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

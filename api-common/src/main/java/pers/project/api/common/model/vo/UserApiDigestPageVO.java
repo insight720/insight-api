@@ -1,7 +1,6 @@
-package pers.project.api.common.model.dto;
+package pers.project.api.common.model.vo;
 
 import lombok.Data;
-import pers.project.api.common.model.vo.UserApiDigestVO;
 
 import java.util.List;
 

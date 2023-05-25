@@ -73,12 +73,12 @@ export default [
         icon: 'smile',
         component: './Welcome',
     },
-    // {
-    //     path: '/welcome',
-    //     name: '可用接口',
-    //     icon: 'smile',
-    //     component: './Welcome',
-    // },
+    {
+        path: '/api',
+        name: '所有接口',
+        icon: 'table',
+        component: './Api',
+    },
     // 错误页
     {
         path: '*',
@@ -116,12 +116,12 @@ export default [
                 path: '/user/api/digest',
                 component: './User/MyApi',
             },
-            // {
-            //     name: '我的订单',
-            //     icon: 'table',
-            //     path: '/user/order',
-            //     component: './User/MyOrder',
-            // },
+            {
+                name: '我的订单',
+                icon: 'table',
+                path: '/user/order',
+                component: './User/MyOrder',
+            },
         ],
     },
     // 管理员页面
@@ -135,29 +135,29 @@ export default [
                 path: '/admin',
                 redirect: '/admin/sub-page',
             },
-            {
-                path: '/admin/sub-page',
-                name: 'sub-page',
-                component: './Admin',
-            },
             // {
-            //     name: '接口管理',
-            //     icon: 'table',
-            //     path: '/admin/api_analysis',
-            //     component: './Admin/ApiAnalysis',
+            //     path: '/admin/sub-page',
+            //     name: 'sub-page',
+            //     component: './Admin',
             // },
             {
-                name: '接口分析',
+                name: '接口管理',
                 icon: 'table',
-                path: '/admin/api_analysis',
-                component: './Admin/ApiAnalysis',
+                path: '/admin/api',
+                component: './Admin/ApiAdmin',
             },
             // {
-            //     name: '用户管理',
+            //     name: '接口分析',
             //     icon: 'table',
             //     path: '/admin/api_analysis',
             //     component: './Admin/ApiAnalysis',
             // },
+            {
+                name: '用户管理',
+                icon: 'table',
+                path: '/admin/user',
+                component: './Admin/UserAdmin',
+            },
         ],
     },
 ];

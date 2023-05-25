@@ -174,7 +174,7 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         update(updateWrapper);
         // 更新 Session 中的账户状态
         CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
-        userDetails.setAccountStatus(targetStatus.name());
+        userDetails.setAccountStatus(targetStatusCode);
         userDetailsService.updateLoginUserDetails(userDetails);
     }
 

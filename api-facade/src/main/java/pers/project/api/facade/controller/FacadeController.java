@@ -7,15 +7,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.vo.ApiAdminPageVO;
+import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.common.util.ResultUtils;
+import pers.project.api.facade.model.query.ApiDigestPageQuery;
+import pers.project.api.facade.model.vo.ApiDigestPageVO;
 import pers.project.api.facade.service.FacadeService;
 
 /**
- * Facade 控制器
+ * Facade 模块控制器
  *
  * @author Luo Fei
  * @date 2023/05/04
@@ -35,11 +39,25 @@ public class FacadeController {
     }
 
     @PostMapping("/user/api/format/and/quantity/usage/result")
-    Result<UserApiFormatAndQuantityUsageVO> userApiFormatAndQuantityUsageResult
+    public Result<UserApiFormatAndQuantityUsageVO> getUserApiFormatAndQuantityUsageResult
             (@Valid @RequestBody UserApiFormatAndQuantityUsageQuery query) {
         UserApiFormatAndQuantityUsageVO formatAndQuantityUsageVO
                 = facadeService.getUserApiFormatAndQuantityUsageVO(query);
         return ResultUtils.success(formatAndQuantityUsageVO);
+    }
+
+    @PostMapping("/api/digest/page")
+    public Result<ApiDigestPageVO> viewApiDigestPage
+            (@Valid @RequestBody ApiDigestPageQuery pageQuery) {
+        ApiDigestPageVO pageVO = facadeService.getApiDigestPageVO(pageQuery);
+        return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/api/admin/page/result")
+    public Result<ApiAdminPageVO> getApiAdminPageResult
+            (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
+        ApiAdminPageVO pageVO = facadeService.getApiAdminPageVO(pageQuery);
+        return ResultUtils.success(pageVO);
     }
 
 }

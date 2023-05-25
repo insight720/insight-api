@@ -4,6 +4,54 @@ declare namespace API {
     codeCheckDTO: VerificationCodeCheckDTO;
   };
 
+  type ApiAdminPageQuery = {
+    size?: number;
+    current?: number;
+    usageTypeSet?: string[];
+    digestUpdateTimeRange?: string[];
+    formatId?: string;
+    methodSet?: number[];
+    formatUpdateTimeRange?: string[];
+    apiStatusSet?: number[];
+    createTimeRange?: string;
+    isDeleted?: number;
+    accountId?: string;
+    apiName?: string;
+    description?: string;
+    url?: string;
+    digestId?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+  };
+
+  type ApiAdminPageVO = {
+    total?: number;
+    apiAdminVOList?: ApiAdminVO[];
+  };
+
+  type ApiAdminVO = {
+    digestUpdateTime?: string;
+    formatId?: string;
+    formatUpdateTime?: string;
+    apiName?: string;
+    description?: string;
+    method?: number;
+    url?: string;
+    usageType?: string;
+    apiStatus?: number;
+    digestId?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    isDeleted?: number;
+    createTime?: string;
+  };
+
   type ApiKeyStatusModificationDTO = {
     accountId?: string;
     newStatus: string;
@@ -42,6 +90,12 @@ declare namespace API {
     codeCheckDTO?: VerificationCodeCheckDTO;
   };
 
+  type ResultApiAdminPageVO = {
+    code?: string;
+    message?: string;
+    data?: ApiAdminPageVO;
+  };
+
   type ResultLoginUserDTO = {
     code?: string;
     message?: string;
@@ -52,6 +106,12 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: string;
+  };
+
+  type ResultUserAdminPageVO = {
+    code?: string;
+    message?: string;
+    data?: UserAdminPageVO;
   };
 
   type ResultUserApiDigestPageVO = {
@@ -66,6 +126,12 @@ declare namespace API {
     data?: UserApiFormatAndQuantityUsageVO;
   };
 
+  type ResultUserOrderPageVO = {
+    code?: string;
+    message?: string;
+    data?: UserOrderPageVO;
+  };
+
   type ResultVoid = {
     code?: string;
     message?: string;
@@ -78,12 +144,68 @@ declare namespace API {
     codeCheckDTO: VerificationCodeCheckDTO;
   };
 
+  type UserAdminPageQuery = {
+    size?: number;
+    current?: number;
+    authoritySet?: string[];
+    accountStatusSet?: number[];
+    accountUpdateTimeRange?: string[];
+    profileUpdateTimeRange?: string[];
+    createTimeRange?: string[];
+    lastLoginTimeRange?: string[];
+    isDeleted?: number;
+    username?: string;
+    emailAddress?: string;
+    phoneNumber?: string;
+    secretId?: string;
+    secretKey?: string;
+    accountId?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
+    ipAddress?: string;
+    ipLocation?: string;
+  };
+
+  type UserAdminPageVO = {
+    total?: number;
+    userAdminVOList?: UserAdminVO[];
+  };
+
+  type UserAdminVO = {
+    profileId?: string;
+    accountUpdateTime?: string;
+    profileUpdateTime?: string;
+    createTime?: string;
+    isDeleted?: number;
+    username?: string;
+    emailAddress?: string;
+    phoneNumber?: string;
+    authority?: string;
+    secretId?: string;
+    secretKey?: string;
+    accountStatus?: number;
+    accountId?: string;
+    avatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
+    ipAddress?: string;
+    ipLocation?: string;
+    lastLoginTime?: string;
+  };
+
   type UserApiDigestPageQuery = {
     accountId?: string;
     apiName?: string;
     description?: string;
     method?: number[];
     url?: string;
+    usageType?: string[];
     apiStatus?: number[];
     createTime?: string[];
     updateTime?: string[];
@@ -102,6 +224,7 @@ declare namespace API {
     description?: string;
     method?: number;
     url?: string;
+    usageType?: string;
     apiStatus?: number;
     createTime?: string;
     updateTime?: string;
@@ -135,6 +258,35 @@ declare namespace API {
     accountId?: string;
     newUsername: string;
     codeCheckDTO: VerificationCodeCheckDTO;
+  };
+
+  type UserOrderPageQuery = {
+    size?: number;
+    current?: number;
+    accountId?: string;
+    orderSn?: string;
+    description?: string;
+    usageType?: number[];
+    orderStatus?: number[];
+    createTime?: string[];
+    updateTime?: string[];
+  };
+
+  type UserOrderPageVO = {
+    total?: number;
+    userOrderVOList?: UserOrderVO[];
+  };
+
+  type UserOrderVO = {
+    orderId?: string;
+    orderSn?: string;
+    description?: string;
+    digestId?: string;
+    usageId?: string;
+    usageType?: string;
+    orderStatus?: number;
+    createTime?: string;
+    updateTime?: string;
   };
 
   type UserProfileSettingDTO = {

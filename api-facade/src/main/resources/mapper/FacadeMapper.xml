@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.project.api.facade.mapper.FacadeMapper">
+
+    <select id="countApiAdminVOs" resultType="java.lang.Long">
+        SELECT COUNT(*) AS total
+        FROM `api-facade`.api_digest AS `digest`
+        JOIN
+        (SELECT *
+        FROM `api-facade`.api_format AS `format`
+        <where>
+            <if test="pageQuery.formatId != null">
+                `format`.id = #{pageQuery.formatId}
+            </if>
+            <if test="pageQuery.digestId != null">
+                `format`.digest_id = #{pageQuery.digestId}
+            </if>
+            <if test="pageQuery.requestParam != null">
+                `format`.request_param LIKE CONCAT('%', #{pageQuery.requestParam}, '%')
+            </if>
+            <if test="pageQuery.requestHeader != null">
+                `format`.request_header LIKE CONCAT('%', #{pageQuery.requestHeader}, '%')
+            </if>
+            <if test="pageQuery.requestBody != null">
+                `format`.request_body LIKE CONCAT('%', #{pageQuery.requestBody}, '%')
+            </if>
+            <if test="pageQuery.responseHeader != null">
+                `format`.response_header LIKE CONCAT('%', #{pageQuery.responseHeader}, '%')
+            </if>
+            <if test="pageQuery.responseBody != null">
+                `format`.response_body LIKE CONCAT('%', #{pageQuery.responseBody}, '%')
+            </if>
+            <if test="pageQuery.isDeleted != null">
+                `format`.is_deleted = #{pageQuery.isDeleted}
+            </if>
+            <if test="pageQuery.createTimeRange != null">
+                `format`.create_time &gt;= #{pageQuery.createTimeRange[0]}
+                AND `format`.create_time &lt;= #{pageQuery.createTimeRange[1]}
+            </if>
+            <if test="pageQuery.formatUpdateTimeRange != null">
+                `format`.update_time &gt;= #{pageQuery.formatUpdateTimeRange[0]}
+                AND `format`.update_time &lt;= #{pageQuery.formatUpdateTimeRange[1]}
+            </if>
+        </where>
+        LIMIT ${(pageQuery.current - 1) * pageQuery.size}, #{pageQuery.size}
+        ) AS sub_format
+        ON `digest`.id = `sub_format`.digest_id
+        <where>
+            <if test="pageQuery.accountId != null">
+                `digest`.account_Id = #{pageQuery.accountId}
+            </if>
+            <if test="pageQuery.apiName != null">
+                `digest`.api_name LIKE CONCAT('%', #{pageQuery.apiName}, '%')
+            </if>
+            <if test="pageQuery.description != null">
+                `digest`.description LIKE CONCAT('%', #{pageQuery.description}, '%')
+            </if>
+            <if test="pageQuery.methodSet != null">
+                `digest`.method IN
+                <foreach collection="pageQuery.methodSet" item="method" separator="," open="(" close=")">
+                    #{method}
+                </foreach>
+            </if>
+            <if test="pageQuery.url != null">
+                `account`.url LIKE CONCAT('%', #{pageQuery.url}, '%')
+            </if>
+            <if test="pageQuery.usageTypeSet != null">
+                `digest`.usage_type IN
+                <foreach collection="pageQuery.usageTypeSet" item="usageType" separator="," open="(" close=")">
+                    #{usageType}
+                </foreach>
+            </if>
+            <if test="pageQuery.apiStatusSet != null">
+                `digest`.apiStatus IN
+                <foreach collection="pageQuery.apiStatusSet" item="apiStatus" separator="," open="(" close=")">
+                    #{apiStatus}
+                </foreach>
+            </if>
+            <if test="pageQuery.digestUpdateTimeRange != null">
+                `digest`.update_time &gt;= #{pageQuery.digestUpdateTimeRange[0]}
+                AND `digest`.update_time &lt;= #{pageQuery.digestUpdateTimeRange[1]}
+            </if>
+        </where>
+    </select>
+
+    <select id="listApiAdminVOs" resultType="pers.project.api.common.model.vo.ApiAdminVO">
+        SELECT `digest`.update_time AS digest_update_time, sub_format.id AS fomate_id,
+        sub_format.update_time AS facade_update_time, `digest`.api_name,
+        `digest`.description, `digest`.method, `digest`.url, `digest`.usage_type,
+        `digest`.api_status, sub_format.digest_id, sub_format.request_param,
+        sub_format.request_header, sub_format.request_body, sub_format.response_header,
+        sub_format.response_body, sub_format.is_deleted, sub_format.create_time
+        FROM `api-facade`.api_digest AS `digest`
+        JOIN
+        (SELECT *
+        FROM `api-facade`.api_format AS `format`
+        <where>
+            <if test="pageQuery.formatId != null">
+                `format`.id = #{pageQuery.formatId}
+            </if>
+            <if test="pageQuery.digestId != null">
+                `format`.digest_id = #{pageQuery.digestId}
+            </if>
+            <if test="pageQuery.requestParam != null">
+                `format`.request_param LIKE CONCAT('%', #{pageQuery.requestParam}, '%')
+            </if>
+            <if test="pageQuery.requestHeader != null">
+                `format`.request_header LIKE CONCAT('%', #{pageQuery.requestHeader}, '%')
+            </if>
+            <if test="pageQuery.requestBody != null">
+                `format`.request_body LIKE CONCAT('%', #{pageQuery.requestBody}, '%')
+            </if>
+            <if test="pageQuery.responseHeader != null">
+                `format`.response_header LIKE CONCAT('%', #{pageQuery.responseHeader}, '%')
+            </if>
+            <if test="pageQuery.responseBody != null">
+                `format`.response_body LIKE CONCAT('%', #{pageQuery.responseBody}, '%')
+            </if>
+            <if test="pageQuery.isDeleted != null">
+                `format`.is_deleted = #{pageQuery.isDeleted}
+            </if>
+            <if test="pageQuery.createTimeRange != null">
+                `format`.create_time &gt;= #{pageQuery.createTimeRange[0]}
+                AND `format`.create_time &lt;= #{pageQuery.createTimeRange[1]}
+            </if>
+            <if test="pageQuery.formatUpdateTimeRange != null">
+                `format`.update_time &gt;= #{pageQuery.formatUpdateTimeRange[0]}
+                AND `format`.update_time &lt;= #{pageQuery.formatUpdateTimeRange[1]}
+            </if>
+        </where>
+        LIMIT ${(pageQuery.current - 1) * pageQuery.size}, #{pageQuery.size}
+        ) AS `sub_format`
+        ON `digest`.id = `sub_format`.digest_id
+        <where>
+            <if test="pageQuery.accountId != null">
+                `digest`.account_Id = #{pageQuery.accountId}
+            </if>
+            <if test="pageQuery.apiName != null">
+                `digest`.api_name LIKE CONCAT('%', #{pageQuery.apiName}, '%')
+            </if>
+            <if test="pageQuery.description != null">
+                `digest`.description LIKE CONCAT('%', #{pageQuery.description}, '%')
+            </if>
+            <if test="pageQuery.methodSet != null">
+                `digest`.method IN
+                <foreach collection="pageQuery.methodSet" item="method" separator="," open="(" close=")">
+                    #{method}
+                </foreach>
+            </if>
+            <if test="pageQuery.url != null">
+                `account`.url LIKE CONCAT('%', #{pageQuery.url}, '%')
+            </if>
+            <if test="pageQuery.usageTypeSet != null">
+                `digest`.usage_type IN
+                <foreach collection="pageQuery.usageTypeSet" item="usageType" separator="," open="(" close=")">
+                    #{usageType}
+                </foreach>
+            </if>
+            <if test="pageQuery.apiStatusSet != null">
+                `digest`.apiStatus IN
+                <foreach collection="pageQuery.apiStatusSet" item="apiStatus" separator="," open="(" close=")">
+                    #{apiStatus}
+                </foreach>
+            </if>
+            <if test="pageQuery.digestUpdateTimeRange != null">
+                `digest`.update_time &gt;= #{pageQuery.digestUpdateTimeRange[0]}
+                AND `digest`.update_time &lt;= #{pageQuery.digestUpdateTimeRange[1]}
+            </if>
+        </where>
+    </select>
+
+</mapper>

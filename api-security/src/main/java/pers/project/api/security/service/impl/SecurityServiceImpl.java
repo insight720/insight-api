@@ -10,14 +10,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserApiDigestPageVO;
+import pers.project.api.common.model.query.ApiAdminPageQuery;
+import pers.project.api.common.model.query.UserAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
-import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
+import pers.project.api.common.model.vo.*;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
 import pers.project.api.security.feign.FacadeFeignClient;
+import pers.project.api.security.mapper.SecurityMapper;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.service.SecurityService;
@@ -48,6 +50,8 @@ public class SecurityServiceImpl implements SecurityService {
     private final VerificationContext verificationContext;
 
     private final FacadeFeignClient facadeFeignClient;
+
+    private final SecurityMapper securityMapper;
 
     @Override
     public void loadDeferredCsrfToken(HttpServletRequest request) {
@@ -131,11 +135,34 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(@Valid UserApiFormatAndQuantityUsageQuery query) {
         Result<UserApiFormatAndQuantityUsageVO> formatAndQuantityUsageResult
-                = facadeFeignClient.userApiFormatAndQuantityUsageResult(query);
+                = facadeFeignClient.getUserApiFormatAndQuantityUsageResult(query);
         if (ResultUtils.isFailure(formatAndQuantityUsageResult)) {
             throw new BusinessException(SERVER_ERROR, "Feign 调用失败");
         }
         return formatAndQuantityUsageResult.getData();
+    }
+
+    @Override
+    public UserAdminPageVO getUserAdminPageVO(UserAdminPageQuery pageQuery) {
+        Long total = securityMapper.countUserAdminVOs(pageQuery);
+        if (total == 0L) {
+            return new UserAdminPageVO();
+        }
+        List<UserAdminVO> userAdminVOList = securityMapper.listUserAdminVOs(pageQuery);
+        UserAdminPageVO userAdminPageVO = new UserAdminPageVO();
+        userAdminPageVO.setTotal(total);
+        userAdminPageVO.setUserAdminVOList(userAdminVOList);
+        return userAdminPageVO;
+    }
+
+    @Override
+    public ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery) {
+        Result<ApiAdminPageVO> userAdminPageResult
+                = facadeFeignClient.getApiAdminPageResult(pageQuery);
+        if (ResultUtils.isFailure(userAdminPageResult)) {
+            throw new BusinessException(SERVER_ERROR, "Feign 调用失败");
+        }
+        return userAdminPageResult.getData();
     }
 
     /**

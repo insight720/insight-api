@@ -4,16 +4,17 @@ USE `api-facade`;
 
 CREATE TABLE IF NOT EXISTS `api-facade`.`api_digest`
 (
-    `id`          BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
-    `account_id`  BIGINT UNSIGNED        NOT NULL COMMENT '创建账户主键',
-    `api_name`    VARCHAR(256)           NOT NULL COMMENT '接口名称',
-    `description` VARCHAR(1024)          NULL COMMENT '接口描述',
-    `method`      TINYINT                NOT NULL COMMENT '请求方法',
-    `url`         VARCHAR(512)           NOT NULL COMMENT '接口地址',
-    `api_status`  TINYINT  DEFAULT 0     NOT NULL COMMENT '接口状态',
-    `is_deleted`  TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
-    `create_time` DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
-    `update_time` DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
+    `id`          BIGINT UNSIGNED                 NOT NULL COMMENT '主键' PRIMARY KEY,
+    `account_id`  BIGINT UNSIGNED                 NOT NULL COMMENT '创建账户主键',
+    `api_name`    VARCHAR(256)                    NOT NULL COMMENT '接口名称',
+    `description` VARCHAR(1024)                   NULL COMMENT '接口描述',
+    `method`      TINYINT                         NOT NULL COMMENT '请求方法',
+    `url`         VARCHAR(512)                    NOT NULL COMMENT '接口地址',
+    'usage_type'  VARCHAR(256) DEFAULT 'QUANTITY' NOT NULL COMMENT '接口用法类型',
+    `api_status`  TINYINT      DEFAULT 0          NOT NULL COMMENT '接口状态',
+    `is_deleted`  TINYINT      DEFAULT 0          NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
+    `create_time` DATETIME     DEFAULT NOW()      NOT NULL COMMENT '创建时间',
+    `update_time` DATETIME     DEFAULT NOW()      NOT NULL ON UPDATE NOW() COMMENT '更新时间'
 ) COMMENT '接口摘要';
 
 CREATE TABLE IF NOT EXISTS `api-facade`.`api_format`
@@ -111,16 +112,17 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_profile`
 
 CREATE TABLE IF NOT EXISTS `api-security`.`user_order`
 (
-    `id`           BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
-    `order_sn`     VARCHAR(512)           NOT NULL COMMENT '订单编号',
-    `account_id`   BIGINT UNSIGNED        NOT NULL COMMENT '账户主键',
-    `digest_id`    BIGINT UNSIGNED        NOT NULL COMMENT '接口摘要主键',
-    `usage_id`     BIGINT UNSIGNED        NOT NULL COMMENT '用户接口用法主键',
-    `usage_type`   TINYINT                NOT NULL COMMENT '接口用法类型',
-    `order_status` TINYINT  DEFAULT 0     NOT NULL COMMENT '订单状态',
-    `is_deleted`   TINYINT  DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
-    `create_time`  DATETIME DEFAULT NOW() NOT NULL COMMENT '创建时间',
-    `update_time`  DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
+    `id`           BIGINT UNSIGNED                 NOT NULL COMMENT '主键' PRIMARY KEY,
+    `order_sn`     VARCHAR(512)                    NOT NULL COMMENT '订单编号',
+    `description`  VARCHAR(1024)                   NOT NULL COMMENT '订单描述',
+    `account_id`   BIGINT UNSIGNED                 NOT NULL COMMENT '账户主键',
+    `digest_id`    BIGINT UNSIGNED                 NOT NULL COMMENT '接口摘要主键',
+    `usage_id`     BIGINT UNSIGNED                 NOT NULL COMMENT '用户接口用法主键',
+    'usage_type'   VARCHAR(256) DEFAULT 'QUANTITY' NOT NULL COMMENT '接口用法类型',
+    `order_status` TINYINT      DEFAULT 0          NOT NULL COMMENT '订单状态',
+    `is_deleted`   TINYINT      DEFAULT 0          NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
+    `create_time`  DATETIME     DEFAULT NOW()      NOT NULL COMMENT '创建时间',
+    `update_time`  DATETIME     DEFAULT NOW()      NOT NULL ON UPDATE NOW() COMMENT '更新时间'
 ) COMMENT '用户接口订单';
 
 ###########################################################################################

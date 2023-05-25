@@ -29,7 +29,6 @@ import pers.project.api.common.model.security.CustomUserDetails;
 import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.validation.validator.SensitiveWordValidator;
 import pers.project.api.security.authentication.VerificationCodeAuthenticationToken;
-import pers.project.api.security.enumeration.AccountStatusEnum;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.PrincipalNotFoundException;
 import pers.project.api.security.mapper.UserAccountMapper;
@@ -287,10 +286,6 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
                         (userAccountPO.getAuthority(), COMMA))
                 .collect(Collectors.toUnmodifiableSet());
         customUserDetails.setAuthoritySet(athroritySet);
-        // 将账户状态转为枚举名称
-        AccountStatusEnum statusEnum = AccountStatusEnum.getEnumByStatusCode
-                (userAccountPO.getAccountStatus());
-        customUserDetails.setAccountStatus(statusEnum.name());
         return customUserDetails;
     }
 
