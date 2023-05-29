@@ -61,7 +61,6 @@ const ApiAdmin: React.FC = () => {
             // 移除原有选项卡
             newPanes.splice(existingTabItemIndex, 1);
         }
-
         newPanes.push(newActiveKey);
         setItems(newPanes);
         setTabItem(newActiveKey);

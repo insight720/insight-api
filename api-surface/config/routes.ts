@@ -74,10 +74,10 @@ export default [
         component: './Welcome',
     },
     {
-        path: '/api',
+        path: '/all/api',
         name: '所有接口',
         icon: 'table',
-        component: './Api',
+        component: './AllApi',
     },
     // 错误页
     {

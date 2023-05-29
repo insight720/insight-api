@@ -192,31 +192,26 @@ const ApiAdminCard: React.FC<ApiAdminCardProps> = (props: ApiAdminCardProps) => 
             title: '请求参数',
             dataIndex: 'requestParam',
             valueType: 'jsonCode',
-            copyable: true,
         },
         {
             title: '请求头',
             dataIndex: 'requestHeader',
             valueType: 'code',
-            copyable: true,
         },
         {
             title: '请求体',
             dataIndex: 'requestBody',
             valueType: 'jsonCode',
-            copyable: true,
         },
         {
             title: '响应头',
             dataIndex: 'responseHeader',
             valueType: 'jsonCode',
-            copyable: true,
         },
         {
             title: '响应体',
             dataIndex: 'responseHeader',
             valueType: 'jsonCode',
-            copyable: true,
         },
         {
             title: '逻辑删除',
@@ -319,7 +314,7 @@ const ApiAdminCard: React.FC<ApiAdminCardProps> = (props: ApiAdminCardProps) => 
         >
             <ProCard>
                 <ProTable<API.UserApiDigestVO>
-                    scroll={{x: 5000}}
+                    scroll={{x: 3500}}
                     columns={columns}
                     cardBordered
                     request={async (

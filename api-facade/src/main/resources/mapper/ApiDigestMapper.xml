@@ -9,7 +9,7 @@
             <result property="accountId" column="account_id" jdbcType="BIGINT"/>
             <result property="apiName" column="api_name" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="method" column="method" jdbcType="TINYINT"/>
+            <result property="method" column="method" jdbcType="VARCHAR"/>
             <result property="url" column="url" jdbcType="VARCHAR"/>
             <result property="usageType" column="usage_type" jdbcType="VARCHAR"/>
             <result property="apiStatus" column="api_status" jdbcType="TINYINT"/>

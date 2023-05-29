@@ -18,6 +18,14 @@ import pers.project.api.facade.model.vo.ApiDigestPageVO;
 public interface FacadeService {
 
     /**
+     * 基于提供的 {@code ApiDigestPageQuery}，返回一个 {@code ApiDigestPageVO} 对象。
+     *
+     * @param pageQuery API 摘要分页 Query
+     * @return API 摘要页面 VO
+     */
+    ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery);
+
+    /**
      * 基于提供的 {@code UserApiDigestPageQuery}，返回一个 {@code UserApiDigestPageVO} 对象。
      *
      * @param pageQuery 用户 API 摘要分页 Query
@@ -33,14 +41,6 @@ public interface FacadeService {
      * @return 用户 API 格式和计数用法 VO
      */
     UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(UserApiFormatAndQuantityUsageQuery query);
-
-    /**
-     * 基于提供的 {@code ApiDigestPageQuery}，返回一个 {@code ApiDigestPageVO} 对象。
-     *
-     * @param pageQuery API 摘要分页 Query
-     * @return API 摘要页面 VO
-     */
-    ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery);
 
 
     /**

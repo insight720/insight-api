@@ -48,17 +48,16 @@ declare namespace API {
   };
 
   type ApiDigestPageQuery = {
-    accountId?: string;
+    size: number;
+    current: number;
     apiName?: string;
     description?: string;
-    methodSet?: number[];
+    methodSet?: string[];
     url?: string;
     usageTypeSet?: string[];
     apiStatusSet?: number[];
-    createTime?: string[];
-    updateTime?: string[];
-    size?: number;
-    current?: number;
+    createTimeRange?: string[];
+    updateTimeRange?: string[];
   };
 
   type ApiDigestPageVO = {
@@ -67,12 +66,12 @@ declare namespace API {
   };
 
   type ApiDigestVO = {
+    methodSet?: string[];
     usageTypeSet?: string[];
     digestId?: string;
     accountId?: string;
     apiName?: string;
     description?: string;
-    method?: number;
     url?: string;
     apiStatus?: number;
     createTime?: string;

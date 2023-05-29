@@ -273,7 +273,7 @@ const UserAdminCard: React.FC<UserAdminCardProps> = (props: UserAdminCardProps) 
         >
             <ProCard>
                 <ProTable<API.UserAdminVO>
-                    scroll={{x: 1500}}
+                    scroll={{x: 3500}}
                     columns={columns}
                     cardBordered
                     request={async (

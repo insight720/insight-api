@@ -5,9 +5,9 @@ import {viewUserApiFormatAndQuantityUsage} from "@/services/api-security/securit
 import {useModel} from "@@/exports";
 
 /**
- * 接口格式和用法卡片属性
+ * API 视图卡属性
  */
-export type ApiFormatAndUsageCardProps = {
+export type ApiViewCardProps = {
     currentUser?: API.LoginUserDTO;
     fetchUserInfo?: () => Promise<API.LoginUserDTO | undefined>;
     setInitialState?: (initialState: (s: any) => any) => void;
@@ -15,9 +15,9 @@ export type ApiFormatAndUsageCardProps = {
 };
 
 /**
- * 接口格式和用法卡片属性
+ * API 视图卡
  */
-const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiFormatAndUsageCardProps) => {
+const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
 
     const {userApiDigestVO} = props;
 
@@ -172,4 +172,4 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
     );
 };
 
-export default ApiFormatAndUsageCard;
+export default ApiViewCard;

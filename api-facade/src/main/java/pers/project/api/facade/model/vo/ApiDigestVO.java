@@ -15,6 +15,11 @@ import java.util.Set;
 public class ApiDigestVO {
 
     /**
+     * 请求方法集合
+     */
+    private Set<String> methodSet;
+
+    /**
      * 接口用法类型集合
      */
     private Set<String> usageTypeSet;
@@ -39,11 +44,6 @@ public class ApiDigestVO {
      * 接口描述
      */
     private String description;
-
-    /**
-     * 请求方法
-     */
-    private Integer method;
 
     /**
      * 接口地址

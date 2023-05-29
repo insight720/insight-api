@@ -2,13 +2,13 @@ import {PageContainer} from '@ant-design/pro-components';
 import React, {useState} from "react";
 import {useModel} from "@@/exports";
 import ApiDigestCard from "./components/ApiDigestCard";
-import ApiFormatAndUsageCard from "./components/ApiFormatAndUsageCard";
+import ApiViewCard from "./components/ApiViewCard";
 
 
 /**
- * 我的接口
+ * 所有接口
  */
-const MyApi: React.FC = () => {
+const AllApi: React.FC = () => {
     // 全局初始状态
     const {initialState} = useModel('@@initialState');
 
@@ -21,12 +21,14 @@ const MyApi: React.FC = () => {
     // 登陆用户信息
     const {currentUser} = initialState || {};
 
+    // tab 项
     type TabItem = {
         tab: string;
         key: string;
         closable: boolean;
     };
 
+    // tab 项的映射
     const tabItems: { [key: string]: TabItem } = {
         "digest": {
             tab: "接口摘要",
@@ -55,6 +57,7 @@ const MyApi: React.FC = () => {
     const [items, setItems]
         = useState<TabItem[]>([tabItem]);
 
+    // 添加标签
     const add = (tabType: TargetKey) => {
         const newPanes: TabItem[] = [...items];
         const newActiveKey = tabItems[tabType as string];
@@ -76,6 +79,7 @@ const MyApi: React.FC = () => {
         setTabItem(tabItems[newTabType]);
     };
 
+    // 删除标签
     const remove = (targetKey: TargetKey) => {
         let newActiveKey = tabItem;
         let lastIndex = -1;
@@ -143,7 +147,7 @@ const MyApi: React.FC = () => {
                 }
                 {
                     tabItem.key === 'format' &&
-                    <ApiFormatAndUsageCard
+                    <ApiViewCard
                         currentUser={currentUser}
                         fetchUserInfo={fetchUserInfo}
                         setInitialState={setInitialState}
@@ -156,4 +160,4 @@ const MyApi: React.FC = () => {
 
 };
 
-export default MyApi;
+export default AllApi;

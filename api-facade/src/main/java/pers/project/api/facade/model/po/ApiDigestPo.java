@@ -48,7 +48,7 @@ public class ApiDigestPo {
     /**
      * 请求方法
      */
-    private Integer method;
+    private String method;
 
     /**
      * 接口地址

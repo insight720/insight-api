@@ -31,9 +31,16 @@ public class FacadeController {
 
     private final FacadeService facadeService;
 
+    @PostMapping("/api/digest/page")
+    public Result<ApiDigestPageVO> viewApiDigestPage(@Valid @RequestBody ApiDigestPageQuery pageQuery) {
+        ApiDigestPageVO pageVO = facadeService.getApiDigestPageVO(pageQuery);
+        return ResultUtils.success(pageVO);
+    }
+
+    // region OpenFeign
     @PostMapping("/user/api/digest/page/result")
     public Result<UserApiDigestPageVO> getUserApiDigestPageResult
-            (@Valid @RequestBody UserApiDigestPageQuery pageQuery) {
+    (@Valid @RequestBody UserApiDigestPageQuery pageQuery) {
         UserApiDigestPageVO pageDTO = facadeService.getUserApiDigestPageDTO(pageQuery);
         return ResultUtils.success(pageDTO);
     }
@@ -46,18 +53,12 @@ public class FacadeController {
         return ResultUtils.success(formatAndQuantityUsageVO);
     }
 
-    @PostMapping("/api/digest/page")
-    public Result<ApiDigestPageVO> viewApiDigestPage
-            (@Valid @RequestBody ApiDigestPageQuery pageQuery) {
-        ApiDigestPageVO pageVO = facadeService.getApiDigestPageVO(pageQuery);
-        return ResultUtils.success(pageVO);
-    }
-
     @PostMapping("/api/admin/page/result")
     public Result<ApiAdminPageVO> getApiAdminPageResult
             (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
         ApiAdminPageVO pageVO = facadeService.getApiAdminPageVO(pageQuery);
         return ResultUtils.success(pageVO);
     }
+    // endregion
 
 }
