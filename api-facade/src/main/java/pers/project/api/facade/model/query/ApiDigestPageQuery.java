@@ -52,7 +52,8 @@ public class ApiDigestPageQuery {
      * 请求方法集合
      */
     @Size(min = 1)
-    private Set<@ContainedIn(values = {"GET"}) String> methodSet;
+    @ContainedIn(values = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"})
+    private Set<String> methodSet;
 
     /**
      * 接口地址（模糊查询）

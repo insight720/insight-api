@@ -13,11 +13,11 @@ import pers.project.api.security.model.po.UserAccountPO;
 public interface UserAccountService extends IService<UserAccountPO> {
 
     /**
-     * 创建新帐户
+     * 创建用户帐户
      *
      * @param userAccountRegistryDTO 用户注册 DTO
      */
-    void createNewAccount(UserAccountRegistryDTO userAccountRegistryDTO);
+    void createUserAccount(UserAccountRegistryDTO userAccountRegistryDTO);
 
     /**
      * 生成 API 密钥

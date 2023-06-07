@@ -1,5 +1,6 @@
 package pers.project.api.security.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +16,19 @@ import pers.project.api.common.model.query.UserAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.*;
+import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
 import pers.project.api.security.feign.FacadeFeignClient;
 import pers.project.api.security.mapper.SecurityMapper;
+import pers.project.api.security.mapper.UserAccountMapper;
+import pers.project.api.security.mapper.UserProfileMapper;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
+import pers.project.api.security.model.po.UserAccountPO;
+import pers.project.api.security.model.po.UserProfilePO;
+import pers.project.api.security.model.vo.ApiCreatorVO;
 import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.verification.VerificationContext;
 
@@ -29,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.springframework.util.StringUtils.commaDelimitedListToSet;
 import static pers.project.api.common.enumeration.ErrorEnum.SERVER_ERROR;
 import static pers.project.api.common.enumeration.ErrorEnum.VERIFICATION_CODE_ERROR;
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.EMAIL;
@@ -52,6 +60,10 @@ public class SecurityServiceImpl implements SecurityService {
     private final FacadeFeignClient facadeFeignClient;
 
     private final SecurityMapper securityMapper;
+
+    private final UserAccountMapper userAccountMapper;
+
+    private final UserProfileMapper userProfileMapper;
 
     @Override
     public void loadDeferredCsrfToken(HttpServletRequest request) {
@@ -163,6 +175,26 @@ public class SecurityServiceImpl implements SecurityService {
             throw new BusinessException(SERVER_ERROR, "Feign 调用失败");
         }
         return userAdminPageResult.getData();
+    }
+
+    @Override
+    public ApiCreatorVO getApiCreatorVO(String accountId) {
+        LambdaQueryWrapper<UserAccountPO> accountQueryWrapper = new LambdaQueryWrapper<>();
+        accountQueryWrapper.select(UserAccountPO::getUsername, UserAccountPO::getEmailAddress,
+                UserAccountPO::getAccountStatus, UserAccountPO::getAuthority, UserAccountPO::getUpdateTime);
+        accountQueryWrapper.eq(UserAccountPO::getId, accountId);
+        UserAccountPO userAccountPO = userAccountMapper.selectOne(accountQueryWrapper);
+        LambdaQueryWrapper<UserProfilePO> profileQueryWrapper = new LambdaQueryWrapper<>();
+        profileQueryWrapper.select(UserProfilePO::getAvatar, UserProfilePO::getNickname,
+                UserProfilePO::getWebsite, UserProfilePO::getGithub, UserProfilePO::getGitee,
+                UserProfilePO::getBiography, UserProfilePO::getIpLocation, UserProfilePO::getLastLoginTime);
+        profileQueryWrapper.eq(UserProfilePO::getAccountId, accountId);
+        UserProfilePO userProfilePO = userProfileMapper.selectOne(profileQueryWrapper);
+        ApiCreatorVO apiCreatorVO = new ApiCreatorVO();
+        BeanCopierUtils.copy(userAccountPO, apiCreatorVO);
+        BeanCopierUtils.copy(userProfilePO, apiCreatorVO);
+        apiCreatorVO.setAuthoritySet(commaDelimitedListToSet(userAccountPO.getAuthority()));
+        return apiCreatorVO;
     }
 
     /**

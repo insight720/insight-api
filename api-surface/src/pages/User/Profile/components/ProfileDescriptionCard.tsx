@@ -19,10 +19,8 @@ const ProfileDescriptionCard: React.FC<ProfileDescriptionCardProps> = (props: Pr
 
     return (
         <ProCard>
-
             <ProDescriptions title="资料内容" bordered
                              column={{xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1}}>
-
                 <ProDescriptions.Item label="用户头像">
                     <Avatar
                         alt="头像无法显示"
@@ -32,7 +30,6 @@ const ProfileDescriptionCard: React.FC<ProfileDescriptionCardProps> = (props: Pr
                         src={currentUser?.avatar}
                     />
                 </ProDescriptions.Item>
-
                 <ProDescriptions.Item label="用户昵称" span={2}>
                     {currentUser?.nickname || <Typography.Text italic>暂无昵称</Typography.Text>}
                 </ProDescriptions.Item>

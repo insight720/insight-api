@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
+import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -14,8 +15,6 @@ import pers.project.api.common.model.vo.ApiAdminPageVO;
 import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.common.util.ResultUtils;
-import pers.project.api.facade.model.query.ApiDigestPageQuery;
-import pers.project.api.facade.model.vo.ApiDigestPageVO;
 import pers.project.api.facade.service.FacadeService;
 
 /**
@@ -30,12 +29,6 @@ import pers.project.api.facade.service.FacadeService;
 public class FacadeController {
 
     private final FacadeService facadeService;
-
-    @PostMapping("/api/digest/page")
-    public Result<ApiDigestPageVO> viewApiDigestPage(@Valid @RequestBody ApiDigestPageQuery pageQuery) {
-        ApiDigestPageVO pageVO = facadeService.getApiDigestPageVO(pageQuery);
-        return ResultUtils.success(pageVO);
-    }
 
     // region OpenFeign
     @PostMapping("/user/api/digest/page/result")
@@ -58,6 +51,13 @@ public class FacadeController {
             (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
         ApiAdminPageVO pageVO = facadeService.getApiAdminPageVO(pageQuery);
         return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/user/quantity/usage/creation/result")
+    public Result<String> getUserQuantityUsageCreationResult
+            (@Valid @RequestBody UserQuantityUsageCreationDTO creationDTO) {
+        String usageId = facadeService.createUserQuantityUsage(creationDTO);
+        return ResultUtils.success(usageId);
     }
     // endregion
 

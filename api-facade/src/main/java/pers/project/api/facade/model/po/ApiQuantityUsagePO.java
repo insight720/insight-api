@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 表【user_quantity_usage (用户接口计数用法) 】的数据 PO
+ * 表【api_quantity_usage (接口计数用法) 】的数据 PO
  *
  * @author Luo Fei
  * @date 2023/05/04
@@ -21,19 +21,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "user_quantity_usage")
-public class UserQuantityUsagePo {
+@TableName(value = "api_quantity_usage")
+public class ApiQuantityUsagePO {
 
     /**
      * 主键
      */
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
-
-    /**
-     * 账户主键
-     */
-    private String accountId;
 
     /**
      * 接口摘要主键
@@ -54,6 +49,11 @@ public class UserQuantityUsagePo {
      * 调用次数存量
      */
     private Long stock;
+
+    /**
+     * 锁定的调用次数存量
+     */
+    private Long lockedStock;
 
     /**
      * 用法状态

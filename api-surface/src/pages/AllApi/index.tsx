@@ -3,6 +3,8 @@ import React, {useState} from "react";
 import {useModel} from "@@/exports";
 import ApiDigestCard from "./components/ApiDigestCard";
 import ApiViewCard from "./components/ApiViewCard";
+import ApiQuantityUsageViewCard from "@/pages/AllApi/components/ApiQuantityUsageViewCard";
+import ApiCreatorViewCard from "@/pages/AllApi/components/ApiCreatorViewCard";
 
 
 /**
@@ -28,6 +30,10 @@ const AllApi: React.FC = () => {
         closable: boolean;
     };
 
+    // 当前查看的 API 摘要
+    const [apiDigestVO, setApiDigestVO]
+        = useState<API.ApiDigestVO>();
+
     // tab 项的映射
     const tabItems: { [key: string]: TabItem } = {
         "digest": {
@@ -39,14 +45,19 @@ const AllApi: React.FC = () => {
             tab: "接口信息",
             key: "format",
             closable: true,
+        },
+        "quantityUsage": {
+            tab: "接口计数用法",
+            key: "quantityUsage",
+            closable: true,
+        },
+        "creator": {
+            tab: "创建者信息",
+            key: "creator",
+            closable: true,
         }
     };
 
-    // 当前查看的 API 摘要
-    const [apiDigestVO, setApiDigestVO]
-        = useState<API.ApiDigestVO>();
-
-    // tab 标签键
     type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
     // tab 标签显示项
@@ -141,6 +152,7 @@ const AllApi: React.FC = () => {
                     <ApiDigestCard currentUser={currentUser}
                                    fetchUserInfo={fetchUserInfo}
                                    setInitialState={setInitialState}
+                                   apiDigestVO={apiDigestVO}
                                    setApiDigestVO={setApiDigestVO}
                                    add={add}
                     />
@@ -151,10 +163,25 @@ const AllApi: React.FC = () => {
                         currentUser={currentUser}
                         fetchUserInfo={fetchUserInfo}
                         setInitialState={setInitialState}
-                        userApiDigestVO={apiDigestVO}/>
+                        apiDigestVO={apiDigestVO}/>
+                }
+                {
+                    tabItem.key === 'quantityUsage' &&
+                    <ApiQuantityUsageViewCard
+                        currentUser={currentUser}
+                        fetchUserInfo={fetchUserInfo}
+                        setInitialState={setInitialState}
+                        apiDigestVO={apiDigestVO}/>
+                }
+                {
+                    tabItem.key === 'creator' &&
+                    <ApiCreatorViewCard
+                        currentUser={currentUser}
+                        fetchUserInfo={fetchUserInfo}
+                        setInitialState={setInitialState}
+                        apiDigestVO={apiDigestVO}/>
                 }
             </PageContainer>
-
         </div>
     );
 

@@ -680,7 +680,6 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                 {tipMessage}
                 <br/>
                 <br/>
-
                 {(verificationFinish === OnFinishTypeEnum.MODIFY_USERNAME
                         || verificationFinish === OnFinishTypeEnum.SET_USERNAME_AND_PASSWORD) &&
                     <ProFormText
@@ -923,7 +922,6 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                         }
                         }/>
                 }
-
             </ModalForm>
 
                 <ProCard>
@@ -1067,7 +1065,6 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
                                 </Button>}
                         </Space>
                     </ProForm.Group>
-
 
                     <ProForm.Group size={"large"} title={"第三方登录"} align={"baseline"}
                                    tooltip={"第三方登录是指用户可以通过使用其已有的第三方账号（如 QQ、WeChat 等）直接登录到本网站，" +

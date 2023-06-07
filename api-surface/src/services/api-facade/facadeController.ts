@@ -17,21 +17,6 @@ export async function getApiAdminPageResult(
   });
 }
 
-/** 此处后端没有提供注释 POST /api/digest/page */
-export async function viewApiDigestPage(
-  body: API.ApiDigestPageQuery,
-  options?: { [key: string]: any },
-) {
-  return request<API.ResultApiDigestPageVO>(`/facade/api/digest/page`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
 /** 此处后端没有提供注释 POST /user/api/digest/page/result */
 export async function getUserApiDigestPageResult(
   body: API.UserApiDigestPageQuery,
@@ -63,4 +48,19 @@ export async function getUserApiFormatAndQuantityUsageResult(
       ...(options || {}),
     },
   );
+}
+
+/** 此处后端没有提供注释 POST /user/quantity/usage/creation/result */
+export async function getUserQuantityUsageCreationResult(
+  body: API.UserQuantityUsageCreationDTO,
+  options?: { [key: string]: any },
+) {
+  return request<API.ResultString>(`/facade/user/quantity/usage/creation/result`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
 }

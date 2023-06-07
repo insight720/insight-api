@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="pers.project.api.facade.mapper.UserQuantityUsageMapper">
 
-    <resultMap id="BaseResultMap" type="pers.project.api.facade.model.po.UserQuantityUsagePo">
+    <resultMap id="BaseResultMap" type="pers.project.api.facade.model.po.UserQuantityUsagePO">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="accountId" column="account_id" jdbcType="BIGINT"/>
             <result property="digestId" column="digest_id" jdbcType="BIGINT"/>
@@ -23,5 +23,11 @@
         usage_status,is_deleted,create_time,
         update_time
     </sql>
+
+    <update id="updateStock">
+        UPDATE `api-facade`.user_quantity_usage
+        SET stock = stock + #{quantity}
+        WHERE digest_id = ${usageId};
+    </update>
 
 </mapper>

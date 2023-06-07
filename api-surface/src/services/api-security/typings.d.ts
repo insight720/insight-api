@@ -52,6 +52,24 @@ declare namespace API {
     createTime?: string;
   };
 
+  type ApiCreatorVO = {
+    accountUpdateTime?: string;
+    profileUpdateTime?: string;
+    authoritySet?: string[];
+    createTime?: string;
+    username?: string;
+    emailAddress?: string;
+    accountStatus?: number;
+    avatar?: string;
+    nickname?: string;
+    website?: string;
+    github?: string;
+    gitee?: string;
+    biography?: string;
+    ipLocation?: string;
+    lastLoginTime?: string;
+  };
+
   type ApiKeyStatusModificationDTO = {
     accountId?: string;
     newStatus: string;
@@ -90,10 +108,27 @@ declare namespace API {
     codeCheckDTO?: VerificationCodeCheckDTO;
   };
 
+  type QuantityUsageOrderCreationDTO = {
+    accountId?: string;
+    digestId?: string;
+    methodSet?: string[];
+    usageTypeSet?: string[];
+    orderQuantity: string;
+    apiName: string;
+    description: string;
+    url: string;
+  };
+
   type ResultApiAdminPageVO = {
     code?: string;
     message?: string;
     data?: ApiAdminPageVO;
+  };
+
+  type ResultApiCreatorVO = {
+    code?: string;
+    message?: string;
+    data?: ApiCreatorVO;
   };
 
   type ResultLoginUserDTO = {
@@ -310,5 +345,9 @@ declare namespace API {
     phoneNumber?: string;
     emailAddress?: string;
     strategy: string;
+  };
+
+  type viewApiCreatorParams = {
+    accountId: string;
   };
 }

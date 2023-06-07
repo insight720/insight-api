@@ -2,7 +2,7 @@ package pers.project.api.facade.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
-import pers.project.api.facade.model.po.ApiFormatPo;
+import pers.project.api.facade.model.po.ApiFormatPO;
 
 /**
  * 针对表【api_format (接口格式) 】的数据库操作 Mapper
@@ -11,7 +11,7 @@ import pers.project.api.facade.model.po.ApiFormatPo;
  * @date 2023/05/04
  */
 @Mapper
-public interface ApiFormatMapper extends BaseMapper<ApiFormatPo> {
+public interface ApiFormatMapper extends BaseMapper<ApiFormatPO> {
 
 }
 

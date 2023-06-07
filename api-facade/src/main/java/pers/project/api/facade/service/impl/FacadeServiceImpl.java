@@ -6,30 +6,23 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.*;
 import pers.project.api.common.util.BeanCopierUtils;
-import pers.project.api.facade.mapper.ApiDigestMapper;
-import pers.project.api.facade.mapper.ApiFormatMapper;
-import pers.project.api.facade.mapper.FacadeMapper;
-import pers.project.api.facade.mapper.UserQuantityUsageMapper;
+import pers.project.api.facade.mapper.*;
 import pers.project.api.facade.model.po.ApiDigestPo;
-import pers.project.api.facade.model.po.ApiFormatPo;
-import pers.project.api.facade.model.po.UserQuantityUsagePo;
-import pers.project.api.facade.model.query.ApiDigestPageQuery;
-import pers.project.api.facade.model.vo.ApiDigestPageVO;
-import pers.project.api.facade.model.vo.ApiDigestVO;
+import pers.project.api.facade.model.po.ApiFormatPO;
+import pers.project.api.facade.model.po.UserQuantityUsagePO;
 import pers.project.api.facade.service.FacadeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.StringUtils.hasText;
 
 /**
  * Facade 模块的 Service 实现
@@ -47,57 +40,9 @@ public class FacadeServiceImpl implements FacadeService {
 
     private final FacadeMapper facadeMapper;
 
-    private final UserQuantityUsageMapper userQuantityUsageMapper;
+    private final ApiQuantityUsageMapper apiQuantityUsageMapper;
 
-    @Override
-    public ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery) {
-        // 按 Query 条件组装 QueryWrapper
-        LambdaQueryWrapper<ApiDigestPo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(ApiDigestPo::getId, ApiDigestPo::getAccountId, ApiDigestPo::getApiName,
-                ApiDigestPo::getDescription, ApiDigestPo::getMethod, ApiDigestPo::getUrl,
-                ApiDigestPo::getApiStatus, ApiDigestPo::getUsageType, ApiDigestPo::getCreateTime,
-                ApiDigestPo::getUpdateTime);
-        String apiName = pageQuery.getApiName();
-        queryWrapper.like(nonNull(apiName), ApiDigestPo::getApiName, apiName);
-        String description = pageQuery.getDescription();
-        queryWrapper.like(nonNull(description), ApiDigestPo::getDescription, description);
-        Set<String> methodSet = pageQuery.getMethodSet();
-        queryWrapper.like(nonNull(methodSet), ApiDigestPo::getMethod,
-                collectionToCommaDelimitedString(methodSet));
-        String url = pageQuery.getUrl();
-        queryWrapper.like(nonNull(url), ApiDigestPo::getUrl, url);
-        Set<String> usageTypeSet = pageQuery.getUsageTypeSet();
-        queryWrapper.in(nonNull(usageTypeSet), ApiDigestPo::getUsageType,
-                collectionToCommaDelimitedString(usageTypeSet));
-        Set<Integer> apiStatusSet = pageQuery.getApiStatusSet();
-        queryWrapper.in(nonNull(apiStatusSet), ApiDigestPo::getApiStatus, apiStatusSet);
-        LocalDateTime[] createTimeRange = pageQuery.getCreateTimeRange();
-        queryWrapper.and(nonNull(createTimeRange),
-                wrapper -> wrapper.ge(ApiDigestPo::getCreateTime, createTimeRange[1])
-                        .le(ApiDigestPo::getCreateTime, createTimeRange[2]));
-        LocalDateTime[] updateTimeRange = pageQuery.getUpdateTimeRange();
-        queryWrapper.and(nonNull(updateTimeRange),
-                wrapper -> wrapper.ge(ApiDigestPo::getUpdateTime, updateTimeRange[1])
-                        .le(ApiDigestPo::getUpdateTime, updateTimeRange[2]));
-        // 用 QueryWrapper 分页查询
-        Page<ApiDigestPo> page = apiDigestMapper.selectPage
-                (Page.of(pageQuery.getCurrent(), pageQuery.getSize()), queryWrapper);
-        ApiDigestPageVO apiDigestPageVO = new ApiDigestPageVO();
-        apiDigestPageVO.setTotal(page.getTotal());
-        List<ApiDigestVO> apiDigestVOList = page.getRecords().stream()
-                .map(apiDigestPo -> {
-                    ApiDigestVO apiDigestVO = new ApiDigestVO();
-                    BeanCopierUtils.copy(apiDigestPo, apiDigestVO);
-                    apiDigestVO.setDigestId(apiDigestPo.getId());
-                    apiDigestVO.setUsageTypeSet
-                            (commaDelimitedListToSet(apiDigestPo.getUsageType()));
-                    apiDigestVO.setMethodSet
-                            (commaDelimitedListToSet(apiDigestPo.getMethod()));
-                    return apiDigestVO;
-                }).collect(Collectors.toList());
-        apiDigestPageVO.setDigestVOList(apiDigestVOList);
-        return apiDigestPageVO;
-    }
+    private final UserQuantityUsageMapper userQuantityUsageMapper;
 
     @Override
     public UserApiDigestPageVO getUserApiDigestPageDTO(UserApiDigestPageQuery pageQuery) {
@@ -147,19 +92,19 @@ public class FacadeServiceImpl implements FacadeService {
     public UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(UserApiFormatAndQuantityUsageQuery query) {
         UserApiFormatAndQuantityUsageVO formatAndQuantityUsageVO = new UserApiFormatAndQuantityUsageVO();
         // 查询 API 格式信息
-        LambdaQueryWrapper<ApiFormatPo> formatQueryWrapper = new LambdaQueryWrapper<>();
-        formatQueryWrapper.select(ApiFormatPo::getRequestParam, ApiFormatPo::getRequestHeader,
-                ApiFormatPo::getRequestBody, ApiFormatPo::getResponseHeader, ApiFormatPo::getResponseBody);
-        formatQueryWrapper.eq(ApiFormatPo::getDigestId, query.getDigestId());
-        ApiFormatPo apiFormatPO = apiFormatMapper.selectOne(formatQueryWrapper);
+        LambdaQueryWrapper<ApiFormatPO> formatQueryWrapper = new LambdaQueryWrapper<>();
+        formatQueryWrapper.select(ApiFormatPO::getRequestParam, ApiFormatPO::getRequestHeader,
+                ApiFormatPO::getRequestBody, ApiFormatPO::getResponseHeader, ApiFormatPO::getResponseBody);
+        formatQueryWrapper.eq(ApiFormatPO::getDigestId, query.getDigestId());
+        ApiFormatPO apiFormatPO = apiFormatMapper.selectOne(formatQueryWrapper);
         BeanCopierUtils.copy(apiFormatPO, formatAndQuantityUsageVO);
         // 查询 API 计数用法信息
-        LambdaQueryWrapper<UserQuantityUsagePo> usageQueryWrapper = new LambdaQueryWrapper<>();
-        usageQueryWrapper.select(UserQuantityUsagePo::getTotal, UserQuantityUsagePo::getFailure,
-                UserQuantityUsagePo::getStock, UserQuantityUsagePo::getUsageStatus);
-        usageQueryWrapper.eq(UserQuantityUsagePo::getAccountId, query.getAccountId());
-        usageQueryWrapper.eq(UserQuantityUsagePo::getDigestId, query.getDigestId());
-        UserQuantityUsagePo userQuantityUsagePo = userQuantityUsageMapper.selectOne(usageQueryWrapper);
+        LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
+        usageQueryWrapper.select(UserQuantityUsagePO::getTotal, UserQuantityUsagePO::getFailure,
+                UserQuantityUsagePO::getStock, UserQuantityUsagePO::getUsageStatus);
+        usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, query.getAccountId());
+        usageQueryWrapper.eq(UserQuantityUsagePO::getDigestId, query.getDigestId());
+        UserQuantityUsagePO userQuantityUsagePo = userQuantityUsageMapper.selectOne(usageQueryWrapper);
         BeanCopierUtils.copy(userQuantityUsagePo, formatAndQuantityUsageVO);
         return formatAndQuantityUsageVO;
     }
@@ -175,6 +120,35 @@ public class FacadeServiceImpl implements FacadeService {
         apiAdminPageVO.setTotal(total);
         apiAdminPageVO.setApiAdminVOList(apiAdminVOList);
         return apiAdminPageVO;
+    }
+
+    @Override
+    // TODO: 2023/6/5 分布式事务
+//    @Transactional(rollbackFor = Throwable.class)
+    public String createUserQuantityUsage(UserQuantityUsageCreationDTO creationDTO) {
+        LambdaQueryWrapper<UserQuantityUsagePO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(UserQuantityUsagePO::getId);
+        String accountId = creationDTO.getAccountId();
+        queryWrapper.eq(UserQuantityUsagePO::getAccountId, accountId);
+        String digestId = creationDTO.getDigestId();
+        queryWrapper.eq(UserQuantityUsagePO::getDigestId, digestId);
+        UserQuantityUsagePO originalUsagePO = userQuantityUsageMapper.selectOne(queryWrapper);
+        String orderQuantity = creationDTO.getOrderQuantity();
+        String usageId;
+        if (originalUsagePO != null) {
+            usageId = originalUsagePO.getId();
+            userQuantityUsageMapper.updateStock(usageId, orderQuantity);
+        } else {
+            UserQuantityUsagePO userQuantityUsagePO = new UserQuantityUsagePO();
+            userQuantityUsagePO.setAccountId(accountId);
+            userQuantityUsagePO.setDigestId(digestId);
+            userQuantityUsagePO.setTotal(orderQuantity);
+            userQuantityUsageMapper.insert(userQuantityUsagePO);
+            usageId = userQuantityUsagePO.getId();
+        }
+        // TODO: 2023/6/6 必须消峰，定时扣减库存量
+        apiQuantityUsageMapper.updateStock(digestId, orderQuantity);
+        return usageId;
     }
 
 }

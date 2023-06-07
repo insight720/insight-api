@@ -37,7 +37,9 @@ public enum ErrorEnum {
 
     PASSWORD_ERROR("A0210", "用户密码错误"),
 
-    SERVER_ERROR("B0001", "系统执行出错");
+    SERVER_ERROR("B0001", "系统执行出错"),
+
+    RPC_ERROR("C0110", "RPC 服务出");
 
     /**
      * 错误码

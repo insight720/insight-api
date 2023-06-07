@@ -74,12 +74,12 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
     const ApiStatusMap: Record<number, { value: number, text: string, status: string }> = {
         [0]: {
             value: 0,
-            text: '正常',
+            name: '正常',
             status: 'success'
         },
         [1]: {
             value: 1,
-            text: '错误',
+            name: '错误',
             status: 'error'
         },
     };
@@ -128,7 +128,7 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
                     <ProDescriptions.Item label="接口状态" span={3}>
                         {/*// @ts-ignore*/}
                         <Badge status={ApiStatusMap[record?.apiStatus || 0].status}
-                               text={ApiStatusMap[record?.apiStatus || 0].text}/>
+                               text={ApiStatusMap[record?.apiStatus || 0].name}/>
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="创建时间" span={2}>
                         {record?.createTime}

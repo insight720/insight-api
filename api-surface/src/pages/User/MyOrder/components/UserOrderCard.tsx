@@ -1,6 +1,6 @@
 import {PlusOutlined} from '@ant-design/icons';
 import {ActionType, ProCard, ProColumns, ProTable, TableDropdown} from '@ant-design/pro-components';
-import {Button, Space, Tag} from 'antd';
+import {Button} from 'antd';
 import React, {useRef} from 'react';
 import {viewUserOrderPage} from "@/services/api-security/userOrderController";
 
@@ -34,13 +34,13 @@ const UserOrderCard: React.FC<UserOrderCardProps> = (props: UserOrderCardProps) 
     /**
      * 接口用法的映射
      */
-    const ApiUsageMap: Record<number, { value: number, name: string, color: string }> = {
-        [0]: {
-            value: 0,
-            name: '计数用法',
-            color: 'green'
-        },
-    };
+    // const ApiUsageMap: Record<number, { value: number, name: string, color: string }> = {
+    //     [0]: {
+    //         value: 0,
+    //         name: '计数用法',
+    //         color: 'green'
+    //     },
+    // };
 
     /**
      * ProTable 的列
@@ -78,13 +78,13 @@ const UserOrderCard: React.FC<UserOrderCardProps> = (props: UserOrderCardProps) 
             renderFormItem: (_, {defaultRender}) => {
                 return defaultRender(_);
             },
-            render: (_, record) => (
-                <Space>
-                    <Tag color={ApiUsageMap[record?.usageType || 0].color}>
-                        {ApiUsageMap[record?.usageType || 0].name}
-                    </Tag>
-                </Space>
-            ),
+            // render: (_, record) => (
+            //     <Space>
+            //         <Tag color={ApiUsageMap[record?.usageType || 0].color}>
+            //             {ApiUsageMap[record?.usageType || 0].name}
+            //         </Tag>
+            //     </Space>
+            // ),
         },
         {
             title: '订单状态',

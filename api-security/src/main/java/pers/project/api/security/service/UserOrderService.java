@@ -1,6 +1,7 @@
 package pers.project.api.security.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import pers.project.api.security.model.dto.QuantityUsageOrderCreationDTO;
 import pers.project.api.security.model.po.UserOrderPO;
 import pers.project.api.security.model.query.UserOrderPageQuery;
 import pers.project.api.security.model.vo.UserOrderPageVO;
@@ -20,5 +21,12 @@ public interface UserOrderService extends IService<UserOrderPO> {
      * @return 用户订单页面 VO
      */
     UserOrderPageVO getUserOrderPageVO(UserOrderPageQuery pageQuery);
+
+    /**
+     * 该方法用于生成计数用法订单。计数用法是指接口的调用次数作为使用依据的一种使用方式。
+     *
+     * @param orderCreationDTO 计数用法订单创建 DTO
+     */
+    void createQuantityUsageOrder(QuantityUsageOrderCreationDTO orderCreationDTO);
 
 }

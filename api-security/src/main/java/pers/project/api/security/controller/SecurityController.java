@@ -4,10 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserAdminPageQuery;
@@ -18,7 +15,9 @@ import pers.project.api.common.model.vo.UserAdminPageVO;
 import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.common.util.ResultUtils;
+import pers.project.api.common.validation.constraint.SnowflakeId;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
+import pers.project.api.security.model.vo.ApiCreatorVO;
 import pers.project.api.security.service.SecurityService;
 
 /**
@@ -73,6 +72,13 @@ public class SecurityController {
             (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
         ApiAdminPageVO pageVO = securityService.getApiAdminPageVO(pageQuery);
         return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/api/creator/{accountId}")
+    public Result<ApiCreatorVO> viewApiCreator
+            (@SnowflakeId @PathVariable String accountId) {
+        ApiCreatorVO apiCreatorVO = securityService.getApiCreatorVO(accountId);
+        return ResultUtils.success(apiCreatorVO);
     }
 
 }

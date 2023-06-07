@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
+import pers.project.api.security.model.dto.QuantityUsageOrderCreationDTO;
 import pers.project.api.security.model.query.UserOrderPageQuery;
 import pers.project.api.security.model.vo.UserOrderPageVO;
 import pers.project.api.security.service.UserOrderService;
@@ -32,6 +33,13 @@ public class UserOrderController {
             (@Valid @RequestBody UserOrderPageQuery pageQuery) {
         UserOrderPageVO pageVO = userOrderService.getUserOrderPageVO(pageQuery);
         return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/quantity/usage/creation")
+    public Result<Void> placeQuantityUsageOrder
+            (@Valid @RequestBody QuantityUsageOrderCreationDTO creationDTO) {
+        userOrderService.createQuantityUsageOrder(creationDTO);
+        return ResultUtils.success();
     }
 
 }

@@ -317,7 +317,6 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
                     />
                 </>
             )}
-
             <ProFormText
                 name="username"
                 label={locale.formatMessage({
@@ -344,7 +343,6 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
                     },
                 ]}
             />
-
             <ProFormText.Password
                 name="password"
                 label={locale.formatMessage({

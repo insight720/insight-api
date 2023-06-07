@@ -1,13 +1,12 @@
 package pers.project.api.facade.service;
 
+import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.ApiAdminPageVO;
 import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
-import pers.project.api.facade.model.query.ApiDigestPageQuery;
-import pers.project.api.facade.model.vo.ApiDigestPageVO;
 
 /**
  * Facade 模块 Service
@@ -16,14 +15,6 @@ import pers.project.api.facade.model.vo.ApiDigestPageVO;
  * @date 2023/05/05
  */
 public interface FacadeService {
-
-    /**
-     * 基于提供的 {@code ApiDigestPageQuery}，返回一个 {@code ApiDigestPageVO} 对象。
-     *
-     * @param pageQuery API 摘要分页 Query
-     * @return API 摘要页面 VO
-     */
-    ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery);
 
     /**
      * 基于提供的 {@code UserApiDigestPageQuery}，返回一个 {@code UserApiDigestPageVO} 对象。
@@ -42,7 +33,6 @@ public interface FacadeService {
      */
     UserApiFormatAndQuantityUsageVO getUserApiFormatAndQuantityUsageVO(UserApiFormatAndQuantityUsageQuery query);
 
-
     /**
      * 基于提供的 {@code ApiAdminPageQuery}，返回一个 {@code ApiAdminPageVO} 对象，
      * 该对象包含了 API 管理页面所需展示的信息。
@@ -51,5 +41,13 @@ public interface FacadeService {
      * @return API 管理页面 VO
      */
     ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
+
+    /**
+     * 创建一条用户接口计数用法记录。
+     *
+     * @param creationDTO 用户接口计数用法创建 DTO
+     * @return 用户接口计数用法 主键
+     */
+    String createUserQuantityUsage(UserQuantityUsageCreationDTO creationDTO);
 
 }

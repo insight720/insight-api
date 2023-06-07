@@ -66,7 +66,7 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     private final TransactionTemplate transactionTemplate;
 
     @Override
-    public void createNewAccount(UserAccountRegistryDTO userAccountRegistryDTO) {
+    public void createUserAccount(UserAccountRegistryDTO userAccountRegistryDTO) {
         // 校验注册数据
         VerificationStrategyEnum strategyEnum = validateUserRegistryDTO(userAccountRegistryDTO);
         // 保存用户账户

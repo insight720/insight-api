@@ -15,6 +15,7 @@ import pers.project.api.security.authentication.VerificaionCodeAuthenticationPro
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
+import pers.project.api.security.model.vo.ApiCreatorVO;
 
 import java.util.function.Supplier;
 
@@ -105,5 +106,14 @@ public interface SecurityService {
      * @return API 管理页面 VO
      */
     ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
+
+    /**
+     * 根据提供的账号 ID，返回一个 {@code ApiCreatorVO} 对象，
+     * 该对象包含了 API 创建者所需展示的信息。
+     *
+     * @param accountId 账号 ID
+     * @return API 创建者 VO
+     */
+    ApiCreatorVO getApiCreatorVO(String accountId);
 
 }

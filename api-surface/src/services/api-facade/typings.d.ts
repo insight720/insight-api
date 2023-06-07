@@ -78,6 +78,16 @@ declare namespace API {
     updateTime?: string;
   };
 
+  type ApiFormatVO = {
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    createTime?: string;
+    updateTime?: string;
+  };
+
   type ApiInfoAddRequest = {
     name?: string;
     description?: string;
@@ -136,6 +146,23 @@ declare namespace API {
     responseHeader?: string;
     status?: number;
     method?: string;
+  };
+
+  type ApiQuantityUsageVO = {
+    total?: number;
+    failure?: number;
+    stock?: number;
+    lockedStock?: number;
+    usageStatus?: number;
+    createTime?: string;
+    updateTime?: string;
+  };
+
+  type ApiStockInfoVO = {
+    stock?: number;
+    lockedStock?: number;
+    usageStatus?: number;
+    updateTime?: string;
   };
 
   type DeleteRequest = {
@@ -199,10 +226,28 @@ declare namespace API {
     data?: ApiDigestPageVO;
   };
 
+  type ResultApiFormatVO = {
+    code?: string;
+    message?: string;
+    data?: ApiFormatVO;
+  };
+
   type ResultApiInfoEntity = {
     code?: string;
     message?: string;
     data?: ApiInfoEntity;
+  };
+
+  type ResultApiQuantityUsageVO = {
+    code?: string;
+    message?: string;
+    data?: ApiQuantityUsageVO;
+  };
+
+  type ResultApiStockInfoVO = {
+    code?: string;
+    message?: string;
+    data?: ApiStockInfoVO;
   };
 
   type ResultBoolean = {
@@ -233,6 +278,12 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: PageApiInfoEntity;
+  };
+
+  type ResultString = {
+    code?: string;
+    message?: string;
+    data?: string;
   };
 
   type ResultUserApiDigestPageVO = {
@@ -299,5 +350,23 @@ declare namespace API {
     failure?: number;
     stock?: number;
     usageStatus?: number;
+  };
+
+  type UserQuantityUsageCreationDTO = {
+    accountId?: string;
+    digestId?: string;
+    orderQuantity: string;
+  };
+
+  type viewApiFormatParams = {
+    digestId: string;
+  };
+
+  type viewApiQuantityUsageParams = {
+    digestId: string;
+  };
+
+  type viewApiStockInfoParams = {
+    digestId: string;
   };
 }

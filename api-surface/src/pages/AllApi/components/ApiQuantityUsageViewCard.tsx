@@ -1,12 +1,12 @@
 import {ProCard, ProDescriptions} from '@ant-design/pro-components';
 import {message, Space, Tag} from 'antd';
 import React, {useEffect, useState} from 'react';
-import {viewApiFormat} from "@/services/api-facade/apiFormatController";
+import {viewApiQuantityUsage} from "@/services/api-facade/apiQuantityUsageController";
 
 /**
- * API 视图卡属性
+ * API 计数用法视图卡属性
  */
-export type ApiViewCardProps = {
+export type ApiQuantityUsageViewCardProps = {
     currentUser?: API.LoginUserDTO;
     fetchUserInfo?: () => Promise<API.LoginUserDTO | undefined>;
     setInitialState?: (initialState: (s: any) => any) => void;
@@ -14,9 +14,9 @@ export type ApiViewCardProps = {
 };
 
 /**
- * API 视图卡
+ * API 计数用法视图卡
  */
-const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
+const ApiQuantityUsageViewCard: React.FC<ApiQuantityUsageViewCardProps> = (props: ApiQuantityUsageViewCardProps) => {
 
     // Api 摘要信息
     const {apiDigestVO} = props;
@@ -76,6 +76,22 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
     };
 
     /**
+     * API 计数用法状态的映射
+     */
+    const ApiQuantityUsageStatusMap: Record<number, { value: number, name: string, color: string }> = {
+        [0]: {
+            value: 0,
+            name: '正常',
+            color: 'green'
+        },
+        [1]: {
+            value: 1,
+            name: '错误',
+            color: 'red'
+        },
+    };
+
+    /**
      * 使用方法映射
      */
     const UsageTypeMap: Record<string, { value: string, color: string }> = {
@@ -85,8 +101,9 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
         },
     };
 
-    const [apiFormatVO, setApiFormatVO]
-        = useState<API.ApiFormatVO>();
+    // 当前接口计数用法 VO
+    const [apiQuantityUsageVO, setApiQuantityUsageVO]
+        = useState<API.ApiQuantityUsageVO>();
 
     // 全局初始状态
     // const {initialState} = useModel('@@initialState');
@@ -97,12 +114,12 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
     const loadData = async () => {
         message.loading("加载中");
         try {
-            const result = await viewApiFormat(
+            const result = await viewApiQuantityUsage(
                 {
                     digestId: apiDigestVO?.digestId || ""
                 }
             )
-            setApiFormatVO(result.data);
+            setApiQuantityUsageVO(result.data);
             message.destroy();
             return true;
         } catch (error: any) {
@@ -110,6 +127,7 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
             message.error(error.message || '加载失败，请重试！');
             return false;
         }
+
     };
 
     useEffect(() => {
@@ -148,7 +166,7 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
                             </Tag>
                         </Space>
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="用法类型">
+                    <ProDescriptions.Item label="所有用法类型">
                         {apiDigestVO?.usageTypeSet?.map((type) => (
                             <Space key={type}>
                                 <Tag color={UsageTypeMap[type || "QUANTITY"].color}>
@@ -157,34 +175,39 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
                             </Space>
                         ))}
                     </ProDescriptions.Item>
-
                     <ProDescriptions.Item label="接口摘要创建时间">
                         {apiDigestVO?.createTime}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="接口摘要更新时间">
                         {apiDigestVO?.updateTime}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="接口格式创建时间">
-                        {apiFormatVO?.createTime}
+                    <ProDescriptions.Item label="计数用法状态">
+                        <Space>
+                            <Tag color={ApiQuantityUsageStatusMap[apiQuantityUsageVO?.usageStatus || 0].color}>
+                                {ApiQuantityUsageStatusMap[apiQuantityUsageVO?.usageStatus || 0].name}
+                            </Tag>
+                        </Space>
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="接口格式更新时间">
-                        {apiFormatVO?.updateTime}
+                    <ProDescriptions.Item label="接口计数用法创建时间">
+                        {apiDigestVO?.createTime}
                     </ProDescriptions.Item>
-
-                    <ProDescriptions.Item label="请求参数" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestParam}
+                    <ProDescriptions.Item label="接口计数用法更新时间">
+                        {apiDigestVO?.updateTime}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="请求头" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestHeader}
+                    <ProDescriptions.Item label="总调用次数">
+                        {apiQuantityUsageVO?.total}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="请求体" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestBody}
+                    <ProDescriptions.Item label="失败调用次数">
+                        {apiQuantityUsageVO?.failure}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="响应头" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestHeader}
+                    <ProDescriptions.Item label="成功调用次数">
+                        {apiQuantityUsageVO?.total || 0 - (apiQuantityUsageVO?.failure || 0)}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="响应体" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestBody}
+                    <ProDescriptions.Item label="调用次数存量">
+                        {apiQuantityUsageVO?.stock}
+                    </ProDescriptions.Item>
+                    <ProDescriptions.Item label="锁定的调用次数存量">
+                        {apiQuantityUsageVO?.stock}
                     </ProDescriptions.Item>
                 </ProDescriptions>
             </ProCard>
@@ -192,4 +215,4 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
     );
 };
 
-export default ApiViewCard;
+export default ApiQuantityUsageViewCard;

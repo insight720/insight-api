@@ -25,7 +25,7 @@ public class UserAccountController {
 
     @PostMapping("/registry")
     public Result<Void> register(@Valid @RequestBody UserAccountRegistryDTO userAccountRegistryDTO) {
-        userAccountService.createNewAccount(userAccountRegistryDTO);
+        userAccountService.createUserAccount(userAccountRegistryDTO);
         return ResultUtils.success();
     }
 

@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "api_format")
-public class ApiFormatPo {
+public class ApiFormatPO {
 
     /**
      * 主键
