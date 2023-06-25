@@ -52,7 +52,6 @@ public class TestClient {
         return bodyFuture.join();
     }
 
-
     public HttpHeaders getHeaders(String requestBody) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

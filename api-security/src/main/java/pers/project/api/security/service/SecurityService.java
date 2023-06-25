@@ -13,9 +13,11 @@ import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.security.authentication.VerificaionCodeAuthenticationProvider;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
+import pers.project.api.security.model.dto.UserApiTestDTO;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.model.vo.ApiCreatorVO;
+import pers.project.api.security.model.vo.UserApiTestVO;
 
 import java.util.function.Supplier;
 
@@ -115,5 +117,14 @@ public interface SecurityService {
      * @return API 创建者 VO
      */
     ApiCreatorVO getApiCreatorVO(String accountId);
+
+    /**
+     * 根据提供的 {@code UserApiTestDTO} 对象，返回一个 {@code UserApiTestVO} 对象，
+     * 该对象包含了用户 API 测试所需展示的信息。
+     *
+     * @param userApiTestDTO 用户 API 测试 DTO 对象
+     * @return 用户 API 测试 VO 对象
+     */
+    UserApiTestVO getUserApiTestVO(UserApiTestDTO userApiTestDTO);
 
 }

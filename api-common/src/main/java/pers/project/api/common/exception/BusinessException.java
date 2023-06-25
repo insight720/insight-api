@@ -3,6 +3,7 @@ package pers.project.api.common.exception;
 
 import lombok.Getter;
 import pers.project.api.common.enumeration.ErrorEnum;
+import pers.project.api.common.model.Result;
 
 /**
  * 业务异常
@@ -23,6 +24,21 @@ public class BusinessException extends RuntimeException {
     public BusinessException(ErrorEnum errorEnum, String message) {
         super(message);
         this.code = errorEnum.code();
+    }
+
+    public BusinessException(String code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public BusinessException(Result<String> result) {
+        super(result.getMessage());
+        this.code = result.getCode();
+    }
+
+    public BusinessException(Result<String> result, String message) {
+        super(message);
+        this.code = result.getCode();
     }
 
 }

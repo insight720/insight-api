@@ -7,6 +7,7 @@ import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.ApiFormatMapper;
 import pers.project.api.facade.model.po.ApiFormatPO;
 import pers.project.api.facade.model.vo.ApiFormatVO;
+import pers.project.api.facade.model.vo.ApiTestFormatVO;
 import pers.project.api.facade.service.ApiFormatService;
 
 import static java.util.Objects.nonNull;
@@ -36,6 +37,23 @@ public class ApiFormatServiceImpl extends ServiceImpl<ApiFormatMapper, ApiFormat
             BeanCopierUtils.copy(apiFormatPO, apiFormatVO);
         }
         return apiFormatVO;
+    }
+
+    @Override
+    public ApiTestFormatVO getApiTestFormatVO(String digestId) {
+        // 查询 ApiFormat 信息
+        LambdaQueryWrapper<ApiFormatPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(ApiFormatPO::getRequestParam, ApiFormatPO::getRequestHeader,
+                ApiFormatPO::getRequestBody, ApiFormatPO::getResponseHeader,
+                ApiFormatPO::getResponseBody);
+        queryWrapper.eq(ApiFormatPO::getDigestId, digestId);
+        ApiFormatPO apiFormatPO = getOne(queryWrapper);
+        // 复制属性
+        ApiTestFormatVO apiTestFormatVO = new ApiTestFormatVO();
+        if (nonNull(apiFormatPO)) {
+            BeanCopierUtils.copy(apiFormatPO, apiTestFormatVO);
+        }
+        return apiTestFormatVO;
     }
 
 }

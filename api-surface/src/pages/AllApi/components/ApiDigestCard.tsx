@@ -161,6 +161,23 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
         },
     };
 
+
+    /**
+     * API 计数用法状态的映射
+     */
+    const ApiQuantityUsageStatusMap: Record<number, { value: number, name: string, color: string }> = {
+        [0]: {
+            value: 0,
+            name: '正常',
+            color: 'green'
+        },
+        [1]: {
+            value: 1,
+            name: '错误',
+            color: 'red'
+        },
+    };
+
     /**
      * ProTable 的列
      */
@@ -353,6 +370,15 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                     用法
                 </a>,
                 <a
+                    key="test"
+                    onClick={() => {
+                        setApiDigestVO?.(record);
+                        add?.("test");
+                    }}
+                >
+                    测试
+                </a>,
+                <a
                     key="order"
                     onClick={() => {
                         if (!currentUser?.secretId) {
@@ -508,7 +534,11 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                                     {apiStockInfoVO?.lockedStock}
                                 </ProDescriptions.Item>
                                 <ProDescriptions.Item label="用法状态">
-                                    {apiStockInfoVO?.usageStatus}
+                                    <Space>
+                                        <Tag color={ApiQuantityUsageStatusMap[apiStockInfoVO?.usageStatus || 0].color}>
+                                            {ApiQuantityUsageStatusMap[apiStockInfoVO?.usageStatus || 0].name}
+                                        </Tag>
+                                    </Space>
                                 </ProDescriptions.Item>
                                 <ProDescriptions.Item label="更新时间">
                                     {apiStockInfoVO?.updateTime}

@@ -42,7 +42,8 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         BeanCopierUtils.copy(userDetails, loginUserDTO);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(JSON.toJSONString(ResultUtils.success(loginUserDTO)));
+        String jsonString = JSON.toJSONString(ResultUtils.success(loginUserDTO));
+        response.getWriter().write(jsonString);
     }
 
 }

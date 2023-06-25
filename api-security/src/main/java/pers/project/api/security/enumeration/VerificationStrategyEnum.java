@@ -16,10 +16,10 @@ import lombok.experimental.Accessors;
 public enum VerificationStrategyEnum {
 
     PHONE("phoneVerificationStrategy", "手机短信验证码",
-            "security:verification:phone_verification_code:"),
+            "security:verification:code:phone:"),
 
     EMAIL("emailVerificationStrategy", "邮件验证码",
-            "security:verification:email_verification_code:");
+            "security:verification:code:email:");
 
     /**
      * 验证策略实现类的 Bean 名称

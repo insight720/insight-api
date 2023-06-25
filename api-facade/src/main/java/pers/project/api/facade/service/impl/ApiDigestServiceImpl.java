@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.ApiDigestMapper;
-import pers.project.api.facade.model.po.ApiDigestPo;
+import pers.project.api.facade.model.po.ApiDigestPO;
 import pers.project.api.facade.model.query.ApiDigestPageQuery;
 import pers.project.api.facade.model.vo.ApiDigestPageVO;
 import pers.project.api.facade.model.vo.ApiDigestVO;
@@ -28,52 +28,52 @@ import static org.springframework.util.StringUtils.commaDelimitedListToSet;
  * @date 2023/05/04
  */
 @Service
-public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigestPo> implements ApiDigestService {
+public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigestPO> implements ApiDigestService {
 
     @Override
     public ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery) {
         // 按 Query 条件组装 QueryWrapper
-        LambdaQueryWrapper<ApiDigestPo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(ApiDigestPo::getId, ApiDigestPo::getAccountId, ApiDigestPo::getApiName,
-                ApiDigestPo::getDescription, ApiDigestPo::getMethod, ApiDigestPo::getUrl,
-                ApiDigestPo::getApiStatus, ApiDigestPo::getUsageType, ApiDigestPo::getCreateTime,
-                ApiDigestPo::getUpdateTime);
+        LambdaQueryWrapper<ApiDigestPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(ApiDigestPO::getId, ApiDigestPO::getAccountId, ApiDigestPO::getApiName,
+                ApiDigestPO::getDescription, ApiDigestPO::getMethod, ApiDigestPO::getUrl,
+                ApiDigestPO::getApiStatus, ApiDigestPO::getUsageType, ApiDigestPO::getCreateTime,
+                ApiDigestPO::getUpdateTime);
         String apiName = pageQuery.getApiName();
-        queryWrapper.like(nonNull(apiName), ApiDigestPo::getApiName, apiName);
+        queryWrapper.like(nonNull(apiName), ApiDigestPO::getApiName, apiName);
         String description = pageQuery.getDescription();
-        queryWrapper.like(nonNull(description), ApiDigestPo::getDescription, description);
+        queryWrapper.like(nonNull(description), ApiDigestPO::getDescription, description);
         Set<String> methodSet = pageQuery.getMethodSet();
-        queryWrapper.like(nonNull(methodSet), ApiDigestPo::getMethod,
+        queryWrapper.like(nonNull(methodSet), ApiDigestPO::getMethod,
                 collectionToCommaDelimitedString(methodSet));
         String url = pageQuery.getUrl();
-        queryWrapper.like(nonNull(url), ApiDigestPo::getUrl, url);
+        queryWrapper.like(nonNull(url), ApiDigestPO::getUrl, url);
         Set<String> usageTypeSet = pageQuery.getUsageTypeSet();
-        queryWrapper.in(nonNull(usageTypeSet), ApiDigestPo::getUsageType,
+        queryWrapper.in(nonNull(usageTypeSet), ApiDigestPO::getUsageType,
                 collectionToCommaDelimitedString(usageTypeSet));
         Set<Integer> apiStatusSet = pageQuery.getApiStatusSet();
-        queryWrapper.in(nonNull(apiStatusSet), ApiDigestPo::getApiStatus, apiStatusSet);
+        queryWrapper.in(nonNull(apiStatusSet), ApiDigestPO::getApiStatus, apiStatusSet);
         LocalDateTime[] createTimeRange = pageQuery.getCreateTimeRange();
         queryWrapper.and(nonNull(createTimeRange),
-                wrapper -> wrapper.ge(ApiDigestPo::getCreateTime, createTimeRange[0])
-                        .le(ApiDigestPo::getCreateTime, createTimeRange[1]));
+                wrapper -> wrapper.ge(ApiDigestPO::getCreateTime, createTimeRange[0])
+                        .le(ApiDigestPO::getCreateTime, createTimeRange[1]));
         LocalDateTime[] updateTimeRange = pageQuery.getUpdateTimeRange();
         queryWrapper.and(nonNull(updateTimeRange),
-                wrapper -> wrapper.ge(ApiDigestPo::getUpdateTime, updateTimeRange[0])
-                        .le(ApiDigestPo::getUpdateTime, updateTimeRange[1]));
+                wrapper -> wrapper.ge(ApiDigestPO::getUpdateTime, updateTimeRange[0])
+                        .le(ApiDigestPO::getUpdateTime, updateTimeRange[1]));
         // 用 QueryWrapper 分页查询
-        Page<ApiDigestPo> page = page
+        Page<ApiDigestPO> page = page
                 (Page.of(pageQuery.getCurrent(), pageQuery.getSize()), queryWrapper);
         ApiDigestPageVO apiDigestPageVO = new ApiDigestPageVO();
         apiDigestPageVO.setTotal(page.getTotal());
         List<ApiDigestVO> apiDigestVOList = page.getRecords().stream()
-                .map(apiDigestPo -> {
+                .map(apiDigestPO -> {
                     ApiDigestVO apiDigestVO = new ApiDigestVO();
-                    BeanCopierUtils.copy(apiDigestPo, apiDigestVO);
-                    apiDigestVO.setDigestId(apiDigestPo.getId());
+                    BeanCopierUtils.copy(apiDigestPO, apiDigestVO);
+                    apiDigestVO.setDigestId(apiDigestPO.getId());
                     apiDigestVO.setUsageTypeSet
-                            (commaDelimitedListToSet(apiDigestPo.getUsageType()));
+                            (commaDelimitedListToSet(apiDigestPO.getUsageType()));
                     apiDigestVO.setMethodSet
-                            (commaDelimitedListToSet(apiDigestPo.getMethod()));
+                            (commaDelimitedListToSet(apiDigestPO.getMethod()));
                     return apiDigestVO;
                 }).collect(Collectors.toList());
         apiDigestPageVO.setDigestVOList(apiDigestVOList);

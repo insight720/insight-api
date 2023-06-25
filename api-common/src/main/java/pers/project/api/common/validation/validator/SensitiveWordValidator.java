@@ -61,8 +61,8 @@ public class SensitiveWordValidator implements ConstraintValidator<SensitiveWord
             .enableUrlCheck(false)
             .enableEmailCheck(false)
             .enableNumCheck(false)
-            .wordAllow(WordAllows.system())
-            .wordDeny(WordDenys.system())
+            .wordAllow(WordAllows.defaults())
+            .wordDeny(WordDenys.defaults())
             .init();
 
     /**
@@ -84,8 +84,8 @@ public class SensitiveWordValidator implements ConstraintValidator<SensitiveWord
             .enableEmailCheck(true)
             .enableNumCheck(true)
             .numCheckLen(8)
-            .wordAllow(WordAllows.system())
-            .wordDeny(WordDenys.system())
+            .wordAllow(WordAllows.defaults())
+            .wordDeny(WordDenys.defaults())
             .init();
 
     /**
@@ -182,7 +182,7 @@ public class SensitiveWordValidator implements ConstraintValidator<SensitiveWord
         String[] customAllows = word.wordAllows();
         if (word.useSystemWordAllows()) {
             // 包括系统默认允许的词汇和自定义的词汇
-            iWordAllow = WordAllows.chains(WordAllows.system(), () -> List.of(customAllows));
+            iWordAllow = WordAllows.chains(WordAllows.defaults(), () -> List.of(customAllows));
         } else {
             // 仅包括自定义的词汇
             iWordAllow = () -> List.of(customAllows);
@@ -192,7 +192,7 @@ public class SensitiveWordValidator implements ConstraintValidator<SensitiveWord
         String[] otherDenys = word.wordDenys();
         if (word.useSystemWordDenys()) {
             // 包括默认禁止的词汇和自定义的词汇
-            iWordDeny = WordDenys.chains(WordDenys.system(), () -> List.of(otherDenys));
+            iWordDeny = WordDenys.chains(WordDenys.defaults(), () -> List.of(otherDenys));
         } else {
             // 仅包括自定义的词汇
             iWordDeny = () -> List.of(otherDenys);

@@ -140,12 +140,6 @@ export default [
             //     name: 'sub-page',
             //     component: './Admin',
             // },
-            {
-                name: '接口管理',
-                icon: 'table',
-                path: '/admin/api',
-                component: './Admin/ApiAdmin',
-            },
             // {
             //     name: '接口分析',
             //     icon: 'table',
@@ -157,6 +151,18 @@ export default [
                 icon: 'table',
                 path: '/admin/user',
                 component: './Admin/UserAdmin',
+            },
+            {
+                name: '接口管理',
+                icon: 'table',
+                path: '/admin/api',
+                component: './Admin/ApiAdmin',
+            },
+            {
+                name: '订单管理',
+                icon: 'table',
+                path: '/admin/order',
+                component: './Admin/OrderAdmin',
             },
         ],
     },

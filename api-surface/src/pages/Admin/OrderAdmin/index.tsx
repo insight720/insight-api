@@ -1,17 +1,14 @@
 import {PageContainer} from '@ant-design/pro-components';
 import React, {useState} from "react";
 import {useModel} from "@@/exports";
-import ApiDigestCard from "./components/ApiDigestCard";
-import ApiViewCard from "./components/ApiViewCard";
-import ApiQuantityUsageViewCard from "@/pages/AllApi/components/ApiQuantityUsageViewCard";
-import ApiCreatorViewCard from "@/pages/AllApi/components/ApiCreatorViewCard";
-import ApiTestCard from "@/pages/AllApi/components/ApiTestCard";
+import ApiAdminCard from "./components/ApiAdminCard";
+import ApiFormatAndUsageCard from "./components/ApiFormatAndUsageCard";
 
 
 /**
- * 所有接口
+ * 接口管理
  */
-const AllApi: React.FC = () => {
+const ApiAdmin: React.FC = () => {
     // 全局初始状态
     const {initialState} = useModel('@@initialState');
 
@@ -24,57 +21,35 @@ const AllApi: React.FC = () => {
     // 登陆用户信息
     const {currentUser} = initialState || {};
 
-    // tab 项
     type TabItem = {
         tab: string;
         key: string;
         closable: boolean;
     };
 
-    // 当前查看的 API 摘要
-    const [apiDigestVO, setApiDigestVO]
-        = useState<API.ApiDigestVO>();
-
-    // tab 项的映射
     const tabItems: { [key: string]: TabItem } = {
-        "digest": {
-            tab: "接口摘要",
-            key: "digest",
+        "api": {
+            tab: "管理的所有接口",
+            key: "api",
             closable: false,
         },
-        "format": {
-            tab: "接口信息",
-            key: "format",
-            closable: true,
-        },
-        "quantityUsage": {
-            tab: "接口计数用法",
-            key: "quantityUsage",
-            closable: true,
-        },
-        "creator": {
-            tab: "接口创建者",
-            key: "creator",
-            closable: true,
-        },
-        "test": {
-            tab: "测试调用",
-            key: "test",
-            closable: true,
-        }
     };
 
+    // 当前查看的 API
+    const [apiAdminVO, setApiAdminVO]
+        = useState<API.ApiDigestVO>();
+
+    // tab 标签键
     type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
     // tab 标签显示项
     const [tabItem, setTabItem]
-        = useState<TabItem>(tabItems['digest'] || null);
+        = useState<TabItem>(tabItems['api'] || null);
 
     // 所有 tab 标签项
     const [items, setItems]
         = useState<TabItem[]>([tabItem]);
 
-    // 添加标签
     const add = (tabType: TargetKey) => {
         const newPanes: TabItem[] = [...items];
         const newActiveKey = tabItems[tabType as string];
@@ -96,7 +71,6 @@ const AllApi: React.FC = () => {
         setTabItem(tabItems[newTabType]);
     };
 
-    // 删除标签
     const remove = (targetKey: TargetKey) => {
         let newActiveKey = tabItem;
         let lastIndex = -1;
@@ -134,19 +108,19 @@ const AllApi: React.FC = () => {
         >
             <PageContainer
                 header={{
-                    title: '所有接口',
+                    title: '管理的所有接口',
                     ghost: true,
                     breadcrumb: {
                         items: [
-                            {title: '公共页'},
-                            {title: '所有接口'}
+                            {title: '管理页'},
+                            {title: '管理的所有接口'}
                         ],
                     },
                 }}
                 tabList={items}
                 tabProps={{
                     activeKey: tabItem.key,
-                    defaultActiveKey: "digest",
+                    defaultActiveKey: "api",
                     onChange: onTabChange,
                     onEdit: onEdit,
                     type: 'editable-card',
@@ -154,51 +128,27 @@ const AllApi: React.FC = () => {
                 }}
             >
                 {
-                    tabItem.key === 'digest' &&
-                    <ApiDigestCard currentUser={currentUser}
-                                   fetchUserInfo={fetchUserInfo}
-                                   setInitialState={setInitialState}
-                                   apiDigestVO={apiDigestVO}
-                                   setApiDigestVO={setApiDigestVO}
-                                   add={add}
+                    tabItem.key === 'api' &&
+                    <ApiAdminCard currentUser={currentUser}
+                                  fetchUserInfo={fetchUserInfo}
+                                  setInitialState={setInitialState}
+                                  setApiAdminVO={setApiAdminVO}
+                                  add={add}
                     />
                 }
                 {
                     tabItem.key === 'format' &&
-                    <ApiViewCard
+                    <ApiFormatAndUsageCard
                         currentUser={currentUser}
                         fetchUserInfo={fetchUserInfo}
                         setInitialState={setInitialState}
-                        apiDigestVO={apiDigestVO}/>
-                }
-                {
-                    tabItem.key === 'quantityUsage' &&
-                    <ApiQuantityUsageViewCard
-                        currentUser={currentUser}
-                        fetchUserInfo={fetchUserInfo}
-                        setInitialState={setInitialState}
-                        apiDigestVO={apiDigestVO}/>
-                }
-                {
-                    tabItem.key === 'creator' &&
-                    <ApiCreatorViewCard
-                        currentUser={currentUser}
-                        fetchUserInfo={fetchUserInfo}
-                        setInitialState={setInitialState}
-                        apiDigestVO={apiDigestVO}/>
-                }
-                {
-                    tabItem.key === 'test' &&
-                    <ApiTestCard
-                        currentUser={currentUser}
-                        fetchUserInfo={fetchUserInfo}
-                        setInitialState={setInitialState}
-                        apiDigestVO={apiDigestVO}/>
+                        userApiDigestVO={apiAdminVO}/>
                 }
             </PageContainer>
+
         </div>
     );
 
 };
 
-export default AllApi;
+export default ApiAdmin;

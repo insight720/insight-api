@@ -2,8 +2,10 @@ package pers.project.api.security.verification;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -13,6 +15,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * @date 2023/04/17
  */
 public abstract class AbstractVerificationStrategy implements VerificationStrategy {
+
+    protected final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 用于生成验证代码的格式字符串。
@@ -28,7 +32,29 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
      */
     private static final int VERIFICATION_CODE_UPPER_BOUND = 1_000_000;
 
-    protected final RedisTemplate<String, Object> redisTemplate;
+    /**
+     * 原子性 Redis 脚本，用于比较并删除键值对。
+     *
+     * <p>该脚本会使用给定的参数与指定键的值进行比较。如果值匹配，则原子地删除该键值对并返回 1；否则，不做任何操作并返回 0。</p>
+     * <p>该脚本将以下两个参数传递给 Redis 服务器：
+     * <ul>
+     *
+     * <li>KEYS[1] - 要比较和删除的键</li>
+     *
+     * <li>ARGV[1] - 用于匹配的值</li>
+     *
+     * </ul></p>
+     *
+     * @param <T> 返回值类型
+     */
+    private static final RedisScript<Long> DELETE_IF_MATCH_SCRIPT = RedisScript.of
+            ("""
+                    if ARGV[1] == redis.call('GET', KEYS[1]) then
+                      return redis.call('del', KEYS[1])
+                    else
+                      return 0
+                    end
+                      """, Long.class);
 
     protected AbstractVerificationStrategy(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -71,15 +97,12 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
      */
     protected boolean checkRedisVerificationCode(String keyPrefix, String contextInfo,
                                                  String userVerificationCode) {
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+
         String codeKey = keyPrefix + contextInfo;
-        String redisVerificationCode = (String) valueOperations.get(codeKey);
-        boolean isValid = userVerificationCode.equals(redisVerificationCode);
-        // 验证成功后立刻删除 Redis 存储的验证码
-        if (isValid) {
-            redisTemplate.delete(codeKey);
-        }
-        return isValid;
+        Long executeResult = redisTemplate.execute
+                (DELETE_IF_MATCH_SCRIPT, Collections.singletonList(codeKey),
+                        userVerificationCode);
+        return (executeResult != null && executeResult == 1L);
     }
 
 }

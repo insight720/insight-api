@@ -39,7 +39,9 @@ public enum ErrorEnum {
 
     SERVER_ERROR("B0001", "系统执行出错"),
 
-    RPC_ERROR("C0110", "RPC 服务出");
+    RPC_ERROR("C0110", "RPC 服务出错"),
+
+    QUANTITY_EXCEEDED_ERROR("A0425", "数量超出限制");
 
     /**
      * 错误码

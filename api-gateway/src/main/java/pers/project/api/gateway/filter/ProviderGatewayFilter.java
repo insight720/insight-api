@@ -13,11 +13,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
-import pers.project.api.common.model.Result;
-import pers.project.api.common.model.entity.ApiInfoEntity;
 import pers.project.api.common.model.entity.UserEntity;
-import pers.project.api.common.util.ResultUtils;
-import pers.project.api.common.util.SignUtils;
 import pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum;
 import pers.project.api.gateway.feign.FacadeFeignService;
 import pers.project.api.gateway.feign.SecurityFeignService;
@@ -25,10 +21,9 @@ import pers.project.api.gateway.filter.factory.ProviderGatewayFilterFactory;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.core.NestedExceptionUtils.getMostSpecificCause;
-import static pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum.*;
+import static pers.project.api.gateway.constant.enumeration.GatewayHeaderEnum.TIMESTAMP;
 import static pers.project.api.gateway.filter.HttpLogFilter.HTTP_LOG_FILTER_ORDER;
 
 /**
@@ -105,6 +100,7 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
     // 抑制 null 警告
     @SuppressWarnings("all")
     private boolean authorizeRequest(ServerWebExchange exchange) throws Exception {
+        // TODO: 2023/6/9 授权过程因测试前端而跳过
         // 检查请求头是否缺少或重复
         ServerHttpRequest request = exchange.getRequest();
         HttpHeaders headers = request.getHeaders();
@@ -119,29 +115,29 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
             return false;
         }
         // 获取请求的用户数据
-        UserEntity userEntity = getUserInfo(exchange);
-        if (userEntity == null) {
-            return false;
-        }
+//        UserEntity userEntity = getUserInfo(exchange);
+//        if (userEntity == null) {
+//            return false;
+//        }
         // 检查签名是否合法
-        String sign = headers.getFirst(SIGN.getName());
-        String body = headers.getFirst(BODY.getName());
-        String secretKey = userEntity.getSecretKey();
-        String serverSign = SignUtils.sign(body, secretKey);
-        if (!sign.equals(serverSign)) {
-            return false;
-        }
-        String method = request.getMethod().name();
+//        String sign = headers.getFirst(SIGN.getName());
+//        String body = headers.getFirst(BODY.getName());
+//        String secretKey = userEntity.getSecretKey();
+//        String serverSign = SignUtils.sign(body, secretKey);
+//        if (!sign.equals(serverSign)) {
+//            return false;
+//        }
+//        String method = request.getMethod().name();
         // 4. 请求的模拟接口是否存在，以及请求方法是否匹配
-        CompletableFuture<Result<ApiInfoEntity>> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
-            String path = request.getPath().value();
-            return facadeFeignService.getApiInfo(path, method);
-        });
-        Result<ApiInfoEntity> apiInfoResult = apiInfoFuture.get();
-        if (ResultUtils.isFailure(apiInfoResult)) {
-            return false;
-        }
-        ApiInfoEntity apiInfoEntity = apiInfoResult.getData();
+//        CompletableFuture<Result<ApiInfoEntity>> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
+//            String path = request.getPath().value();
+//            return facadeFeignService.getApiInfo(path, method);
+//        });
+//        Result<ApiInfoEntity> apiInfoResult = apiInfoFuture.get();
+//        if (ResultUtils.isFailure(apiInfoResult)) {
+//            return false;
+//        }
+//        ApiInfoEntity apiInfoEntity = apiInfoResult.getData();
         // todo 是否还有调用次数
         return true;
     }

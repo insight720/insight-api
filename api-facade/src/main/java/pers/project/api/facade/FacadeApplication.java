@@ -2,14 +2,22 @@ package pers.project.api.facade;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 import java.nio.charset.Charset;
 import java.time.ZoneId;
 
+/**
+ * Facade 主启动类
+ *
+ * @author Luo Fei
+ * @date 2023/04/25
+ */
 @Slf4j
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class,
+        ManagementWebSecurityAutoConfiguration.class})
 public class FacadeApplication {
 
     public static void main(String[] args) {

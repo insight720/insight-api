@@ -161,6 +161,12 @@ declare namespace API {
     data?: UserApiFormatAndQuantityUsageVO;
   };
 
+  type ResultUserApiTestVO = {
+    code?: string;
+    message?: string;
+    data?: UserApiTestVO;
+  };
+
   type ResultUserOrderPageVO = {
     code?: string;
     message?: string;
@@ -280,6 +286,21 @@ declare namespace API {
     failure?: number;
     stock?: number;
     usageStatus?: number;
+  };
+
+  type UserApiTestDTO = {
+    accountId?: string;
+    secretId: string;
+    digestId?: string;
+    method: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+  };
+
+  type UserApiTestVO = {
+    responseHeader?: string;
+    responseBody?: string;
   };
 
   type UsernameAndPasswordSettingDTO = {

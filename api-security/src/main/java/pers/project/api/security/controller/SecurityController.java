@@ -3,6 +3,7 @@ package pers.project.api.security.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.model.Result;
@@ -16,8 +17,10 @@ import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.common.validation.constraint.SnowflakeId;
+import pers.project.api.security.model.dto.UserApiTestDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.model.vo.ApiCreatorVO;
+import pers.project.api.security.model.vo.UserApiTestVO;
 import pers.project.api.security.service.SecurityService;
 
 /**
@@ -26,6 +29,7 @@ import pers.project.api.security.service.SecurityService;
  * @author Luo Fei
  * @date 2023/03/24
  */
+@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -79,6 +83,13 @@ public class SecurityController {
             (@SnowflakeId @PathVariable String accountId) {
         ApiCreatorVO apiCreatorVO = securityService.getApiCreatorVO(accountId);
         return ResultUtils.success(apiCreatorVO);
+    }
+
+    @PostMapping("/user/api/test")
+    public Result<UserApiTestVO> testUserApi
+            (@Valid @RequestBody UserApiTestDTO UserApiTestDTO) {
+        UserApiTestVO userApiTestVO = securityService.getUserApiTestVO(UserApiTestDTO);
+        return ResultUtils.success(userApiTestVO);
     }
 
 }

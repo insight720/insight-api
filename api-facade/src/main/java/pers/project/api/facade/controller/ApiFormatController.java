@@ -10,6 +10,7 @@ import pers.project.api.common.model.Result;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.common.validation.constraint.SnowflakeId;
 import pers.project.api.facade.model.vo.ApiFormatVO;
+import pers.project.api.facade.model.vo.ApiTestFormatVO;
 import pers.project.api.facade.service.ApiFormatService;
 
 /**
@@ -20,8 +21,8 @@ import pers.project.api.facade.service.ApiFormatService;
  */
 @Validated
 @RestController
-@RequestMapping("/format")
 @RequiredArgsConstructor
+@RequestMapping("/format")
 public class ApiFormatController {
 
     private final ApiFormatService apiFormatService;
@@ -30,6 +31,12 @@ public class ApiFormatController {
     public Result<ApiFormatVO> viewApiFormat(@SnowflakeId @PathVariable String digestId) {
         ApiFormatVO apiFormatVO = apiFormatService.getApiFormatVO(digestId);
         return ResultUtils.success(apiFormatVO);
+    }
+
+    @GetMapping("/test/{digestId}")
+    public Result<ApiTestFormatVO> viewApiTestFormat(@SnowflakeId @PathVariable String digestId) {
+        ApiTestFormatVO apiTestFormatVO = apiFormatService.getApiTestFormatVO(digestId);
+        return ResultUtils.success(apiTestFormatVO);
     }
 
 }

@@ -1,7 +1,7 @@
 package pers.project.api.facade.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import pers.project.api.facade.model.po.ApiDigestPo;
+import pers.project.api.facade.model.po.ApiDigestPO;
 import pers.project.api.facade.model.query.ApiDigestPageQuery;
 import pers.project.api.facade.model.vo.ApiDigestPageVO;
 
@@ -11,7 +11,7 @@ import pers.project.api.facade.model.vo.ApiDigestPageVO;
  * @author Luo Fei
  * @date 2023/05/04
  */
-public interface ApiDigestService extends IService<ApiDigestPo> {
+public interface ApiDigestService extends IService<ApiDigestPO> {
 
     /**
      * 基于提供的 {@code ApiDigestPageQuery}，返回一个 {@code ApiDigestPageVO} 对象。

@@ -165,6 +165,14 @@ declare namespace API {
     updateTime?: string;
   };
 
+  type ApiTestFormatVO = {
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+  };
+
   type DeleteRequest = {
     id?: number;
   };
@@ -248,6 +256,12 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: ApiStockInfoVO;
+  };
+
+  type ResultApiTestFormatVO = {
+    code?: string;
+    message?: string;
+    data?: ApiTestFormatVO;
   };
 
   type ResultBoolean = {
@@ -367,6 +381,10 @@ declare namespace API {
   };
 
   type viewApiStockInfoParams = {
+    digestId: string;
+  };
+
+  type viewApiTestFormatParams = {
     digestId: string;
   };
 }

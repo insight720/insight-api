@@ -87,6 +87,18 @@ export async function viewUserApiFormatAndQuantityUsage(
   );
 }
 
+/** 此处后端没有提供注释 POST /user/api/test */
+export async function testUserApi(body: API.UserApiTestDTO, options?: { [key: string]: any }) {
+  return request<API.ResultUserApiTestVO>(`/security/user/api/test`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 此处后端没有提供注释 POST /verification/code */
 export async function getVerificationCode(
   body: API.VerificationCodeSendingDTO,

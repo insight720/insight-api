@@ -139,7 +139,7 @@ const ApiQuantityUsageViewCard: React.FC<ApiQuantityUsageViewCardProps> = (props
             style={{background: '#F5F7FA'}}
         >
             <ProCard>
-                <ProDescriptions bordered
+                <ProDescriptions bordered title={"接口计数用法"}
                                  column={{xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1}}>
                     <ProDescriptions.Item label="接口名称" span={1}>
                         {apiDigestVO?.apiName}
@@ -207,7 +207,7 @@ const ApiQuantityUsageViewCard: React.FC<ApiQuantityUsageViewCardProps> = (props
                         {apiQuantityUsageVO?.stock}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="锁定的调用次数存量">
-                        {apiQuantityUsageVO?.stock}
+                        {apiQuantityUsageVO?.lockedStock}
                     </ProDescriptions.Item>
                 </ProDescriptions>
             </ProCard>

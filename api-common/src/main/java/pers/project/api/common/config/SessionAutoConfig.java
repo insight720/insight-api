@@ -33,16 +33,24 @@ public class SessionAutoConfig {
         });
     }
 
+    // TODO: 2023/6/9 必须在配置文件中指明 spring.session.repository-type=indexed，否则会有两个 Bean
     @EnableRedisIndexedHttpSession(flushMode = FlushMode.IMMEDIATE)
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = Type.SERVLET)
     public static class HttpSessionConfig {
+        {
+
+            System.out.println("HttpSessionConfig.实例初始值设定项");
+        }
     }
 
     @EnableRedisWebSession
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = Type.REACTIVE)
     public static class WebSessionConfig {
+        {
+            System.out.println("WebSessionConfig.实例初始值设定项");
+        }
     }
 
 }

@@ -1,10 +1,13 @@
 package pers.project.api.security.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dreamlu.mica.core.utils.WebUtil;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
@@ -18,17 +21,21 @@ import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.*;
 import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.ResultUtils;
+import pers.project.api.sdk.client.TestClient;
+import pers.project.api.sdk.model.Test;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
 import pers.project.api.security.feign.FacadeFeignClient;
 import pers.project.api.security.mapper.SecurityMapper;
 import pers.project.api.security.mapper.UserAccountMapper;
 import pers.project.api.security.mapper.UserProfileMapper;
+import pers.project.api.security.model.dto.UserApiTestDTO;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.dto.VerificationCodeSendingDTO;
 import pers.project.api.security.model.po.UserAccountPO;
 import pers.project.api.security.model.po.UserProfilePO;
 import pers.project.api.security.model.vo.ApiCreatorVO;
+import pers.project.api.security.model.vo.UserApiTestVO;
 import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.verification.VerificationContext;
 
@@ -195,6 +202,27 @@ public class SecurityServiceImpl implements SecurityService {
         BeanCopierUtils.copy(userProfilePO, apiCreatorVO);
         apiCreatorVO.setAuthoritySet(commaDelimitedListToSet(userAccountPO.getAuthority()));
         return apiCreatorVO;
+    }
+
+    @Override
+    public UserApiTestVO getUserApiTestVO(UserApiTestDTO userApiTestDTO) {
+        // 查询 API 密钥
+        LambdaQueryWrapper<UserAccountPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(UserAccountPO::getSecretKey);
+        queryWrapper.eq(UserAccountPO::getId, userApiTestDTO.getAccountId());
+        UserAccountPO userAccountPO = userAccountMapper.selectOne(queryWrapper);
+        // TODO: 2023/6/9 假的模拟请求
+        // 发送远程请求（也可以用 Feign）
+        TestClient testClient = new TestClient(userApiTestDTO.getSecretId(), userAccountPO.getSecretKey());
+        Test test = new Test();
+        test.setTest(JSON.toJSONString(userApiTestDTO));
+        Cookie session = WebUtil.getRequest().getCookies()[0];
+        String resultString = testClient.post(test, session.getName(), session.getValue());
+        // 返回调用结果
+        UserApiTestVO userApiTestVO = new UserApiTestVO();
+        userApiTestVO.setResponseHeader(resultString);
+        userApiTestVO.setResponseBody(resultString);
+        return userApiTestVO;
     }
 
     /**

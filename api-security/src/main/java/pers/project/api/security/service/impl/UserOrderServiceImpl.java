@@ -8,19 +8,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.enumeration.ErrorEnum;
-import pers.project.api.common.exception.BusinessException;
-import pers.project.api.common.model.Result;
+import org.springframework.transaction.annotation.Transactional;
 import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.util.BeanCopierUtils;
-import pers.project.api.common.util.ResultUtils;
+import pers.project.api.common.util.TransactionUtils;
 import pers.project.api.security.feign.FacadeFeignClient;
 import pers.project.api.security.mapper.UserOrderMapper;
 import pers.project.api.security.model.dto.QuantityUsageOrderCreationDTO;
+import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
 import pers.project.api.security.model.po.UserOrderPO;
 import pers.project.api.security.model.query.UserOrderPageQuery;
 import pers.project.api.security.model.vo.UserOrderPageVO;
 import pers.project.api.security.model.vo.UserOrderVO;
+import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.service.UserOrderService;
 
 import java.time.LocalDateTime;
@@ -40,6 +40,8 @@ import static pers.project.api.common.enumeration.UsageTypeEnum.QUANTITY_USAGE;
 @Service
 @RequiredArgsConstructor
 public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrderPO> implements UserOrderService {
+
+    private final SecurityService securityService;
 
     private final FacadeFeignClient facadeFeignClient;
 
@@ -83,28 +85,42 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
     }
 
     @Override
-    // TODO: 2023/6/5 分布式事务
-//    @Transactional(rollbackFor = Throwable.class)
+    // 本地事务
+    @Transactional(rollbackFor = Throwable.class)
     public void createQuantityUsageOrder(QuantityUsageOrderCreationDTO orderCreationDTO) {
+        // 检查验证码（保证幂等性）
+        VerificationCodeCheckDTO codeCheckDTO = orderCreationDTO.getCodeCheckDTO();
+        securityService.checkVerificationCode(codeCheckDTO, null);
+        // 用户接口计数用法创建 DTO
         UserQuantityUsageCreationDTO usageCreationDTO = new UserQuantityUsageCreationDTO();
         String digestId = orderCreationDTO.getDigestId();
         usageCreationDTO.setDigestId(digestId);
-        String accountId = orderCreationDTO.getAccountId();
-        usageCreationDTO.setAccountId(accountId);
-        String orderQuantity = orderCreationDTO.getOrderQuantity();
-        usageCreationDTO.setOrderQuantity(orderQuantity);
+        usageCreationDTO.setAccountId(orderCreationDTO.getAccountId());
+        usageCreationDTO.setOrderQuantity(orderCreationDTO.getOrderQuantity());
+        // 事务回滚后发送消息让 Facade 模块回滚用户接口计数用法记录的创建
+        TransactionUtils.ifRolledBackAfterCompletion(() -> {
+                    // 此处抛出异常不会传播给  调用者
+                    try {
+                    }  catch (Exception e) {
+                        log.error("");
+                    }
+        });
+/*
+        // 创建一条用户接口计数用法记录（远程调用）
         Result<String> usageCreationResult
                 = facadeFeignClient.getUserQuantityUsageCreationResult(usageCreationDTO);
         if (ResultUtils.isFailure(usageCreationResult)) {
-            throw new BusinessException(ErrorEnum.RPC_ERROR, "创建订单失败，请稍后再试");
+            throw new BusinessException(usageCreationResult);
         }
-        String usageId = usageCreationResult.getData();
+*/
+        // 创建新的用户订单
+//        String usageId = usageCreationResult.getData();
         UserOrderPO userOrderPO = new UserOrderPO();
         userOrderPO.setOrderSn(IdWorker.getTimeId());
         userOrderPO.setDescription(buildQuantityUsageOrderDescription(orderCreationDTO));
         userOrderPO.setAccountId(orderCreationDTO.getAccountId());
         userOrderPO.setDigestId(digestId);
-        userOrderPO.setUsageId(usageId);
+//        userOrderPO.setUsageId(usageId);
         userOrderPO.setUsageType(QUANTITY_USAGE.storedValue());
         save(userOrderPO);
     }

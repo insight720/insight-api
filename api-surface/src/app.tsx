@@ -22,13 +22,7 @@ import {Link} from "umi";
  * 令牌会自动保存在 Cookie 中
  */
 const fetchCsrfToken = async () => {
-    try {
-        const result = await getCsrfToken();
-        return result.data;
-    } catch (error: any) {
-        message.error(error.message || "服务器内部错误，请重试！");
-        return undefined;
-    }
+    await getCsrfToken();
 };
 
 /**

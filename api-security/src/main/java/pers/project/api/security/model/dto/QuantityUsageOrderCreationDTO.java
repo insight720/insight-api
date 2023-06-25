@@ -1,5 +1,6 @@
 package pers.project.api.security.model.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,6 +19,13 @@ import java.util.Set;
  */
 @Data
 public class QuantityUsageOrderCreationDTO {
+
+    /**
+     * 验证码检查 DTO
+     */
+    @NotNull
+    @Valid
+    private VerificationCodeCheckDTO codeCheckDTO;
 
     /**
      * 用户账户主键

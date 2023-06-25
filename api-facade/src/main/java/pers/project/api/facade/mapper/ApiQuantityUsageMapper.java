@@ -14,7 +14,14 @@ import pers.project.api.facade.model.po.ApiQuantityUsagePO;
 @Mapper
 public interface ApiQuantityUsageMapper extends BaseMapper<ApiQuantityUsagePO> {
 
-    void updateStock(@Param("digestId") String digestId, @Param("quantity") String quantity);
+    /**
+     * 根据接口摘要 ID {@code digestId}，更新计数用法库存数量 {@code quantity}。
+     *
+     * @param digestId 接口摘要 ID
+     * @param quantity 更新的数量
+     * @return 受影响的数据行数（0 或 1）
+     */
+    int updateStockByDigestId(@Param("digestId") String digestId, @Param("quantity") String quantity);
 
 }
 

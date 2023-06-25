@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "api_digest")
-public class ApiDigestPo {
+public class ApiDigestPO {
 
     /**
      * 主键
