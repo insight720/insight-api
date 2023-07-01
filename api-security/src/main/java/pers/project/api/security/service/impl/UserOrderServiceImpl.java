@@ -47,6 +47,7 @@ import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.QUANTIT
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_STOCK_DEDUCTION_TAG;
 import static pers.project.api.common.constant.rocketmq.RocketMQTopicNameConst.FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC;
 import static pers.project.api.common.enumeration.ErrorEnum.SERVER_ERROR;
+import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.NEW;
 import static pers.project.api.common.enumeration.UsageTypeEnum.QUANTITY_USAGE;
 import static pers.project.api.common.util.RocketMQUtils.getTransactionId;
 
@@ -60,6 +61,9 @@ import static pers.project.api.common.util.RocketMQUtils.getTransactionId;
 @Service
 @RequiredArgsConstructor
 public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrderPO> implements UserOrderService {
+
+    private static final String QUANTITY_USAGE_STOCK_DEDUCTION_MESSAGE_DESTINATION =
+            FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC + COLON + QUANTITY_USAGE_STOCK_DEDUCTION_TAG;
 
     private final SecurityService securityService;
 
@@ -123,11 +127,13 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
                 // 回调的消息（用于打印日志等需求）
                 = stockDeductionMessage -> transactionTemplate.executeWithoutResult(ignored -> {
             // 记录事务状态不确定的日志
-            TransactionUtils.ifUnknownAfterCompletion(() ->
-                    log.warn("""
-                            Quantity usage order insertion transaction status unknown \
-                            for orderSn: {}, transactionID: {}
-                            """, orderSn, getTransactionId(stockDeductionMessage)));
+            TransactionUtils.ifUnknownAfterCompletion(() -> {
+                String format = """
+                        Local transaction status for quantity usage order insertion is unknown, \
+                        orderSn: {} transactionID: {}
+                        """;
+                log.warn(format, orderSn, getTransactionId(stockDeductionMessage));
+            });
             // 订单号作用于消费过程幂等（Spring 管理的 Redis 事务)
             redisTransactionTemplate.opsForValue().set(stockDeductionMessageKeysKey, orderSn);
             // 保存接口计数用法订单记录
@@ -137,6 +143,7 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
             userOrderPO.setAccountId(orderCreationDTO.getAccountId());
             userOrderPO.setDigestId(orderCreationDTO.getDigestId());
             userOrderPO.setUsageType(QUANTITY_USAGE.storedValue());
+            userOrderPO.setOrderStatus(NEW.storedValue());
             save(userOrderPO);
         });
         // 同步发送扣库存消息（事务消息）
@@ -146,16 +153,16 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
         stockDeductionDTO.setOrderQuantity(orderCreationDTO.getOrderQuantity());
         stockDeductionDTO.setOrderSn(orderSn);
         // 事务消息发送结果（其父类 SendResult 包含更多信息）
-        TransactionSendResult transactionSendResult
-                = rocketMQTemplate.sendMessageInTransaction
-                (FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC + COLON + QUANTITY_USAGE_STOCK_DEDUCTION_TAG,
-                        MessageBuilder
-                                .withPayload(stockDeductionDTO)
-                                // 订单号作为消息的 Keys（全局唯一业务索引键）
-                                .setHeader(KEYS, orderSn)
-                                .build(), localTransactionExecutionConsumer);
-        log.info("Transaction message sendStatus: {}, transaction ID: {}",
-                transactionSendResult.getSendStatus(), transactionSendResult.getTransactionId());
+        Message<QuantityUsageStockDeductionDTO> stockDeductionMessage = MessageBuilder
+                .withPayload(stockDeductionDTO)
+                // 订单号作为消息的 Keys（全局唯一业务索引键）
+                .setHeader(KEYS, orderSn)
+                .build();
+        TransactionSendResult transactionSendResult = rocketMQTemplate.sendMessageInTransaction
+                (QUANTITY_USAGE_STOCK_DEDUCTION_MESSAGE_DESTINATION, stockDeductionMessage,
+                        localTransactionExecutionConsumer);
+        log.info("Transaction message sendStatus: {}, orderSn: {}, transaction ID: {}",
+                transactionSendResult.getSendStatus(), orderSn, transactionSendResult.getTransactionId());
         if (transactionSendResult.getLocalTransactionState() != COMMIT_MESSAGE) {
             // 抛出异常（本地事务回滚或状态未知)
             throw new BusinessException(SERVER_ERROR, "保存接口计数用法订单记录失败");
@@ -163,10 +170,11 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
     }
 
     @Override
-    public RocketMQLocalTransactionState getQuantityUsageStockDeductionMessageTransactionState(Message<byte[]> message) {
+    public RocketMQLocalTransactionState getQuantityUsageStockDeductionMessageTransactionState
+            (Message<byte[]> stockDeductionMessage) {
         // 在订单表找到了这个订单，说明本地事务插入订单的操作已经正确提交；如果订单表没有订单，说明本地事务已经回滚
         QuantityUsageStockDeductionDTO quantityUsageStockDeductionDTO
-                = JSON.parseObject(message.getPayload(), QuantityUsageStockDeductionDTO.class);
+                = JSON.parseObject(stockDeductionMessage.getPayload(), QuantityUsageStockDeductionDTO.class);
         LambdaQueryWrapper<UserOrderPO> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserOrderPO::getOrderSn, quantityUsageStockDeductionDTO.getOrderSn());
         return baseMapper.exists(queryWrapper) ? COMMIT : ROLLBACK;
@@ -179,9 +187,9 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
      * @return 订单描述信息字符串
      */
     private String buildQuantityUsageOrderDescription(QuantityUsageOrderCreationDTO orderCreationDTO) {
+        // 根据需求拼接订单描述信息
         return """
-                接口名称：%s；接口描述：%s；请求方法：%s；接口地址：%s；
-                接口用法类型：%s；订单锁定的调用次数：%s
+                接口名称：%s；接口描述：%s；请求方法：%s；接口地址：%s；接口用法类型：%s；订单锁定的调用次数：%s
                 """.formatted(orderCreationDTO.getApiName(),
                 orderCreationDTO.getDescription(),
                 orderCreationDTO.getMethodSet(),

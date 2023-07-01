@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
+import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.StringUtils.hasText;
+import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.STOCK_SHORTAGE;
+import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.SUCCESS;
 
 /**
  * Facade 项目的 Service 实现
@@ -127,6 +131,49 @@ public class FacadeServiceImpl implements FacadeService {
         apiAdminPageVO.setTotal(total);
         apiAdminPageVO.setApiAdminVOList(apiAdminVOList);
         return apiAdminPageVO;
+    }
+
+    @Override
+    public void updateOrderQuantityUsageStock(QuantityUsageStockDeductionDTO stockDeductionDTO, QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO) {
+        // 查询原来的用户接口计数用法是否存在
+        LambdaQueryWrapper<UserQuantityUsagePO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(UserQuantityUsagePO::getId);
+        String digestId = stockDeductionDTO.getDigestId();
+        queryWrapper.eq(UserQuantityUsagePO::getDigestId, digestId);
+        String accountId = stockDeductionDTO.getAccountId();
+        queryWrapper.eq(UserQuantityUsagePO::getAccountId, accountId);
+        UserQuantityUsagePO originalUserQuantityUsagePO = userQuantityUsageMapper.selectOne(queryWrapper);
+        boolean userQuantityUsageExists = (originalUserQuantityUsagePO != null);
+        // 先尝试扣减存量，扣减失败则说明存量不足，下单失败
+        String orderQuantity = stockDeductionDTO.getOrderQuantity();
+        int matchedRows = apiQuantityUsageMapper.updateStockByDigestId(digestId, orderQuantity);
+        if (matchedRows != 1) {
+            // 原来的用法主键
+            if (userQuantityUsageExists) {
+                orderStatusUpdateDTO.setUsageId(originalUserQuantityUsagePO.getId());
+            }
+            // 订单状态为存量不足
+            orderStatusUpdateDTO.setOrderStatus(STOCK_SHORTAGE.storedValue());
+            return;
+        }
+        // 订单状态为下单成功
+        orderStatusUpdateDTO.setOrderStatus(SUCCESS.storedValue());
+        // 根据原来的用户接口计数用法是否存在来确定执行更新操作还是插入操作
+        if (userQuantityUsageExists) {
+            // 更新用户接口计数用法的存量
+            userQuantityUsageMapper.updateStockByAccountIdAndDigestId(accountId, digestId, orderQuantity);
+            // 原来的用法主键
+            orderStatusUpdateDTO.setUsageId(originalUserQuantityUsagePO.getId());
+            return;
+        }
+        // 保存新的用户接口计数用法
+        UserQuantityUsagePO newUserQuantityUsagePO = new UserQuantityUsagePO();
+        newUserQuantityUsagePO.setAccountId(accountId);
+        newUserQuantityUsagePO.setDigestId(digestId);
+        newUserQuantityUsagePO.setStock(orderQuantity);
+        userQuantityUsageMapper.insert(newUserQuantityUsagePO);
+        // 新的用法主键
+        orderStatusUpdateDTO.setUsageId(newUserQuantityUsagePO.getId());
     }
 
 }

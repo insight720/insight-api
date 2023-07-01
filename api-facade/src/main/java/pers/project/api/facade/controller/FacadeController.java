@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -51,13 +50,6 @@ public class FacadeController {
             (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
         ApiAdminPageVO pageVO = facadeService.getApiAdminPageVO(pageQuery);
         return ResultUtils.success(pageVO);
-    }
-
-    @PostMapping("/user/quantity/usage/creation/result")
-    public Result<String> getUserQuantityUsageCreationResult
-            (@Valid @RequestBody UserQuantityUsageCreationDTO creationDTO) {
-        String usageId = facadeService.createUserQuantityUsage(creationDTO);
-        return ResultUtils.success(usageId);
     }
     // endregion
 

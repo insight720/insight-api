@@ -39,11 +39,11 @@ public class SecurityTransactionListener implements RocketMQLocalTransactionList
         Consumer<Message<byte[]>> messageConsumer = (Consumer<Message<byte[]>>) arg;
         // transactionId 可用作业务的回查标记
         String transactionId = RocketMQUtils.getTransactionId(message);
-        log.info("Local transaction execution, transaction ID: " + transactionId);
+        log.info("Local transaction execution, transaction ID: {}", transactionId);
         try {
             // 实际执行本地事务
             messageConsumer.accept(message);
-            log.info("Local transaction commit, transaction ID: " + transactionId);
+            log.info("Local transaction commit, transaction ID: {}", transactionId);
             // 本地事务正常执行
             return COMMIT;
         } catch (Exception e) {

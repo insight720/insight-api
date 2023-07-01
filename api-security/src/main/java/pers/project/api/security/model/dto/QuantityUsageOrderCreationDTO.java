@@ -45,7 +45,7 @@ public class QuantityUsageOrderCreationDTO {
     @Size(min = 1, max = 8)
     @ContainedIn(values = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"})
     private Set<String> methodSet;
-
+    // TODO: 2023/7/2 也许仅传递订单相关接口的用法类型
     /**
      * 接口用法类型集合
      */

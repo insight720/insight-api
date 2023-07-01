@@ -45,7 +45,7 @@ public final class RedisKeyPrefixConst {
             = "security:verification:email_verification_code:";
 
     /**
-     * 库存扣减消息 KEYS 的键名称前缀
+     * 接口计数用法存量扣减消息 KEYS 的键名称前缀
      * <p>
      * 此名称前缀后还有一层目录结构：订单号。
      * <p>
@@ -58,13 +58,13 @@ public final class RedisKeyPrefixConst {
             = "facade:quantity_usage:stock_deduction_message_keys:";
 
     /**
-     * 接口计数用法订单状态更新消息 KEYS 键前缀
+     * 接口计数用法订单状态更新消息 KEYS 的键名称前缀
      * <p>
      * 此名称前缀后还有一层目录结构：订单号。
      * <p>
      * 具体格式为：
      * <pre>
-     * security:order:quantity_usage_order_status_update_message_keys:
+     * security:order:quantity_usage_order_status_update_message_keys:{orderSn}
      * </pre>
      */
     public static final String QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX

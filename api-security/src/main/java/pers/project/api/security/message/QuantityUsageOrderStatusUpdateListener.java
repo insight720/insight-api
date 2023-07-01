@@ -6,14 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
-import pers.project.api.common.constant.redis.RedisScriptConst;
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
+import pers.project.api.common.util.RedisUtils;
+import pers.project.api.security.service.UserOrderService;
 
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX;
 import static pers.project.api.common.constant.rocketmq.RocketMQConsumerGroupNameConst.SECURITY_QUANTITY_USAGE_ORDER_STATUS_UPDATE_GROUP;
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_ORDER_STATUS_UPDATE_TAG;
 import static pers.project.api.common.constant.rocketmq.RocketMQTopicNameConst.SECURITY_QUANTITY_USAGE_ORDER_NORMAL_TOPIC;
@@ -33,25 +32,22 @@ import static pers.project.api.common.constant.rocketmq.RocketMQTopicNameConst.S
                 consumerGroup = SECURITY_QUANTITY_USAGE_ORDER_STATUS_UPDATE_GROUP)
 public class QuantityUsageOrderStatusUpdateListener implements RocketMQListener<MessageExt> {
 
-    private final RocketMQTemplate rocketMQTemplate;
-
-    private final TransactionTemplate transactionTemplate;
+    private final UserOrderService userOrderService;
 
     private final RedisTemplate<String, Object> redisTemplate;
-
-    /**
-     * 作用于确保幂等性的令牌验证 Redis 脚本
-     *
-     * @see RedisScriptConst#IDEMPOTENCY_TOKEN_LUA_SCRIPT
-     */
-    private static final RedisScript<Long> IDEMPOTENCY_TOKEN_REDIS_SCRIPT = RedisScript.of
-            (RedisScriptConst.IDEMPOTENCY_TOKEN_LUA_SCRIPT, Long.class);
 
     @Override
     public void onMessage(MessageExt orderStatusUpdateMessageExt) {
         QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO
                 = JSON.parseObject(orderStatusUpdateMessageExt.getBody(), QuantityUsageOrderStatusUpdateDTO.class);
-        System.out.println("orderStatusUpdateDTO = " + orderStatusUpdateDTO);
+        // 检查作用于消费过程幂等的令牌
+        String orderSn = orderStatusUpdateDTO.getOrderSn();
+        String orderStatusUpdateKeysKey = QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
+        boolean isDuplicate = RedisUtils.checkIdempotencyToken(redisTemplate, orderStatusUpdateKeysKey, orderSn);
+        if (isDuplicate) {
+            log.info("Duplicate order status update message, orderSn: {}", orderSn);
+            return;
+        }
     }
 
 }

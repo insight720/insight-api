@@ -1,5 +1,7 @@
 package pers.project.api.facade.service;
 
+import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
+import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -40,5 +42,21 @@ public interface FacadeService {
      * @return API 管理页面 VO
      */
     ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
+
+    /**
+     * 更新订单的接口计数用法存量。
+     * <p>
+     * 这个方法主要在本地事务中执行两个操作：
+     * <pre>
+     * 1. 扣减接口计数用法存量。
+     * 2. 接口计数用法订单状态更新 DTO。
+     * </pre>
+     * {@code orderStatusUpdateDTO} 用于回复 Security 项目订单状态消息。
+     *
+     * @param stockDeductionDTO    接口计数用法存量扣减 DTO
+     * @param orderStatusUpdateDTO 接口计数用法订单状态更新 DTO
+     */
+    void updateOrderQuantityUsageStock(QuantityUsageStockDeductionDTO stockDeductionDTO,
+                                       QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO);
 
 }

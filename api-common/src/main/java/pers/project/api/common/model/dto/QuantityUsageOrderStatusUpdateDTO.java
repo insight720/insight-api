@@ -4,7 +4,7 @@ import lombok.Data;
 import pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum;
 
 /**
- * 接口计数用法状态更新 DTO
+ * 接口计数用法订单状态更新 DTO
  *
  * @author Luo Fei
  * @date 2023/06/28
