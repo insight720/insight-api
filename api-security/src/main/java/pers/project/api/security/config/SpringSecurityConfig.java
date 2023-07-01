@@ -122,6 +122,7 @@ public class SpringSecurityConfig {
      * @see <a href="https://docs.spring.io/spring-security/reference/5.8/migration/servlet/exploits.html#_i_am_using_angularjs_or_another_javascript_framework">I am using AngularJS or another Javascript framework</a>
      * @see <a href="https://github.com/spring-projects/spring-security/issues/12915">Issue</a>
      */
+    // Suppress warnings for csrfTokenRequestHandler
     @SuppressWarnings("all")
     @Bean
     public CsrfTokenRequestHandler csrfTokenRequestHandler() {

@@ -166,25 +166,25 @@ const AccountAuthenticationCard: React.FC<AccountAuthenticationCardProps> = (pro
             }
         }
 
-        /**
-         * 确定身份验证策略
-         *
-         * 如果用户没有绑定对应的信息，则进行错误提示，并返回 null。
-         */
-        function determineAuthStrategy() {
-            const phoneNumber = currentUser?.phoneNumber;
-            const emailAddress = currentUser?.emailAddress;
-            const isUsingPhone = (authStrategy === "PHONE");
-            if (isUsingPhone && !phoneNumber) {
-                message.error("你没有绑定手机号")
-                return null;
-            }
-            if (!isUsingPhone && !emailAddress) {
-                message.error("你没有绑定邮箱地址")
-                return null;
-            }
-            return isUsingPhone;
+    /**
+     * 确定身份验证策略
+     *
+     * 如果用户没有绑定对应的信息，则进行错误提示，并返回 null。
+     */
+    const determineAuthStrategy = () => {
+        const phoneNumber = currentUser?.phoneNumber;
+        const emailAddress = currentUser?.emailAddress;
+        const isUsingPhone = (authStrategy === "PHONE");
+        if (isUsingPhone && !phoneNumber) {
+            message.error("你没有绑定手机号")
+            return null;
         }
+        if (!isUsingPhone && !emailAddress) {
+            message.error("你没有绑定邮箱地址")
+            return null;
+        }
+        return isUsingPhone;
+    };
 
         // 修改账户名的提示消息
         const modifyUsernameTipMessage: React.ReactNode = (

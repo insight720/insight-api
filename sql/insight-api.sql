@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_order`
     `description`  VARCHAR(1024)                   NOT NULL COMMENT '订单描述',
     `account_id`   BIGINT UNSIGNED                 NOT NULL COMMENT '账户主键',
     `digest_id`    BIGINT UNSIGNED                 NOT NULL COMMENT '接口摘要主键',
-    `usage_id`     BIGINT UNSIGNED                 NOT NULL COMMENT '用户接口用法主键',
+    `usage_id`     BIGINT UNSIGNED                 NULL COMMENT '用户接口用法主键',
     'usage_type'   VARCHAR(256) DEFAULT 'QUANTITY' NOT NULL COMMENT '接口用法类型',
     `order_status` TINYINT      DEFAULT 0          NOT NULL COMMENT '订单状态',
     `is_deleted`   TINYINT      DEFAULT 0          NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',

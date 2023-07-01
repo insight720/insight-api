@@ -1,6 +1,5 @@
 package pers.project.api.facade.service;
 
-import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -9,7 +8,7 @@ import pers.project.api.common.model.vo.UserApiDigestPageVO;
 import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 
 /**
- * Facade 模块 Service
+ * Facade 项目 Service
  *
  * @author Luo Fei
  * @date 2023/05/05
@@ -41,13 +40,5 @@ public interface FacadeService {
      * @return API 管理页面 VO
      */
     ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
-
-    /**
-     * 创建一条用户接口计数用法记录。
-     *
-     * @param creationDTO 用户接口计数用法创建 DTO
-     * @return 用户接口计数用法 主键
-     */
-    String createUserQuantityUsage(UserQuantityUsageCreationDTO creationDTO);
 
 }

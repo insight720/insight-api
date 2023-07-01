@@ -1,5 +1,6 @@
 package pers.project.api.security.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -7,12 +8,19 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.producer.TransactionSendResult;
+import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
+import org.springframework.transaction.support.TransactionTemplate;
+import pers.project.api.common.exception.BusinessException;
+import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.TransactionUtils;
-import pers.project.api.security.feign.FacadeFeignClient;
 import pers.project.api.security.mapper.UserOrderMapper;
 import pers.project.api.security.model.dto.QuantityUsageOrderCreationDTO;
 import pers.project.api.security.model.dto.VerificationCodeCheckDTO;
@@ -26,10 +34,21 @@ import pers.project.api.security.service.UserOrderService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.baomidou.mybatisplus.core.toolkit.StringPool.COLON;
+import static org.apache.rocketmq.client.producer.LocalTransactionState.COMMIT_MESSAGE;
+import static org.apache.rocketmq.spring.core.RocketMQLocalTransactionState.COMMIT;
+import static org.apache.rocketmq.spring.core.RocketMQLocalTransactionState.ROLLBACK;
+import static org.apache.rocketmq.spring.support.RocketMQHeaders.KEYS;
 import static org.springframework.util.StringUtils.hasText;
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.QUANTITY_USAGE_STOCK_DEDUCTION_MESSAGE_KEYS_KEY_PREFIX;
+import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_STOCK_DEDUCTION_TAG;
+import static pers.project.api.common.constant.rocketmq.RocketMQTopicNameConst.FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC;
+import static pers.project.api.common.enumeration.ErrorEnum.SERVER_ERROR;
 import static pers.project.api.common.enumeration.UsageTypeEnum.QUANTITY_USAGE;
+import static pers.project.api.common.util.RocketMQUtils.getTransactionId;
 
 /**
  * 针对表【user_order (用户接口订单) 】的数据库操作 Service 实现
@@ -37,13 +56,20 @@ import static pers.project.api.common.enumeration.UsageTypeEnum.QUANTITY_USAGE;
  * @author Luo Fei
  * @date 2023/03/20
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrderPO> implements UserOrderService {
 
     private final SecurityService securityService;
 
-    private final FacadeFeignClient facadeFeignClient;
+    private final RocketMQTemplate rocketMQTemplate;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private final RedisTemplate<String, Object> redisTransactionTemplate;
+
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public UserOrderPageVO getUserOrderPageVO(UserOrderPageQuery pageQuery) {
@@ -85,50 +111,71 @@ public class UserOrderServiceImpl extends ServiceImpl<UserOrderMapper, UserOrder
     }
 
     @Override
-    // 本地事务
-    @Transactional(rollbackFor = Throwable.class)
     public void createQuantityUsageOrder(QuantityUsageOrderCreationDTO orderCreationDTO) {
-        // 检查验证码（保证幂等性）
+        // 检查验证码以保证幂等性（LUA 脚本确保检查操作原子性）
         VerificationCodeCheckDTO codeCheckDTO = orderCreationDTO.getCodeCheckDTO();
         securityService.checkVerificationCode(codeCheckDTO, null);
-        // 用户接口计数用法创建 DTO
-        UserQuantityUsageCreationDTO usageCreationDTO = new UserQuantityUsageCreationDTO();
-        String digestId = orderCreationDTO.getDigestId();
-        usageCreationDTO.setDigestId(digestId);
-        usageCreationDTO.setAccountId(orderCreationDTO.getAccountId());
-        usageCreationDTO.setOrderQuantity(orderCreationDTO.getOrderQuantity());
-        // 事务回滚后发送消息让 Facade 模块回滚用户接口计数用法记录的创建
-        TransactionUtils.ifRolledBackAfterCompletion(() -> {
-                    // 此处抛出异常不会传播给  调用者
-                    try {
-                    }  catch (Exception e) {
-                        log.error("");
-                    }
+        // 全局唯一的订单号
+        String orderSn = IdWorker.getTimeId();
+        String stockDeductionMessageKeysKey = QUANTITY_USAGE_STOCK_DEDUCTION_MESSAGE_KEYS_KEY_PREFIX + orderSn;
+        // 本地事务
+        Consumer<Message<byte[]>> localTransactionExecutionConsumer
+                // 回调的消息（用于打印日志等需求）
+                = stockDeductionMessage -> transactionTemplate.executeWithoutResult(ignored -> {
+            // 记录事务状态不确定的日志
+            TransactionUtils.ifUnknownAfterCompletion(() ->
+                    log.warn("""
+                            Quantity usage order insertion transaction status unknown \
+                            for orderSn: {}, transactionID: {}
+                            """, orderSn, getTransactionId(stockDeductionMessage)));
+            // 订单号作用于消费过程幂等（Spring 管理的 Redis 事务)
+            redisTransactionTemplate.opsForValue().set(stockDeductionMessageKeysKey, orderSn);
+            // 保存接口计数用法订单记录
+            UserOrderPO userOrderPO = new UserOrderPO();
+            userOrderPO.setOrderSn(orderSn);
+            userOrderPO.setDescription(buildQuantityUsageOrderDescription(orderCreationDTO));
+            userOrderPO.setAccountId(orderCreationDTO.getAccountId());
+            userOrderPO.setDigestId(orderCreationDTO.getDigestId());
+            userOrderPO.setUsageType(QUANTITY_USAGE.storedValue());
+            save(userOrderPO);
         });
-/*
-        // 创建一条用户接口计数用法记录（远程调用）
-        Result<String> usageCreationResult
-                = facadeFeignClient.getUserQuantityUsageCreationResult(usageCreationDTO);
-        if (ResultUtils.isFailure(usageCreationResult)) {
-            throw new BusinessException(usageCreationResult);
+        // 同步发送扣库存消息（事务消息）
+        QuantityUsageStockDeductionDTO stockDeductionDTO = new QuantityUsageStockDeductionDTO();
+        stockDeductionDTO.setAccountId(orderCreationDTO.getAccountId());
+        stockDeductionDTO.setDigestId(orderCreationDTO.getDigestId());
+        stockDeductionDTO.setOrderQuantity(orderCreationDTO.getOrderQuantity());
+        stockDeductionDTO.setOrderSn(orderSn);
+        // 事务消息发送结果（其父类 SendResult 包含更多信息）
+        TransactionSendResult transactionSendResult
+                = rocketMQTemplate.sendMessageInTransaction
+                (FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC + COLON + QUANTITY_USAGE_STOCK_DEDUCTION_TAG,
+                        MessageBuilder
+                                .withPayload(stockDeductionDTO)
+                                // 订单号作为消息的 Keys（全局唯一业务索引键）
+                                .setHeader(KEYS, orderSn)
+                                .build(), localTransactionExecutionConsumer);
+        log.info("Transaction message sendStatus: {}, transaction ID: {}",
+                transactionSendResult.getSendStatus(), transactionSendResult.getTransactionId());
+        if (transactionSendResult.getLocalTransactionState() != COMMIT_MESSAGE) {
+            // 抛出异常（本地事务回滚或状态未知)
+            throw new BusinessException(SERVER_ERROR, "保存接口计数用法订单记录失败");
         }
-*/
-        // 创建新的用户订单
-//        String usageId = usageCreationResult.getData();
-        UserOrderPO userOrderPO = new UserOrderPO();
-        userOrderPO.setOrderSn(IdWorker.getTimeId());
-        userOrderPO.setDescription(buildQuantityUsageOrderDescription(orderCreationDTO));
-        userOrderPO.setAccountId(orderCreationDTO.getAccountId());
-        userOrderPO.setDigestId(digestId);
-//        userOrderPO.setUsageId(usageId);
-        userOrderPO.setUsageType(QUANTITY_USAGE.storedValue());
-        save(userOrderPO);
+    }
+
+    @Override
+    public RocketMQLocalTransactionState getQuantityUsageStockDeductionMessageTransactionState(Message<byte[]> message) {
+        // 在订单表找到了这个订单，说明本地事务插入订单的操作已经正确提交；如果订单表没有订单，说明本地事务已经回滚
+        QuantityUsageStockDeductionDTO quantityUsageStockDeductionDTO
+                = JSON.parseObject(message.getPayload(), QuantityUsageStockDeductionDTO.class);
+        LambdaQueryWrapper<UserOrderPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserOrderPO::getOrderSn, quantityUsageStockDeductionDTO.getOrderSn());
+        return baseMapper.exists(queryWrapper) ? COMMIT : ROLLBACK;
     }
 
     /**
-     * 构建计数用法订单描述信息
+     * 构建接口计数用法订单描述信息
      *
-     * @param orderCreationDTO 计数用法订单创建 DTO
+     * @param orderCreationDTO 接口计数用法创建 DTO
      * @return 订单描述信息字符串
      */
     private String buildQuantityUsageOrderDescription(QuantityUsageOrderCreationDTO orderCreationDTO) {

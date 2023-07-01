@@ -3,7 +3,6 @@ package pers.project.api.facade.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.facade.model.po.UserQuantityUsagePO;
 
 /**
@@ -16,11 +15,15 @@ import pers.project.api.facade.model.po.UserQuantityUsagePO;
 public interface UserQuantityUsageMapper extends BaseMapper<UserQuantityUsagePO> {
 
     /**
-     * 根据 {@code creationDTO} 中提供的信息，更新用户接口计数用法的库存数量。
+     * 根据账户 ID 和接口摘要 ID 更新调用次数存量。
      *
-     * @param creationDTO 用户接口计数用法创建 DTO
+     * @param accountId 账户 ID
+     * @param digestId  接口摘要 ID
+     * @param quantity  要更新的数量
      */
-    void updateStockByCreationDTO(@Param("creationDTO") UserQuantityUsageCreationDTO creationDTO);
+    void updateStockByAccountIdAndDigestId(@Param("accountId") String accountId,
+                                           @Param("digestId") String digestId,
+                                           @Param("quantity") String quantity);
 
 }
 

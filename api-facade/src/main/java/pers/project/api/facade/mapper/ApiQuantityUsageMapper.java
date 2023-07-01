@@ -15,7 +15,7 @@ import pers.project.api.facade.model.po.ApiQuantityUsagePO;
 public interface ApiQuantityUsageMapper extends BaseMapper<ApiQuantityUsagePO> {
 
     /**
-     * 根据接口摘要 ID {@code digestId}，更新计数用法库存数量 {@code quantity}。
+     * 根据接口摘要 ID，更新接口计数用法存量。
      *
      * @param digestId 接口摘要 ID
      * @param quantity 更新的数量

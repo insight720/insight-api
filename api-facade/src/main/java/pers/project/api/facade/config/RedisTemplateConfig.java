@@ -1,27 +1,48 @@
-package pers.project.api.security.config;
+package pers.project.api.facade.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import pers.project.api.common.handler.CustomFastJsonRedisSerializer;
 
 /**
- * Spring Data Redis 配置类
+ * {@code RedisTemplate} 配置类
+ * <p>
+ * 配置两个 {@code RedisTemplate}，一个支持事务，另外一个不支持，
+ * 以解决支持事务的 {@code RedisTemplate} 返回值为 {@code null} 的问题。
  *
  * @author Luo Fei
- * @date 2023/04/25
+ * @date 2023/06/30
  */
 @Configuration
-public class SpringDataRedisConfig {
+@RequiredArgsConstructor
+public class RedisTemplateConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = getBasicRedisTemplate(connectionFactory);
+        // 关闭事务支持
+        template.setEnableTransactionSupport(false);
+        return template;
+    }
+
+    @Bean
+    @Lazy
+    public RedisTemplate<String, Object> redisTransactionTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = getBasicRedisTemplate(connectionFactory);
+        // 启用事务支持
+        template.setEnableTransactionSupport(true);
+        return template;
+    }
+
+    private static RedisTemplate<String, Object> getBasicRedisTemplate
+            (RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        // 启用事务支持
-//        template.setEnableTransactionSupport(true);
         // key 用 String 序列化
         template.setKeySerializer(RedisSerializer.string());
         template.setHashKeySerializer(RedisSerializer.string());

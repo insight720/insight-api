@@ -26,8 +26,6 @@ public class EmailVerificationStrategy extends AbstractVerificationStrategy {
 
     private final EmailProperties properties;
 
-    // Supress mailSender
-    @SuppressWarnings("all")
     protected EmailVerificationStrategy(RedisTemplate<String, Object> redisTemplate,
                                         SesClient sesClient,
                                         EmailProperties properties) {

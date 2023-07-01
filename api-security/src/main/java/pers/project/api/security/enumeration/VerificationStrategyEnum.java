@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.EMAIL_VERIFICATION_CODE_KEY_PREFIX;
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.PHONE_VERIFICATION_CODE_KEY_PREFIX;
+
 /**
  * 验证策略枚举
  *
@@ -16,10 +19,10 @@ import lombok.experimental.Accessors;
 public enum VerificationStrategyEnum {
 
     PHONE("phoneVerificationStrategy", "手机短信验证码",
-            "security:verification:code:phone:"),
+            PHONE_VERIFICATION_CODE_KEY_PREFIX),
 
     EMAIL("emailVerificationStrategy", "邮件验证码",
-            "security:verification:code:email:");
+            EMAIL_VERIFICATION_CODE_KEY_PREFIX);
 
     /**
      * 验证策略实现类的 Bean 名称

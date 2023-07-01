@@ -3,6 +3,7 @@ package pers.project.api.security.verification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
+import pers.project.api.common.constant.redis.RedisScriptConst;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -33,28 +34,12 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
     private static final int VERIFICATION_CODE_UPPER_BOUND = 1_000_000;
 
     /**
-     * 原子性 Redis 脚本，用于比较并删除键值对。
+     * 作用于确保幂等性的令牌验证 Redis 脚本
      *
-     * <p>该脚本会使用给定的参数与指定键的值进行比较。如果值匹配，则原子地删除该键值对并返回 1；否则，不做任何操作并返回 0。</p>
-     * <p>该脚本将以下两个参数传递给 Redis 服务器：
-     * <ul>
-     *
-     * <li>KEYS[1] - 要比较和删除的键</li>
-     *
-     * <li>ARGV[1] - 用于匹配的值</li>
-     *
-     * </ul></p>
-     *
-     * @param <T> 返回值类型
+     * @see RedisScriptConst#IDEMPOTENCY_TOKEN_LUA_SCRIPT
      */
-    private static final RedisScript<Long> DELETE_IF_MATCH_SCRIPT = RedisScript.of
-            ("""
-                    if ARGV[1] == redis.call('GET', KEYS[1]) then
-                      return redis.call('del', KEYS[1])
-                    else
-                      return 0
-                    end
-                      """, Long.class);
+    private static final RedisScript<Long> IDEMPOTENCY_TOKEN_REDIS_SCRIPT = RedisScript.of
+            (RedisScriptConst.IDEMPOTENCY_TOKEN_LUA_SCRIPT, Long.class);
 
     protected AbstractVerificationStrategy(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -100,7 +85,7 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
 
         String codeKey = keyPrefix + contextInfo;
         Long executeResult = redisTemplate.execute
-                (DELETE_IF_MATCH_SCRIPT, Collections.singletonList(codeKey),
+                (IDEMPOTENCY_TOKEN_REDIS_SCRIPT, Collections.singletonList(codeKey),
                         userVerificationCode);
         return (executeResult != null && executeResult == 1L);
     }

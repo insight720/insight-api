@@ -30,7 +30,7 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
     // 手机号前缀选项（如 +86）
     const [phoneOption, setPhoneOption] = useState<string>("+86")
 
-    // 验证码输入框禁用状态
+    // 国际化
     const locale = useIntl();
 
     /**

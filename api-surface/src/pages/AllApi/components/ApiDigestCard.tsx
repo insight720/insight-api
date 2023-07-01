@@ -1,11 +1,20 @@
-import {ModalForm, ProCard, ProColumns, ProDescriptions, ProFormDigit, ProTable} from '@ant-design/pro-components';
+import {
+    ModalForm,
+    ProCard,
+    ProColumns,
+    ProDescriptions,
+    ProFormCaptcha,
+    ProFormDigit,
+    ProTable
+} from '@ant-design/pro-components';
 import {message, Space, Tabs, Tag, Typography} from 'antd';
 import React, {useState} from 'react';
 import {viewApiDigestPage} from "@/services/api-facade/apiDigestController";
 import {viewApiStockInfo} from "@/services/api-facade/apiQuantityUsageController";
-import {SlidersFilled} from "@ant-design/icons";
-import {FormattedMessage} from "@@/exports";
+import {LockOutlined, SlidersFilled} from "@ant-design/icons";
+import {FormattedMessage, useIntl} from "@@/exports";
 import {placeQuantityUsageOrder} from "@/services/api-security/userOrderController";
+import {getVerificationCode} from "@/services/api-security/securityController";
 
 /**
  * 接口摘要卡片属性
@@ -17,6 +26,8 @@ export type ApiDigestCardProps = {
     apiDigestVO?: API.ApiDigestVO;
     setApiDigestVO?: (newValue: API.ApiDigestVO | undefined) => void;
     add?: (tabType: string) => void;
+    remove?: (tabType: string) => void;
+    setOrderResultStatus?: (tabType: string) => void;
 };
 
 /**
@@ -33,8 +44,14 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
     // 设置当前查看的 API 摘要
     const {setApiDigestVO} = props;
 
-    // 设置当前查看的 API 摘要
+    // 新增标签
     const {add} = props;
+
+    // 设置订单结果状态
+    const {setOrderResultStatus} = props;
+
+    // 国际化
+    const locale = useIntl();
 
     /**
      * 操作模态框的类型
@@ -44,8 +61,6 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
         VIEW_USAGE = 0,
         // 下订单
         PLACE_ORDER = 1,
-        // 查看创建者
-        VIEW_CREATOR = 2
     }
 
     // 操作模态框开关
@@ -76,11 +91,27 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
     const [apiStockInfoVO, setApiStockInfoVO]
         = useState<API.ApiStockInfoVO>();
 
-    // 接口用法类型标签页 Tab 选项
+    // 身份验证策略
+    const [authStrategy, setAuthStrategy]
+        = useState<string>("PHONE");
+
+    // 接口用法类型 Tab 选项
     const apiUsageTypeTabItems = [
         {
             key: "QUANTITY",
             label: "计数用法",
+        },
+    ];
+
+    // 身份验证类型 Tab 选项
+    const verificationTabItems = [
+        {
+            key: "PHONE",
+            label: "手机号验证"
+        },
+        {
+            key: "EMAIL",
+            label: "邮箱号验证"
         },
     ];
 
@@ -160,7 +191,6 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
             color: 'green'
         },
     };
-
 
     /**
      * API 计数用法状态的映射
@@ -411,7 +441,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
     ];
 
     /**
-     * 修改用户名提交函数
+     * 查看用法状态提交函数
      */
     const viewUsageOnFinish = async () => {
         // 检查用户是否绑定信息
@@ -447,13 +477,44 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
     };
 
     /**
-     * 西单提交函数
+     * 确定身份验证策略
+     *
+     * 如果用户没有绑定对应的信息，则进行错误提示，并返回 null。
+     */
+    const determineAuthStrategy = () => {
+        const phoneNumber = currentUser?.phoneNumber;
+        const emailAddress = currentUser?.emailAddress;
+        const isUsingPhone = (authStrategy === "PHONE");
+        if (isUsingPhone && !phoneNumber) {
+            message.error("你没有绑定手机号")
+            return null;
+        }
+        if (!isUsingPhone && !emailAddress) {
+            message.error("你没有绑定邮箱地址")
+            return null;
+        }
+        return isUsingPhone;
+    };
+
+    /**
+     * 下单提交函数
      */
     const placeOrderOnFinish = async (formData: any) => {
+        // 检查用户是否绑定信息
+        const isUsingPhone = determineAuthStrategy();
+        if (isUsingPhone === null) {
+            return false;
+        }
         message.loading("下单中");
         try {
             await placeQuantityUsageOrder(
                 {
+                    codeCheckDTO: {
+                        phoneNumber: isUsingPhone ? currentUser?.phoneNumber : undefined,
+                        emailAddress: !isUsingPhone ? currentUser?.emailAddress : undefined,
+                        strategy: authStrategy || "",
+                        verificationCode: formData.verificationCode
+                    },
                     accountId: currentUser?.accountId,
                     digestId: apiDigestVO?.digestId,
                     methodSet: apiDigestVO?.methodSet,
@@ -465,14 +526,19 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                 }
             );
             message.destroy();
-            message.success('下单成功');
+            // 打开成功的订单结果页面
+            await add?.("result");
+            setOrderResultStatus?.("success");
             return true;
         } catch (error: any) {
             message.destroy();
-            message.error(error.message || "下单失败，请稍后再试");
+            // 打开失败的订单结果页面
+            await add?.("result");
+            setOrderResultStatus?.("error");
             return false;
         }
     };
+
 
     return (
         <div
@@ -544,6 +610,32 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                                     {apiStockInfoVO?.updateTime}
                                 </ProDescriptions.Item>
                             </ProDescriptions>
+                            <Tabs
+                                activeKey={authStrategy}
+                                onChange={setAuthStrategy}
+                                centered
+                                items={verificationTabItems}/>
+                            <Typography.Text>
+                                <Typography.Text>
+                                    <Typography.Text strong>
+                                        下单需进行已绑定邮箱或手机号的验证码身份验证
+                                    </Typography.Text>
+                                    <Typography.Text>
+                                        。如未绑定，请前往
+                                        <Typography.Text italic strong> 认证设置 </Typography.Text>
+                                        并至少绑定一个邮箱或手机号。感谢您的支持！
+                                    </Typography.Text>
+                                </Typography.Text>
+                                <Typography.Text>
+                                    下单成功后请尽快前往
+                                    <Typography.Text strong> 我的订单 </Typography.Text>
+                                    进行订单确认，
+                                    <Typography.Text strong>
+                                        若 30 分钟未确认，订单将自动取消
+                                    </Typography.Text>。
+                                </Typography.Text>
+                            </Typography.Text>
+                            <br/>
                             <br/>
                             <ProFormDigit
                                 name="quantity"
@@ -572,6 +664,72 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                                         },
                                     },
                                 ]}
+                            />
+                            <ProFormCaptcha
+                                placeholder={locale.formatMessage({
+                                    id: 'Please enter',
+                                    defaultMessage: '请输入验证码',
+                                })}
+                                fieldProps={{
+                                    size: 'large',
+                                    prefix: <LockOutlined/>,
+                                }}
+                                captchaProps={{
+                                    size: 'large',
+                                }}
+                                captchaTextRender={(timing, count) => {
+                                    if (timing) {
+                                        return `${count} ${locale.formatMessage({
+                                            id: 'pages.getCaptchaSecondText',
+                                            defaultMessage: '获取验证码',
+                                        })}`;
+                                    }
+                                    return locale.formatMessage({
+                                        id: 'pages.login.phoneLogin.getVerificationCode',
+                                        defaultMessage: '获取验证码',
+                                    });
+                                }}
+                                name="verificationCode"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: (
+                                            <FormattedMessage
+                                                id="Please enter the verification code"
+                                                defaultMessage="验证码是必填项"
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        pattern: /^\d{6}$/,
+                                        message: (
+                                            <FormattedMessage
+                                                id="is not a valid verification code"
+                                                defaultMessage="不是有效的验证码"
+                                            />
+                                        )
+                                    }
+                                ]}
+                                onGetCaptcha={async () => {
+                                    // 检查用户是否绑定信息
+                                    const isUsingPhone = determineAuthStrategy();
+                                    if (isUsingPhone === null) {
+                                        // 让等待状态结束
+                                        throw new Error();
+                                    }
+                                    try {
+                                        await getVerificationCode({
+                                            phoneNumber: isUsingPhone ? currentUser?.phoneNumber : undefined,
+                                            emailAddress: !isUsingPhone ? currentUser?.emailAddress : undefined,
+                                            strategy: authStrategy || ""
+                                        });
+                                        message.success("获取验证码成功");
+                                    } catch (error: any) {
+                                        message.error(error.message || "获取验证码失败");
+                                        // 让等待状态结束
+                                        throw error;
+                                    }
+                                }}
                             />
                         </>
                     )}

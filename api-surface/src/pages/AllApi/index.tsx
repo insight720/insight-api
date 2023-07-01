@@ -6,6 +6,7 @@ import ApiViewCard from "./components/ApiViewCard";
 import ApiQuantityUsageViewCard from "@/pages/AllApi/components/ApiQuantityUsageViewCard";
 import ApiCreatorViewCard from "@/pages/AllApi/components/ApiCreatorViewCard";
 import ApiTestCard from "@/pages/AllApi/components/ApiTestCard";
+import ApiOrderResultCard from "@/pages/AllApi/components/ApiOrderResultCard";
 
 
 /**
@@ -23,6 +24,10 @@ const AllApi: React.FC = () => {
 
     // 登陆用户信息
     const {currentUser} = initialState || {};
+
+    // 订单结果状态
+    const [orderResultStatus, setOrderResultStatus]
+        = useState<string>();
 
     // tab 项
     type TabItem = {
@@ -60,6 +65,11 @@ const AllApi: React.FC = () => {
         "test": {
             tab: "测试调用",
             key: "test",
+            closable: true,
+        },
+        "result": {
+            tab: "下单结果",
+            key: "result",
             closable: true,
         }
     };
@@ -159,8 +169,9 @@ const AllApi: React.FC = () => {
                                    fetchUserInfo={fetchUserInfo}
                                    setInitialState={setInitialState}
                                    apiDigestVO={apiDigestVO}
-                                   setApiDigestVO={setApiDigestVO}
                                    add={add}
+                                   setApiDigestVO={setApiDigestVO}
+                                   setOrderResultStatus={setOrderResultStatus}
                     />
                 }
                 {
@@ -194,6 +205,13 @@ const AllApi: React.FC = () => {
                         fetchUserInfo={fetchUserInfo}
                         setInitialState={setInitialState}
                         apiDigestVO={apiDigestVO}/>
+                }
+                {
+                    tabItem.key === 'result' &&
+                    <ApiOrderResultCard
+                        orderResultStatus={orderResultStatus}
+                        remove={remove}
+                    />
                 }
             </PageContainer>
         </div>

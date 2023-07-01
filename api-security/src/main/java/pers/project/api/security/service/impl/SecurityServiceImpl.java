@@ -50,7 +50,7 @@ import static pers.project.api.security.enumeration.VerificationStrategyEnum.EMA
 import static pers.project.api.security.enumeration.VerificationStrategyEnum.PHONE;
 
 /**
- * Security 模块的 Service 实现
+ * Security 项目的 Service 实现
  *
  * @author Luo Fei
  * @date 2023/03/24

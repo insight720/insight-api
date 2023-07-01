@@ -6,7 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.dto.UserQuantityUsageCreationDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -16,7 +15,7 @@ import pers.project.api.common.model.vo.UserApiFormatAndQuantityUsageVO;
 import pers.project.api.security.feign.fallback.FacadeFeignFallbackFactory;
 
 /**
- * Facade 模块 Feign 客户端
+ * Facade 项目 Feign 客户端
  *
  * @author Luo Fei
  * @date 2023/05/05
@@ -37,9 +36,5 @@ public interface FacadeFeignClient {
     @PostMapping("/api/admin/page/result")
     Result<ApiAdminPageVO> getApiAdminPageResult
             (@Valid @RequestBody ApiAdminPageQuery pageQuery);
-
-    @PostMapping("/user/quantity/usage/creation/result")
-    Result<String> getUserQuantityUsageCreationResult
-            (@Valid @RequestBody UserQuantityUsageCreationDTO creationDTO);
 
 }

@@ -109,6 +109,7 @@ declare namespace API {
   };
 
   type QuantityUsageOrderCreationDTO = {
+    codeCheckDTO: VerificationCodeCheckDTO;
     accountId?: string;
     digestId?: string;
     methodSet?: string[];

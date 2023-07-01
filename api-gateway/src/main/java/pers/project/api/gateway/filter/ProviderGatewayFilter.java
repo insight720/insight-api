@@ -97,7 +97,7 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      *
      * @return true 如果请求被授权
      */
-    // 抑制 null 警告
+    // Suppress warnings for csrfTokenRequestHandler
     @SuppressWarnings("all")
     private boolean authorizeRequest(ServerWebExchange exchange) throws Exception {
         // TODO: 2023/6/9 授权过程因测试前端而跳过

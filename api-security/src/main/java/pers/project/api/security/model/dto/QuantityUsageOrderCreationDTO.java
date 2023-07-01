@@ -12,7 +12,7 @@ import pers.project.api.common.validation.constraint.SnowflakeId;
 import java.util.Set;
 
 /**
- * 计数用法订单创建 DTO
+ * 接口计数用法订单创建 DTO
  *
  * @author Luo Fei
  * @date 2023/06/03
@@ -42,24 +42,24 @@ public class QuantityUsageOrderCreationDTO {
     /**
      * 请求方法集合
      */
-    @Size(min = 1)
+    @Size(min = 1, max = 8)
     @ContainedIn(values = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"})
     private Set<String> methodSet;
 
     /**
      * 接口用法类型集合
      */
-    @Size(min = 1)
+    @Size(min = 1, max = 1)
     @ContainedIn(values = {"QUANTITY"})
     private Set<String> usageTypeSet;
-
+// TODO: 2023/6/30 校验字符串数值
     /**
      * 订单锁定的调用次数
      */
     @NotNull
     private String orderQuantity;
 
-    // region Same with ApiDigestPo
+    // region Same with ApiDigestPO
     /**
      * 接口名称
      */

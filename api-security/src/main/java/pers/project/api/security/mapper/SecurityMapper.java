@@ -8,7 +8,7 @@ import pers.project.api.common.model.vo.UserAdminVO;
 import java.util.List;
 
 /**
- * Security 模块的数据库操作 Mapper
+ * Security 项目的数据库操作 Mapper
  *
  * @author Luo Fei
  * @date 2023/05/21

@@ -5,10 +5,10 @@ import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import pers.project.api.common.transaction.*;
 
 import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
-import static org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization;
 
 /**
  * 事务工具类
@@ -51,7 +51,7 @@ public abstract class TransactionUtils {
      */
     public static void beforeReadOnlyCommit(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CommittingTransactionSynchronization.readOnly(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CommittingTransactionSynchronization.readOnly(delegate));
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class TransactionUtils {
      */
     public static void beforeReadWriteCommit(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CommittingTransactionSynchronization.readWrite(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CommittingTransactionSynchronization.readWrite(delegate));
     }
 
     /**
@@ -84,7 +84,7 @@ public abstract class TransactionUtils {
      */
     public static void beforeCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(new CompletingTransactionSynchronization(delegate));
+        TransactionSynchronizationManager.registerSynchronization(new CompletingTransactionSynchronization(delegate));
     }
 
     /**
@@ -99,7 +99,7 @@ public abstract class TransactionUtils {
      */
     public static void afterCommit(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(new CommittedTransactionSynchronization(delegate));
+        TransactionSynchronizationManager.registerSynchronization(new CommittedTransactionSynchronization(delegate));
     }
 
     /**
@@ -114,7 +114,7 @@ public abstract class TransactionUtils {
      */
     public static void afterCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CompletedTransactionSynchronization.committed(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.committed(delegate));
     }
 
     /**
@@ -129,7 +129,7 @@ public abstract class TransactionUtils {
      */
     public static void ifRolledBackAfterCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CompletedTransactionSynchronization.rolledBack(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.rolledBack(delegate));
     }
 
     /**
@@ -144,7 +144,7 @@ public abstract class TransactionUtils {
      */
     public static void ifCommittedAfterCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CompletedTransactionSynchronization.committed(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.committed(delegate));
     }
 
     /**
@@ -159,7 +159,28 @@ public abstract class TransactionUtils {
      */
     public static void ifUnknownAfterCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        registerSynchronization(CompletedTransactionSynchronization.unknown(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.unknown(delegate));
+    }
+
+    /**
+     * 注册原生的 {@link TransactionSynchronization} 。
+     * <p>
+     * 当需要在事务上下文执行特定的同步操作时，可以使用两种不同的方式：
+     * <p>
+     * 1. 使用 {@link TxSyncDelegate} 接口
+     * <p>
+     * 2. 直接使用原生的 {@link TransactionSynchronization} 接口。
+     * <p>
+     * 使用原生的 {@link TransactionSynchronization} 接口相比使用 {@link TxSyncDelegate} 拥有更高的效率，
+     * 因为它依赖于更少的中间对象。然而，使用原生接口可能会降低代码的可读性并增加编码难度。
+     * <p>
+     * 此方法功能由 {@link TransactionSynchronization} 支持，使用前请阅读其说明。
+     *
+     * @throws NoTransactionException 如果当前不在事务上下文中
+     */
+    public static void registerSynchronization(TransactionSynchronization synchronization) {
+        throwExceptionIfTransactionInactive();
+        TransactionSynchronizationManager.registerSynchronization(synchronization);
     }
 
     /**

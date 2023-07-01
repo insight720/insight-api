@@ -18,7 +18,7 @@ import pers.project.api.common.util.ResultUtils;
 import pers.project.api.facade.service.FacadeService;
 
 /**
- * Facade 模块控制器
+ * Facade 项目控制器
  *
  * @author Luo Fei
  * @date 2023/05/04
