@@ -24,12 +24,20 @@
         update_time
     </sql>
 
-    <update id="updateStockByDigestId">
+    <update id="updateDeductedStockByDigestId">
         UPDATE `api-facade`.api_quantity_usage
         SET locked_stock = locked_stock + #{quantity},
             stock        = stock - #{quantity}
         WHERE digest_id = #{digestId}
           AND stock &gt;= #{quantity}
+    </update>
+
+    <update id="updateReleasedStockByDigestId">
+        UPDATE `api-facade`.api_quantity_usage
+        SET locked_stock = locked_stock - #{quantity},
+            stock        = stock + #{quantity}
+        WHERE digest_id = #{digestId}
+          AND locked_stock &gt;= #{quantity}
     </update>
 
 </mapper>

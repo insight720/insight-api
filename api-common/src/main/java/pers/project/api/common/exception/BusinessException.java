@@ -7,6 +7,8 @@ import pers.project.api.common.model.Result;
 
 /**
  * 业务异常
+ * <p>
+ * 此异常通常用于业务流程控制，给前端错误信息。
  *
  * @author Luo Fei
  * @date 2023/03/14

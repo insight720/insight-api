@@ -294,12 +294,6 @@ declare namespace API {
     data?: PageApiInfoEntity;
   };
 
-  type ResultString = {
-    code?: string;
-    message?: string;
-    data?: string;
-  };
-
   type ResultUserApiDigestPageVO = {
     code?: string;
     message?: string;
@@ -364,12 +358,6 @@ declare namespace API {
     failure?: number;
     stock?: number;
     usageStatus?: number;
-  };
-
-  type UserQuantityUsageCreationDTO = {
-    accountId?: string;
-    digestId?: string;
-    orderQuantity: string;
   };
 
   type viewApiFormatParams = {

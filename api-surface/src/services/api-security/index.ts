@@ -2,16 +2,16 @@
 /* eslint-disable */
 // API 更新时间：
 // API 唯一标识：
+import * as quantityUsageOrderController from './quantityUsageOrderController';
 import * as securityController from './securityController';
 import * as userAccountController from './userAccountController';
 import * as userDetailsController from './userDetailsController';
-import * as userOrderController from './userOrderController';
 import * as userProfileController from './userProfileController';
 
 export default {
   userProfileController,
   userAccountController,
   securityController,
-  userOrderController,
+  quantityUsageOrderController,
   userDetailsController,
 };

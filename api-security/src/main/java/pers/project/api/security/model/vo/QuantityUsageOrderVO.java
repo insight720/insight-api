@@ -6,13 +6,13 @@ import pers.project.api.common.validation.constraint.SnowflakeId;
 import java.time.LocalDateTime;
 
 /**
- * 用户订单 VO
+ * 接口计数用法订单 VO
  *
  * @author Luo Fei
- * @date 2023/05/16
+ * @date 2023/07/08
  */
 @Data
-public class UserOrderVO {
+public class QuantityUsageOrderVO {
 
     /**
      * 订单主键
@@ -41,9 +41,9 @@ public class UserOrderVO {
     private String usageId;
 
     /**
-     * 接口用法类型
+     * 下单的调用次数
      */
-    private String usageType;
+    private String quantity;
 
     /**
      * 订单状态

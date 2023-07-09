@@ -13,8 +13,9 @@ import {viewApiDigestPage} from "@/services/api-facade/apiDigestController";
 import {viewApiStockInfo} from "@/services/api-facade/apiQuantityUsageController";
 import {LockOutlined, SlidersFilled} from "@ant-design/icons";
 import {FormattedMessage, useIntl} from "@@/exports";
-import {placeQuantityUsageOrder} from "@/services/api-security/userOrderController";
+
 import {getVerificationCode} from "@/services/api-security/securityController";
+import {placeQuantityUsageOrder} from "@/services/api-security/quantityUsageOrderController";
 
 /**
  * 接口摘要卡片属性
@@ -27,7 +28,7 @@ export type ApiDigestCardProps = {
     setApiDigestVO?: (newValue: API.ApiDigestVO | undefined) => void;
     add?: (tabType: string) => void;
     remove?: (tabType: string) => void;
-    setOrderResultStatus?: (tabType: string) => void;
+    setOrderResultStatus?: (status: string) => void;
 };
 
 /**
@@ -519,7 +520,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                     digestId: apiDigestVO?.digestId,
                     methodSet: apiDigestVO?.methodSet,
                     usageTypeSet: apiDigestVO?.usageTypeSet,
-                    orderQuantity: formData?.quantity,
+                    quantity: formData?.quantity,
                     apiName: apiDigestVO?.apiName || "",
                     description: apiDigestVO?.description || "",
                     url: apiDigestVO?.url || ""

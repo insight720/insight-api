@@ -49,18 +49,3 @@ export async function getUserApiFormatAndQuantityUsageResult(
     },
   );
 }
-
-/** 此处后端没有提供注释 POST /user/quantity/usage/creation/result */
-export async function getUserQuantityUsageCreationResult(
-  body: API.UserQuantityUsageCreationDTO,
-  options?: { [key: string]: any },
-) {
-  return request<API.ResultString>(`/facade/user/quantity/usage/creation/result`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}

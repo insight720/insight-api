@@ -20,4 +20,5 @@ public interface ProviderFeignService {
     String get(@RequestParam("test") String test, @RequestHeader HttpHeaders httpHeaders,
                @CookieValue(name = "SESSION", required = false) Cookie cookie);
 
+
 }

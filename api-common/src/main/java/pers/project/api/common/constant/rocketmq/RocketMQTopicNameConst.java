@@ -19,16 +19,16 @@ import lombok.NoArgsConstructor;
 public class RocketMQTopicNameConst {
 
     /**
-     * Security 项目的接口计数用法订单事务主题
-     */
-    public static final String SECURITY_QUANTITY_USAGE_ORDER_TRANSACTION_TOPIC
-            = "security_quantity_usage_order_transaction_topic";
-
-    /**
      * Security 项目的接口计数用法订单普通主题
      */
     public static final String SECURITY_QUANTITY_USAGE_ORDER_NORMAL_TOPIC
             = "security_quantity_usage_order_normal_topic";
+
+    /**
+     * Security 项目的接口计数用法订单延时主题
+     */
+    public static final String SECURITY_QUANTITY_USAGE_ORDER_DELAY_TOPIC
+            = "security_quantity_usage_order_delay_topic";
 
     /**
      * Facade 项目的接口计数用法事务主题

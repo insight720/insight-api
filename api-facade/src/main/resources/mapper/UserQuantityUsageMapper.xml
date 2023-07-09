@@ -24,11 +24,16 @@
         update_time
     </sql>
 
-    <update id="updateStockByAccountIdAndDigestId">
+    <update id="updateConfirmedStockById">
         UPDATE `api-facade`.user_quantity_usage
         SET stock = stock + #{quantity}
-        WHERE account_id = #{accountId}
-        AND digest_id = #{digestId}
+        WHERE id = #{usageId}
     </update>
+
+    <delete id="deletePhysicallyByAccountId">
+        DELETE
+        FROM `api-facade`.user_quantity_usage
+        WHERE id = #{usageId};
+    </delete>
 
 </mapper>

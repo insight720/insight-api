@@ -108,16 +108,59 @@ declare namespace API {
     codeCheckDTO?: VerificationCodeCheckDTO;
   };
 
+  type QuantityUsageOrderCancellationDTO = {
+    codeCheckDTO: VerificationCodeCheckDTO;
+    orderSn: string;
+    accountId?: string;
+    digestId?: string;
+  };
+
+  type QuantityUsageOrderConfirmationDTO = {
+    codeCheckDTO: VerificationCodeCheckDTO;
+    orderSn: string;
+    usageId?: string;
+    quantity: string;
+  };
+
   type QuantityUsageOrderCreationDTO = {
     codeCheckDTO: VerificationCodeCheckDTO;
     accountId?: string;
     digestId?: string;
     methodSet?: string[];
     usageTypeSet?: string[];
-    orderQuantity: string;
+    quantity: string;
     apiName: string;
     description: string;
     url: string;
+  };
+
+  type QuantityUsageOrderPageQuery = {
+    size?: number;
+    current?: number;
+    accountId?: string;
+    quantity?: string;
+    orderSn?: string;
+    description?: string;
+    orderStatusSet?: number[];
+    createTimeRange?: string[];
+    updateTimeRange?: string[];
+  };
+
+  type QuantityUsageOrderPageVO = {
+    total?: number;
+    quantityUsageOrderVOList?: QuantityUsageOrderVO[];
+  };
+
+  type QuantityUsageOrderVO = {
+    orderId?: string;
+    orderSn?: string;
+    description?: string;
+    digestId?: string;
+    usageId?: string;
+    quantity?: string;
+    orderStatus?: number;
+    createTime?: string;
+    updateTime?: string;
   };
 
   type ResultApiAdminPageVO = {
@@ -136,6 +179,12 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: LoginUserDTO;
+  };
+
+  type ResultQuantityUsageOrderPageVO = {
+    code?: string;
+    message?: string;
+    data?: QuantityUsageOrderPageVO;
   };
 
   type ResultString = {
@@ -166,12 +215,6 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: UserApiTestVO;
-  };
-
-  type ResultUserOrderPageVO = {
-    code?: string;
-    message?: string;
-    data?: UserOrderPageVO;
   };
 
   type ResultVoid = {
@@ -315,35 +358,6 @@ declare namespace API {
     accountId?: string;
     newUsername: string;
     codeCheckDTO: VerificationCodeCheckDTO;
-  };
-
-  type UserOrderPageQuery = {
-    size?: number;
-    current?: number;
-    accountId?: string;
-    orderSn?: string;
-    description?: string;
-    usageType?: number[];
-    orderStatus?: number[];
-    createTime?: string[];
-    updateTime?: string[];
-  };
-
-  type UserOrderPageVO = {
-    total?: number;
-    userOrderVOList?: UserOrderVO[];
-  };
-
-  type UserOrderVO = {
-    orderId?: string;
-    orderSn?: string;
-    description?: string;
-    digestId?: string;
-    usageId?: string;
-    usageType?: string;
-    orderStatus?: number;
-    createTime?: string;
-    updateTime?: string;
   };
 
   type UserProfileSettingDTO = {

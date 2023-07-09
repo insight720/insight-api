@@ -2,6 +2,7 @@ package pers.project.api.facade.service;
 
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
+import pers.project.api.common.model.dto.QuantityUsageStockReleaseDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -44,19 +45,31 @@ public interface FacadeService {
     ApiAdminPageVO getApiAdminPageVO(ApiAdminPageQuery pageQuery);
 
     /**
-     * 更新订单的接口计数用法存量。
+     * 更新接口计数用法扣减的存量。
      * <p>
      * 这个方法主要在本地事务中执行两个操作：
      * <pre>
      * 1. 扣减接口计数用法存量。
-     * 2. 接口计数用法订单状态更新 DTO。
+     * 2. 查询用户的接口计数用法的主键，如果还不存在则新建一个。
      * </pre>
      * {@code orderStatusUpdateDTO} 用于回复 Security 项目订单状态消息。
      *
      * @param stockDeductionDTO    接口计数用法存量扣减 DTO
      * @param orderStatusUpdateDTO 接口计数用法订单状态更新 DTO
      */
-    void updateOrderQuantityUsageStock(QuantityUsageStockDeductionDTO stockDeductionDTO,
-                                       QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO);
+    void updateQuantityUsageDeductedStock(QuantityUsageStockDeductionDTO stockDeductionDTO,
+                                          QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO);
+
+    /**
+     * 更新计数用法释放的存量。
+     * <p>
+     * 这个方法主要在本地事务中执行一个操作：
+     * <pre>
+     * 1. 释放订单的接口技术用法存量。
+     * </pre>
+     *
+     * @param stockReleaseDTO 接口计数用法存量释放 DTO
+     */
+    void updateQuantityUsageReleasedStock(QuantityUsageStockReleaseDTO stockReleaseDTO);
 
 }

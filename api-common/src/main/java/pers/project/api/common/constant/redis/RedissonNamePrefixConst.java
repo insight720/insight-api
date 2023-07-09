@@ -2,6 +2,7 @@ package pers.project.api.common.constant.redis;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 
 /**
@@ -18,5 +19,17 @@ import org.redisson.api.RedissonClient;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RedissonNamePrefixConst {
 
+    /**
+     * 用户接口计数用法存量的 {@link RSemaphore} 名称前缀
+     * <p>
+     * 此名称前缀后还有一层目录结构：用户接口计数用法主键。
+     * <p>
+     * 具体格式为：
+     * <pre>
+     * facade:quantity_usage:user_quantity_usage_stock_semaphore:{usageId}
+     * </pre>
+     */
+    public static final String USER_QUANTITY_USAGE_STOCK_SEMAPHORE_NAME_PREFIX
+            = "facade:quantity_usage:user_quantity_usage_stock_semaphore:";
 
 }

@@ -12,17 +12,17 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 表【user_order (用户接口订单) 】的数据 Entity
+ * 表【quantity_usage_order (接口计数用法订单) 】的数据 Entity
  *
  * @author Luo Fei
- * @date 2023/03/20
+ * @date 2023/07/03
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "user_order")
-public class UserOrderPO {
+@TableName(value = "quantity_usage_order")
+public class QuantityUsageOrderPO {
 
     /**
      * 主键
@@ -56,9 +56,9 @@ public class UserOrderPO {
     private String usageId;
 
     /**
-     * 接口用法类型
+     * 下单的调用次数
      */
-    private String usageType;
+    private String quantity;
 
     /**
      * 订单状态

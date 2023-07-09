@@ -9,8 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import pers.project.api.common.enumeration.UserQuantityUsageStatusEnum;
+import pers.project.api.common.exception.DataInconsistencyException;
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
+import pers.project.api.common.model.dto.QuantityUsageStockReleaseDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
@@ -134,34 +137,28 @@ public class FacadeServiceImpl implements FacadeService {
     }
 
     @Override
-    public void updateOrderQuantityUsageStock(QuantityUsageStockDeductionDTO stockDeductionDTO, QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO) {
-        // 查询原来的用户接口计数用法是否存在
-        LambdaQueryWrapper<UserQuantityUsagePO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(UserQuantityUsagePO::getId);
-        String digestId = stockDeductionDTO.getDigestId();
-        queryWrapper.eq(UserQuantityUsagePO::getDigestId, digestId);
-        String accountId = stockDeductionDTO.getAccountId();
-        queryWrapper.eq(UserQuantityUsagePO::getAccountId, accountId);
-        UserQuantityUsagePO originalUserQuantityUsagePO = userQuantityUsageMapper.selectOne(queryWrapper);
-        boolean userQuantityUsageExists = (originalUserQuantityUsagePO != null);
+    public void updateQuantityUsageDeductedStock(QuantityUsageStockDeductionDTO stockDeductionDTO, QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO) {
         // 先尝试扣减存量，扣减失败则说明存量不足，下单失败
-        String orderQuantity = stockDeductionDTO.getOrderQuantity();
-        int matchedRows = apiQuantityUsageMapper.updateStockByDigestId(digestId, orderQuantity);
+        String digestId = stockDeductionDTO.getDigestId();
+        String quantity = stockDeductionDTO.getQuantity();
+        int matchedRows = apiQuantityUsageMapper.updateDeductedStockByDigestId(digestId, quantity);
         if (matchedRows != 1) {
-            // 原来的用法主键
-            if (userQuantityUsageExists) {
-                orderStatusUpdateDTO.setUsageId(originalUserQuantityUsagePO.getId());
-            }
             // 订单状态为存量不足
             orderStatusUpdateDTO.setOrderStatus(STOCK_SHORTAGE.storedValue());
             return;
         }
         // 订单状态为下单成功
         orderStatusUpdateDTO.setOrderStatus(SUCCESS.storedValue());
+        // 查询原来的用户接口计数用法是否存在
+        LambdaQueryWrapper<UserQuantityUsagePO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(UserQuantityUsagePO::getId);
+        queryWrapper.eq(UserQuantityUsagePO::getDigestId, digestId);
+        String accountId = stockDeductionDTO.getAccountId();
+        queryWrapper.eq(UserQuantityUsagePO::getAccountId, accountId);
+        UserQuantityUsagePO originalUserQuantityUsagePO = userQuantityUsageMapper.selectOne(queryWrapper);
+        boolean userQuantityUsageExists = (originalUserQuantityUsagePO != null);
         // 根据原来的用户接口计数用法是否存在来确定执行更新操作还是插入操作
         if (userQuantityUsageExists) {
-            // 更新用户接口计数用法的存量
-            userQuantityUsageMapper.updateStockByAccountIdAndDigestId(accountId, digestId, orderQuantity);
             // 原来的用法主键
             orderStatusUpdateDTO.setUsageId(originalUserQuantityUsagePO.getId());
             return;
@@ -170,10 +167,25 @@ public class FacadeServiceImpl implements FacadeService {
         UserQuantityUsagePO newUserQuantityUsagePO = new UserQuantityUsagePO();
         newUserQuantityUsagePO.setAccountId(accountId);
         newUserQuantityUsagePO.setDigestId(digestId);
-        newUserQuantityUsagePO.setStock(orderQuantity);
+        newUserQuantityUsagePO.setUsageStatus(UserQuantityUsageStatusEnum.NEW.storedValue());
         userQuantityUsageMapper.insert(newUserQuantityUsagePO);
         // 新的用法主键
         orderStatusUpdateDTO.setUsageId(newUserQuantityUsagePO.getId());
+    }
+
+    @Override
+    public void updateQuantityUsageReleasedStock(QuantityUsageStockReleaseDTO stockReleaseDTO) {
+        // 释放接口计数用法存量
+        String digestId = stockReleaseDTO.getDigestId();
+        String quantity = stockReleaseDTO.getQuantity();
+        int matchedRows = apiQuantityUsageMapper.updateReleasedStockByDigestId(digestId, quantity);
+        if (matchedRows != 1) {
+            // 存量添加失败说明数据产生不一致问题，需要抛出异常，让本地事务回滚，并让消息消费重试
+            String message = """
+                    Stock release failed due to inconsistent data: %s
+                    """.formatted(stockReleaseDTO);
+            throw new DataInconsistencyException(message);
+        }
     }
 
 }

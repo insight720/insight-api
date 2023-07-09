@@ -1,8 +1,8 @@
 import {PageContainer} from '@ant-design/pro-components';
 import React, {useState} from "react";
 import {useModel} from "@@/exports";
-import UserOrderCard from "./components/UserOrderCard";
-import ApiFormatAndUsageCard from "./components/ApiFormatAndUsageCard";
+import QuantityUsageOrderCard from "./components/QuantityUsageOrderCard";
+import ApiOrderResultCard from "@/pages/User/MyOrder/components/ApiOrderResultCard";
 
 
 /**
@@ -29,20 +29,21 @@ const MyOrder: React.FC = () => {
 
     const tabItems: { [key: string]: TabItem } = {
         "order": {
-            tab: "用户订单",
+            tab: "计数用法订单",
             key: "order",
             closable: false,
         },
-        "info": {
-            tab: "订单信息",
-            key: "info",
+        "format": {
+            tab: "订单操作结果",
+            key: "format",
             closable: true,
-        }
+        },
+        "result": {
+            tab: "订单操作结果",
+            key: "result",
+            closable: true,
+        },
     };
-
-    // 当前查看的用户订单
-    const [userOrderVO, setUserOrderVO]
-        = useState<API.UserOrderVO>();
 
     // tab 标签键
     type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
@@ -54,6 +55,14 @@ const MyOrder: React.FC = () => {
     // 所有 tab 标签项
     const [items, setItems]
         = useState<TabItem[]>([tabItem]);
+
+    // 订单结果状态
+    const [orderResultStatus, setOrderResultStatus]
+        = useState<string>();
+
+    // 订单结果类型
+    const [orderResultType, setOrderResultType]
+        = useState<string>();
 
     const add = (tabType: TargetKey) => {
         const newPanes: TabItem[] = [...items];
@@ -134,20 +143,21 @@ const MyOrder: React.FC = () => {
             >
                 {
                     tabItem.key === 'order' &&
-                    <UserOrderCard currentUser={currentUser}
-                                   fetchUserInfo={fetchUserInfo}
-                                   setInitialState={setInitialState}
-                                   setUserApiDigestVO={setUserOrderVO}
-                                   add={add}
+                    <QuantityUsageOrderCard currentUser={currentUser}
+                                            fetchUserInfo={fetchUserInfo}
+                                            setInitialState={setInitialState}
+                                            setOrderResultStatus={setOrderResultStatus}
+                                            setOrderResultType={setOrderResultType}
+                                            add={add}
                     />
                 }
                 {
-                    tabItem.key === 'format' &&
-                    <ApiFormatAndUsageCard
-                        currentUser={currentUser}
-                        fetchUserInfo={fetchUserInfo}
-                        setInitialState={setInitialState}
-                        userApiDigestVO={userOrderVO}/>
+                    tabItem.key === 'result' &&
+                    <ApiOrderResultCard
+                        orderResultStatus={orderResultStatus}
+                        orderResultType={orderResultType}
+                        remove={remove}
+                    />
                 }
             </PageContainer>
         </div>

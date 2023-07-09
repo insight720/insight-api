@@ -54,10 +54,10 @@ public class QuantityUsageOrderCreationDTO {
     private Set<String> usageTypeSet;
 // TODO: 2023/6/30 校验字符串数值
     /**
-     * 订单锁定的调用次数
+     * 下单的调用次数
      */
     @NotNull
-    private String orderQuantity;
+    private String quantity;
 
     // region Same with ApiDigestPO
     /**

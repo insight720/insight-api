@@ -71,7 +71,7 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
     /**
      * API 状态的映射
      */
-    const ApiStatusMap: Record<number, { value: number, text: string, status: string }> = {
+    const ApiStatusMap: Record<number, { value: number, name: string, status: string }> = {
         [0]: {
             value: 0,
             name: '正常',

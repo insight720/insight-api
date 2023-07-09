@@ -8,7 +8,7 @@ import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import pers.project.api.common.util.RocketMQUtils;
-import pers.project.api.security.service.UserOrderService;
+import pers.project.api.security.service.QuantityUsageOrderService;
 
 import java.util.function.Consumer;
 
@@ -16,6 +16,7 @@ import static org.apache.rocketmq.spring.core.RocketMQLocalTransactionState.*;
 import static org.apache.rocketmq.spring.support.RocketMQHeaders.PREFIX;
 import static org.apache.rocketmq.spring.support.RocketMQHeaders.TAGS;
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_STOCK_DEDUCTION_TAG;
+import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_STOCK_RELEASE_TAG;
 
 /**
  * Security 项目事务监听器
@@ -28,7 +29,7 @@ import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUA
 @RocketMQTransactionListener
 public class SecurityTransactionListener implements RocketMQLocalTransactionListener {
 
-    private final UserOrderService userOrderService;
+    private final QuantityUsageOrderService userOrderService;
 
     @Override
     // Suppress warnings for messageConsumer
@@ -67,6 +68,8 @@ public class SecurityTransactionListener implements RocketMQLocalTransactionList
             RocketMQLocalTransactionState localTransactionState = switch (messageTag) {
                 case QUANTITY_USAGE_STOCK_DEDUCTION_TAG ->
                         userOrderService.getQuantityUsageStockDeductionMessageTransactionState(message);
+                case QUANTITY_USAGE_STOCK_RELEASE_TAG ->
+                        userOrderService.getQuantityUsageStockReleaseMessageTransactionState(message);
                 default -> throw new IllegalStateException("Unexpected value: " + messageTag);
             };
             log.info("""

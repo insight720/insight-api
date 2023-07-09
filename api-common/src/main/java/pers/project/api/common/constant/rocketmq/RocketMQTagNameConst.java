@@ -25,9 +25,27 @@ public final class RocketMQTagNameConst {
             = "quantity_usage_stock_deduction_tag";
 
     /**
+     * 接口计数用法存量释放标签
+     */
+    public static final String QUANTITY_USAGE_STOCK_RELEASE_TAG
+            = "quantity_usage_stock_release_tag";
+
+    /**
+     * 接口计数用法存量确认标签
+     */
+    public static final String QUANTITY_USAGE_STOCK_CONFIRMATION_TAG
+            = "quantity_usage_stock_confirmation_tag";
+
+    /**
      * 接口计数用法订单状态更新标签
      */
     public static final String QUANTITY_USAGE_ORDER_STATUS_UPDATE_TAG
             = "quantity_usage_order_status_update_tag";
+
+    /**
+     * 接口计数用法订单定时关闭标签
+     */
+    public static final String QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_TAG
+            = "quantity_usage_order_scheduled_close_tag";
 
 }

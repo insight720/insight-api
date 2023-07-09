@@ -70,4 +70,44 @@ public final class RedisKeyPrefixConst {
     public static final String QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX
             = "security:order:quantity_usage_order_status_update_message_keys:";
 
+
+    /**
+     * 接口计数用法订单定时关闭延时消息 KEYS 的键名称前缀
+     * <p>
+     * 此名称前缀后还有一层目录结构：订单号。
+     * <p>
+     * 具体格式为：
+     * <pre>
+     * security:order:quantity_usage_order_scheduled_close_message_keys::{orderSn}
+     * </pre>
+     */
+    public static final String QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_MESSAGE_KEYS_KEY_PREFIX
+            = "security:order:quantity_usage_order_scheduled_close_message_keys:";
+
+    /**
+     * 接口计数用法存量释放消息 KEYS 的键名称前缀
+     * <p>
+     * 此名称前缀后还有一层目录结构：订单号。
+     * <p>
+     * 具体格式为：
+     * <pre>
+     * facade:quantity_usage:stock_release_message_keys:{orderSn}
+     * </pre>
+     */
+    public static final String QUANTITY_USAGE_STOCK_RELEASE_MESSAGE_KEYS_KEY_PREFIX
+            = "facade:quantity_usage:stock_release_message_keys:";
+
+    /**
+     * 接口计数用法存量确认消息 KEYS 的键名称前缀
+     * <p>
+     * 此名称前缀后还有一层目录结构：订单号。
+     * <p>
+     * 具体格式为：
+     * <pre>
+     * facade:quantity_usage:stock_confirmation_message_keys:{orderSn}
+     * </pre>
+     */
+    public static final String QUANTITY_USAGE_STOCK_CONFIRMATION_MESSAGE_KEYS_KEY_PREFIX
+            = "facade:quantity_usage:stock_confirmation_message_keys:";
+
 }

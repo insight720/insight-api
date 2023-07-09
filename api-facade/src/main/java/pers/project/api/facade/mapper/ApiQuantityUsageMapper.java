@@ -15,13 +15,22 @@ import pers.project.api.facade.model.po.ApiQuantityUsagePO;
 public interface ApiQuantityUsageMapper extends BaseMapper<ApiQuantityUsagePO> {
 
     /**
-     * 根据接口摘要 ID，更新接口计数用法存量。
+     * 根据接口摘要 ID，更新接口计数用法扣减的存量。
+     *
+     * @param digestId 接口摘要 ID
+     * @param quantity 更新的数量
+     * @return 符合条件的数据行数（0 或 1）
+     */
+    int updateDeductedStockByDigestId(@Param("digestId") String digestId, @Param("quantity") String quantity);
+
+    /**
+     * 根据接口摘要 ID，更新接口计数用法释放的存量。
      *
      * @param digestId 接口摘要 ID
      * @param quantity 更新的数量
      * @return 受影响的数据行数（0 或 1）
      */
-    int updateStockByDigestId(@Param("digestId") String digestId, @Param("quantity") String quantity);
+    int updateReleasedStockByDigestId(@Param("digestId") String digestId, @Param("quantity") String quantity);
 
 }
 

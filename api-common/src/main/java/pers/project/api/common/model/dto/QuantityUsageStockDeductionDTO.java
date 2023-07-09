@@ -22,9 +22,9 @@ public class QuantityUsageStockDeductionDTO {
     private String digestId;
 
     /**
-     * 订单锁定的调用次数
+     * 需要扣除的存量
      */
-    private String orderQuantity;
+    private String quantity;
 
     /**
      * 订单编号

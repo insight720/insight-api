@@ -114,7 +114,7 @@ public abstract class TransactionUtils {
      */
     public static void afterCompletion(TxSyncDelegate delegate) {
         throwExceptionIfTransactionInactive();
-        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.committed(delegate));
+        TransactionSynchronizationManager.registerSynchronization(CompletedTransactionSynchronization.completed(delegate));
     }
 
     /**

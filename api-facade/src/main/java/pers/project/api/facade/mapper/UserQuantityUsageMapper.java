@@ -15,15 +15,22 @@ import pers.project.api.facade.model.po.UserQuantityUsagePO;
 public interface UserQuantityUsageMapper extends BaseMapper<UserQuantityUsagePO> {
 
     /**
-     * 根据账户 ID 和接口摘要 ID 更新调用次数存量。
+     * 根据 ID 更新已确认的调用次数存量。
      *
-     * @param accountId 账户 ID
-     * @param digestId  接口摘要 ID
-     * @param quantity  要更新的数量
+     * @param usageId  用户接口计数用法主键
+     * @param quantity 要更新的数量
      */
-    void updateStockByAccountIdAndDigestId(@Param("accountId") String accountId,
-                                           @Param("digestId") String digestId,
-                                           @Param("quantity") String quantity);
+    int updateConfirmedStockById(@Param("usageId") String usageId,
+                                 @Param("quantity") String quantity);
+
+    /**
+     * 通过 usageId 物理删除。
+     * <p>
+     * 用于删除新建但因订单取消而不再使用的用户接口计数用法。
+     *
+     * @param usageId 用户接口计数用法主键
+     */
+    void deletePhysicallyByAccountId(@Param("usageId") String usageId);
 
 }
 

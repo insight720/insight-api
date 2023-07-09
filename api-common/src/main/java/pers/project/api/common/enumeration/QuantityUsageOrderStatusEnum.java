@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 /**
- * 订单状态枚举
+ * 接口计数用法订单状态枚举
  *
  * @author Luo Fei
- * @date 2023/06/28
+ * @date 2023/07/08
  */
 @Getter
 @AllArgsConstructor
@@ -23,7 +23,9 @@ public enum QuantityUsageOrderStatusEnum {
 
     TIMEOUT_CANCELLATION(3, "超时取消"),
 
-    USER_CANCELLATION(4, "用户取消");
+    USER_CANCELLATION(4, "用户取消"),
+
+    CONFIRMATION(5, "订单确认");;
 
     /**
      * 数据库中存储的值
@@ -31,7 +33,7 @@ public enum QuantityUsageOrderStatusEnum {
     private final Integer storedValue;
 
     /**
-     * 订单状态描述
+     * 状态描述
      */
     private final String description;
 
