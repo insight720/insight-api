@@ -2,7 +2,6 @@ package pers.project.api.facade.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.model.dto.QuantityUsageStockConfirmationDTO;
 import pers.project.api.facade.mapper.UserQuantityUsageMapper;
 import pers.project.api.facade.model.po.UserQuantityUsagePO;
 import pers.project.api.facade.service.UserQuantityUsageService;
@@ -15,11 +14,6 @@ import pers.project.api.facade.service.UserQuantityUsageService;
  */
 @Service
 public class UserQuantityUsageServiceImpl extends ServiceImpl<UserQuantityUsageMapper, UserQuantityUsagePO> implements UserQuantityUsageService {
-
-    @Override
-    public void updateConfirmedStock(QuantityUsageStockConfirmationDTO stockConfirmationDTO) {
-
-    }
 
 }
 

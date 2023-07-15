@@ -1,10 +1,12 @@
 package pers.project.api.gateway.feign;
 
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.entity.UserEntity;
+import pers.project.api.common.model.dto.ClientUserInfoDTO;
+import pers.project.api.common.model.query.ClientUserInfoQuery;
 
 
 /**
@@ -16,11 +18,7 @@ import pers.project.api.common.model.entity.UserEntity;
 @FeignClient(name = "gateway", contextId = "security", path = "/gateway/security")
 public interface SecurityFeignService {
 
-    @GetMapping("/user/getInvokeUser")
-    Result<UserEntity> getInvokeUser(@RequestParam("accessKey") String accessKey);
-
-    @GetMapping("/userApiInfo/invokeCount")
-    Result<Boolean> invokeCount(@RequestParam("apiInfoId") long apiInfoId,
-                                @RequestParam("userId") long userId);
+    @PostMapping("/request/user/info/result")
+    Result<ClientUserInfoDTO> getClientUserInfoResult(@Valid @RequestBody ClientUserInfoQuery userInfoQuery);
 
 }

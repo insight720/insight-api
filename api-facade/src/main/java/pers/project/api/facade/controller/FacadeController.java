@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.project.api.common.model.Result;
+import pers.project.api.common.model.dto.QuantityUsageApiInfoDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
+import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.ApiAdminPageVO;
@@ -50,6 +52,12 @@ public class FacadeController {
             (@Valid @RequestBody ApiAdminPageQuery pageQuery) {
         ApiAdminPageVO pageVO = facadeService.getApiAdminPageVO(pageQuery);
         return ResultUtils.success(pageVO);
+    }
+
+    @PostMapping("/quantity/usage/api/info/result")
+    public Result<QuantityUsageApiInfoDTO> getQuantityUsageApiInfoResult(@Valid @RequestBody QuantityUsageApiInfoQuery apiInfoQuery) {
+        QuantityUsageApiInfoDTO quantityUsageApiInfoDTO = facadeService.getQuantityUsageApiInfoDTO(apiInfoQuery);
+        return ResultUtils.success(quantityUsageApiInfoDTO);
     }
     // endregion
 

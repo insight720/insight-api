@@ -12,6 +12,11 @@ import lombok.Data;
 public class UserApiTestVO {
 
     /**
+     * 响应状态码
+     */
+    private Integer statusCode;
+
+    /**
      * 响应头
      */
     private String responseHeader;

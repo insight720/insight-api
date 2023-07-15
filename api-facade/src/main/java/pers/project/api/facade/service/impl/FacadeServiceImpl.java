@@ -1,6 +1,7 @@
 package pers.project.api.facade.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,10 +12,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import pers.project.api.common.enumeration.UserQuantityUsageStatusEnum;
 import pers.project.api.common.exception.DataInconsistencyException;
+import pers.project.api.common.model.dto.QuantityUsageApiInfoDTO;
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockReleaseDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
+import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.*;
@@ -27,9 +30,12 @@ import pers.project.api.facade.service.FacadeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.StringUtils.hasText;
+import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.USER_QUANTITY_USAGE_FAILURE_SEMAPHORE_NAME_PREFIX;
+import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.USER_QUANTITY_USAGE_TOTAL_SEMAPHORE_NAME_PREFIX;
 import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.STOCK_SHORTAGE;
 import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.SUCCESS;
 
@@ -57,6 +63,8 @@ public class FacadeServiceImpl implements FacadeService {
     private final RedissonClient redissonClient;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    private final UserQuantityUsageServiceImpl userQuantityUsageService;
 
     @Override
     public UserApiDigestPageVO getUserApiDigestPageDTO(UserApiDigestPageQuery pageQuery) {
@@ -114,12 +122,32 @@ public class FacadeServiceImpl implements FacadeService {
         BeanCopierUtils.copy(apiFormatPO, formatAndQuantityUsageVO);
         // 查询 API 计数用法信息
         LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
-        usageQueryWrapper.select(UserQuantityUsagePO::getTotal, UserQuantityUsagePO::getFailure,
-                UserQuantityUsagePO::getStock, UserQuantityUsagePO::getUsageStatus);
+        usageQueryWrapper.select(UserQuantityUsagePO::getId, UserQuantityUsagePO::getStock, UserQuantityUsagePO::getUsageStatus);
         usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, query.getAccountId());
         usageQueryWrapper.eq(UserQuantityUsagePO::getDigestId, query.getDigestId());
         UserQuantityUsagePO userQuantityUsagePo = userQuantityUsageMapper.selectOne(usageQueryWrapper);
         BeanCopierUtils.copy(userQuantityUsagePo, formatAndQuantityUsageVO);
+        String usageId = userQuantityUsagePo.getId();
+        // 查询接口调用次数统计量和失败调用次数统计量
+        String userTotalSemaphoreName = USER_QUANTITY_USAGE_TOTAL_SEMAPHORE_NAME_PREFIX + usageId;
+        int total = redissonClient.getSemaphore(userTotalSemaphoreName).availablePermits();
+        String userFailureSemaphoreName = USER_QUANTITY_USAGE_FAILURE_SEMAPHORE_NAME_PREFIX + usageId;
+        int failure = redissonClient.getSemaphore(userFailureSemaphoreName).availablePermits();
+        formatAndQuantityUsageVO.setTotal((long) total);
+        formatAndQuantityUsageVO.setFailure((long) failure);
+        // 查询后更新数据库（临时写法）
+        // TODO: 2023/7/16 临时写法
+        CompletableFuture.runAsync(() -> {
+            LambdaUpdateWrapper<UserQuantityUsagePO> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.set(UserQuantityUsagePO::getTotal, total);
+            updateWrapper.set(UserQuantityUsagePO::getFailure, failure);
+            updateWrapper.eq(UserQuantityUsagePO::getId, usageId);
+            userQuantityUsageService.update(updateWrapper);
+        }).exceptionally(throwable -> {
+            log.warn("Error update user quantity usage, usageId: {}, exception message: {}",
+                    usageId, throwable.getMessage());
+            return null;
+        });
         return formatAndQuantityUsageVO;
     }
 
@@ -186,6 +214,33 @@ public class FacadeServiceImpl implements FacadeService {
                     """.formatted(stockReleaseDTO);
             throw new DataInconsistencyException(message);
         }
+    }
+
+    @Override
+    public QuantityUsageApiInfoDTO getQuantityUsageApiInfoDTO(QuantityUsageApiInfoQuery apiInfoQuery) {
+        // 查询接口摘要数据（可以添加查询状态字段）
+        LambdaQueryWrapper<ApiDigestPO> digestQueryWrapper = new LambdaQueryWrapper<>();
+        digestQueryWrapper.select(ApiDigestPO::getId);
+        digestQueryWrapper.eq(ApiDigestPO::getUrl, apiInfoQuery.getOriginalUrl());
+        // method 存储为 , 分隔的请求方法名字符串，必须用模糊匹配查询，可根据需求修改设计
+        digestQueryWrapper.like(ApiDigestPO::getMethod, apiInfoQuery.getMethod());
+        ApiDigestPO apiDigestPO = apiDigestMapper.selectOne(digestQueryWrapper);
+        if (apiDigestPO == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to find API, apiInfoQuery: " + apiInfoQuery);
+            }
+            return new QuantityUsageApiInfoDTO();
+        }
+        // 查询用户计数用法数据（可以添加查询状态字段）
+        LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
+        usageQueryWrapper.select(UserQuantityUsagePO::getId);
+        usageQueryWrapper.eq(UserQuantityUsagePO::getDigestId, apiDigestPO.getId());
+        usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, apiDigestPO.getAccountId());
+        UserQuantityUsagePO userQuantityUsagePO = userQuantityUsageMapper.selectOne(usageQueryWrapper);
+        QuantityUsageApiInfoDTO quantityUsageApiInfoDTO = new QuantityUsageApiInfoDTO();
+        quantityUsageApiInfoDTO.setDigestId(apiDigestPO.getId());
+        quantityUsageApiInfoDTO.setUsageId(userQuantityUsagePO.getId());
+        return quantityUsageApiInfoDTO;
     }
 
 }

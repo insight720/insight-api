@@ -1,7 +1,6 @@
 import {ProCard} from '@ant-design/pro-components';
 import {Button, Result, Typography} from 'antd';
 import React from 'react';
-import {Link} from "umi";
 
 /**
  * 接口订单结果卡片属性
@@ -32,24 +31,35 @@ const ApiOrderResultCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardPr
     };
 
     /**
-     * 下单成功结果子标题
+     * 订单确认成功结果子标题
      */
-    const successfulOrderResultSubtitle: React.ReactNode =
+    const successfulOrderConfirmationResultSubtitle: React.ReactNode =
         <Typography.Text>
-            请尽快前往
-            <Typography.Text strong> 我的订单 </Typography.Text>
-            进行订单确认，
-            <Typography.Text strong>
-                若 30 分钟未确认，订单将自动取消
-            </Typography.Text>。
+            订单确认成功，您可点击返回键查看。
         </Typography.Text>;
 
     /**
-     * 下单失败结果子标题
+     * 订单确认失败结果子标题
      */
-    const failedOrderResultSubtitle: React.ReactNode =
+    const failedOrderConfirmationResultSubtitle: React.ReactNode =
         <Typography.Text>
-            请稍后尝试重新下单或联系管理员。
+            订单确认失败，请点击返回键查看，并稍后尝试重新确认。
+        </Typography.Text>;
+
+    /**
+     * 取消订单成功结果子标题
+     */
+    const successfulOrderCancellationResultSubtitle: React.ReactNode =
+        <Typography.Text>
+            订单取消成功，您可点击返回键查看。
+        </Typography.Text>;
+
+    /**
+     * 取消订单失败结果子标题
+     */
+    const failedOrderCancellationResultSubtitle: React.ReactNode =
+        <Typography.Text>
+            订单取消失败，请点击返回键查看，并稍后尝试重新取消。
         </Typography.Text>;
 
     return (
@@ -63,16 +73,11 @@ const ApiOrderResultCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardPr
                         status={orderResultStatus || "info"}
                         title={orderResultStatus === "success" ? "确认成功" : "确认失败"}
                         subTitle={orderResultStatus === "success" ?
-                            successfulOrderResultSubtitle : failedOrderResultSubtitle}
+                            successfulOrderConfirmationResultSubtitle : failedOrderConfirmationResultSubtitle}
                         extra={[
                             <Button type="primary" key="back" onClick={handleBack}>
                                 返回
                             </Button>,
-                            orderResultStatus === "success" && (
-                                <Link key="view" to="/user/order">
-                                    <Button key="view">我的订单</Button>
-                                </Link>
-                            ),
                         ]}
                     />
                 }
@@ -82,16 +87,11 @@ const ApiOrderResultCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardPr
                         status={orderResultStatus || "info"}
                         title={orderResultStatus === "success" ? "取消成功" : "取消失败"}
                         subTitle={orderResultStatus === "success" ?
-                            successfulOrderResultSubtitle : failedOrderResultSubtitle}
+                            successfulOrderCancellationResultSubtitle : failedOrderCancellationResultSubtitle}
                         extra={[
                             <Button type="primary" key="back" onClick={handleBack}>
                                 返回
                             </Button>,
-                            orderResultStatus === "success" && (
-                                <Link key="view" to="/user/order">
-                                    <Button key="view">我的订单</Button>
-                                </Link>
-                            ),
                         ]}
                     />
                 }

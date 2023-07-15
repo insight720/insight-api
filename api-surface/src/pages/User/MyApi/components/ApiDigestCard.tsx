@@ -311,7 +311,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                         onChange: (page) => console.log(page),
                     }}
                     dateFormatter="string"
-                    headerTitle="接口摘要"
+                    headerTitle="摘要列表"
                     toolBarRender={() => [
                         <Button
                             key="button"

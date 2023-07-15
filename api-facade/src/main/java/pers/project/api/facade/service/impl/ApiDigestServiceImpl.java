@@ -34,10 +34,7 @@ public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigest
     public ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery) {
         // 按 Query 条件组装 QueryWrapper
         LambdaQueryWrapper<ApiDigestPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(ApiDigestPO::getId, ApiDigestPO::getAccountId, ApiDigestPO::getApiName,
-                ApiDigestPO::getDescription, ApiDigestPO::getMethod, ApiDigestPO::getUrl,
-                ApiDigestPO::getApiStatus, ApiDigestPO::getUsageType, ApiDigestPO::getCreateTime,
-                ApiDigestPO::getUpdateTime);
+        // 模糊查询
         String apiName = pageQuery.getApiName();
         queryWrapper.like(nonNull(apiName), ApiDigestPO::getApiName, apiName);
         String description = pageQuery.getDescription();
@@ -47,11 +44,13 @@ public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigest
                 collectionToCommaDelimitedString(methodSet));
         String url = pageQuery.getUrl();
         queryWrapper.like(nonNull(url), ApiDigestPO::getUrl, url);
+        // 集合条件
         Set<String> usageTypeSet = pageQuery.getUsageTypeSet();
         queryWrapper.in(nonNull(usageTypeSet), ApiDigestPO::getUsageType,
                 collectionToCommaDelimitedString(usageTypeSet));
         Set<Integer> apiStatusSet = pageQuery.getApiStatusSet();
         queryWrapper.in(nonNull(apiStatusSet), ApiDigestPO::getApiStatus, apiStatusSet);
+        // 时间范围条件
         LocalDateTime[] createTimeRange = pageQuery.getCreateTimeRange();
         queryWrapper.and(nonNull(createTimeRange),
                 wrapper -> wrapper.ge(ApiDigestPO::getCreateTime, createTimeRange[0])
@@ -63,6 +62,7 @@ public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigest
         // 用 QueryWrapper 分页查询
         Page<ApiDigestPO> page = page
                 (Page.of(pageQuery.getCurrent(), pageQuery.getSize()), queryWrapper);
+        // 转换查询到的分页数据
         ApiDigestPageVO apiDigestPageVO = new ApiDigestPageVO();
         apiDigestPageVO.setTotal(page.getTotal());
         List<ApiDigestVO> apiDigestVOList = page.getRecords().stream()

@@ -1,5 +1,6 @@
 package pers.project.api.common.util;
 
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -29,6 +30,8 @@ public abstract class RedisUtils {
 
     /**
      * 验证作用于幂等性的令牌。
+     * <p>
+     * 此方法使用 {@code RedisTemplate} 运行脚本，也可以使用 {@link RedissonClient} 来运行脚本。
      *
      * @param redisTemplate {@code RedisTemplate} 实例
      * @param key           Redis 的键

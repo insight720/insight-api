@@ -27,6 +27,7 @@ public final class RedisScriptConst {
      * </p>
      * <p>该脚本将以下两个参数传递给 Redis 服务器：
      * <ul>
+     * 脚本既可以用 Redisson 执行，也可以用
      *
      * <li>KEYS[1] - 要比较和删除的键</li>
      *

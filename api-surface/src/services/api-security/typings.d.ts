@@ -135,8 +135,8 @@ declare namespace API {
   };
 
   type QuantityUsageOrderPageQuery = {
-    size?: number;
-    current?: number;
+    size: number;
+    current: number;
     accountId?: string;
     quantity?: string;
     orderSn?: string;
@@ -337,12 +337,15 @@ declare namespace API {
     secretId: string;
     digestId?: string;
     method: string;
+    url: string;
+    pathVariable?: string;
     requestParam?: string;
     requestHeader?: string;
     requestBody?: string;
   };
 
   type UserApiTestVO = {
+    statusCode?: number;
     responseHeader?: string;
     responseBody?: string;
   };

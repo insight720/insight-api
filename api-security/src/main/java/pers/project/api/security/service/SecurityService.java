@@ -3,10 +3,8 @@ package pers.project.api.security.service;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import pers.project.api.common.exception.BusinessException;
-import pers.project.api.common.model.query.ApiAdminPageQuery;
-import pers.project.api.common.model.query.UserAdminPageQuery;
-import pers.project.api.common.model.query.UserApiDigestPageQuery;
-import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.dto.ClientUserInfoDTO;
+import pers.project.api.common.model.query.*;
 import pers.project.api.common.model.vo.ApiAdminPageVO;
 import pers.project.api.common.model.vo.UserAdminPageVO;
 import pers.project.api.common.model.vo.UserApiDigestPageVO;
@@ -126,5 +124,14 @@ public interface SecurityService {
      * @return 用户 API 测试 VO 对象
      */
     UserApiTestVO getUserApiTestVO(UserApiTestDTO userApiTestDTO);
+
+    /**
+     * 根据提供的 {@code ClientUserInfoQuery} 对象，返回一个 {@code ClientUserInfoDTO} 对象，
+     * 该对象包含了用户请求的验签和日志所需数据。
+     *
+     * @param userInfoQuery Insight API 客户端的用户信息 Query
+     * @return Insight API 客户端的用户信息 DTO
+     */
+    ClientUserInfoDTO getClientUserInfoDTO(ClientUserInfoQuery userInfoQuery);
 
 }

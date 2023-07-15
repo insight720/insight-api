@@ -114,11 +114,6 @@ declare namespace API {
     isDelete?: number;
   };
 
-  type ApiInfoInvokeRequest = {
-    id?: number;
-    requestParams?: string;
-  };
-
   type ApiInfoQueryRequest = {
     current?: number;
     pageSize?: number;
@@ -280,12 +275,6 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: number;
-  };
-
-  type ResultObject = {
-    code?: string;
-    message?: string;
-    data?: Record<string, any>;
   };
 
   type ResultPageApiInfoEntity = {

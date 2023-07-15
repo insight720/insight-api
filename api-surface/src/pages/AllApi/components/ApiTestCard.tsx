@@ -104,10 +104,11 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
     // 处理表单提交事件
     const handleSubmit = async (values: any) => {
         const modifiedValues: any = {};
-        // 将 requestBody、requestHeader 和 requestParam 初始化为空对象
+        // 将 requestBody、requestHeader、requestParam、pathVariable 初始化为空对象
         modifiedValues.requestBody = {};
         modifiedValues.requestHeader = {};
         modifiedValues.requestParam = {};
+        modifiedValues.pathVariable = {};
         Object.entries(values).forEach(([key, value]) => {
             let modifiedKey = key;
             if (key.startsWith("requestParam.")) {
@@ -119,6 +120,9 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
             } else if (key.startsWith("requestBody.")) {
                 modifiedKey = key.replace("requestBody.", "");
                 modifiedValues.requestBody[modifiedKey] = value;
+            } else if (key.startsWith("pathVariable.")) {
+                modifiedKey = key.replace("pathVariable.", "");
+                modifiedValues.pathVariable[modifiedKey] = value;
             } else {
                 modifiedValues[key] = value;
             }
@@ -126,12 +130,15 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
         const requestBody = JSON.stringify(modifiedValues.requestBody);
         const requestHeader = JSON.stringify(modifiedValues.requestHeader);
         const requestParam = JSON.stringify(modifiedValues.requestParam);
+        const pathVariable = JSON.stringify(modifiedValues.pathVariable);
         console.log("requestBody");
         console.log(requestBody);
         console.log("requestHeader");
         console.log(requestHeader);
         console.log("requestParam");
         console.log(requestParam);
+        console.log("pathVariable");
+        console.log(pathVariable);
         message.loading("测试调用中");
         try {
             const result = await testUserApi(
@@ -139,7 +146,9 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                     accountId: currentUser?.accountId,
                     secretId: currentUser?.secretId || "",
                     digestId: apiDigestVO?.digestId,
+                    url: apiDigestVO?.url || "",
                     method: values.method,
+                    pathVariable: pathVariable,
                     requestParam: requestParam,
                     requestHeader: requestHeader,
                     requestBody: requestBody
@@ -163,6 +172,9 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                     visible closable onClose={onClose}
                     width={700}>
                 <ProDescriptions column={1}>
+                    <ProDescriptions.Item title={"响应状态码"} valueType={"text"}>
+                        {result.data.statusCode}
+                    </ProDescriptions.Item>
                     <ProDescriptions.Item title={"响应头"} valueType={"jsonCode"}>
                         {result.data.responseHeader}
                     </ProDescriptions.Item>
@@ -211,7 +223,7 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                         {apiTestFormatVO?.requestHeader}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应体" valueType={"jsonCode"} span={3}>
-                        {apiTestFormatVO?.requestBody}
+                        {apiTestFormatVO?.responseBody}
                     </ProDescriptions.Item>
                 </ProDescriptions>
             </ProCard>
@@ -220,18 +232,21 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                      title={<Typography.Text strong>测试调用表单</Typography.Text>}>
                 <Typography.Text>
                     这里是一个 API 测试调用的表单。除了请求方法外，填写的每一项下的几个参数都会被转换为 JSON
-                    格式字符串的一个属性。其中请求参数包含路径变量和查询参数两种类型。路径变量是 URL
+                    格式字符串的一个属性。其中参数包含路径变量和查询参数两种类型。路径变量是 URL
                     中用花括号括起来的变量，例如：/users/&#123;userId&#125;。查询参数则是使用
-                    ?、&、和 = 表示的键值对，例如：/users?name=john&amp;age=30。
+                    ?、&、和 = 表示的键值对，例如：/users?name=john&age=30。
                     <br/><br/>
                     在此表单中，您可以根据测试需要添加请求相关内容进行测试调用。
                     使用 JSON 格式的好处是它可以方便地序列化和反序列化数据，而且通常比其他格式更加易读
                     、易于解析和传输。
+                    <br/><br/>
+                    请注意，当前测试调用的请求体仅支持 JSON 字符串。
                 </Typography.Text>
                 <br/>
                 <br/>
                 <ProForm onFinish={handleSubmit}>
-                    <Collapse defaultActiveKey={["method", "requestParam", "requestHeader", "requestBody"]}>
+                    <Collapse
+                        defaultActiveKey={["method", "pathVariable", "requestParam", "requestHeader", "requestBody"]}>
                         <Panel header="请求方法" key={"method"}>
                             <ProFormText name="method"
                                          rules={[{required: true, message: '请选择请求方法'}]}>
@@ -246,7 +261,15 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                                 />
                             </ProFormText>
                         </Panel>
-                        <Panel header="请求参数" key={"requestParam"}>
+                        <Panel header="路径变量" key={"pathVariable"}>
+                            {/* 使用正则表达式匹配路径变量的名称 */}
+                            {apiDigestVO?.url?.match(/{(.*?)}/g)?.map((variable, index) => {
+                                // 去除花括号，获取路径变量的名称
+                                const name = variable.slice(1, -1);
+                                return <ProFormText key={index} name={`pathVariable.${name}`} label={name}/>;
+                            })}
+                        </Panel>
+                        <Panel header="查询参数" key={"requestParam"}>
                             {/* 使用 map 方法循环遍历 JSON 对象的属性，并嵌套对应的输入框 */}
                             {Object.keys(JSON.parse(apiTestFormatVO?.requestParam || "{}")).map((key) => (
                                 <ProFormText key={key} name={`requestParam.${key}`} label={key}/>

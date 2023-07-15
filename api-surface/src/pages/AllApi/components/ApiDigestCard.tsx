@@ -232,6 +232,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
         {
             title: '请求方法',
             dataIndex: 'methodSet',
+            valueType: 'treeSelect',
             fieldProps: {
                 multiple: true
             },
@@ -791,7 +792,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                         onChange: (page) => console.log(page),
                     }}
                     dateFormatter="string"
-                    headerTitle="接口摘要"
+                    headerTitle="摘要列表"
                 />
             </ProCard>
         </div>

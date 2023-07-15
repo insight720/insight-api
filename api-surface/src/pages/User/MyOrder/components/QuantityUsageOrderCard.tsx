@@ -136,6 +136,26 @@ const QuantityUsageOrderCard: React.FC<QuantityUsageOrderCardProps> = (props: Qu
         return isUsingPhone;
     }
 
+    // 订单状态的枚举
+    const QuantityUsageOrderStatusEnum = {
+        NEW: {storedValue: 0, description: "订单新建"},
+        SUCCESS: {storedValue: 1, description: "下单成功"},
+        STOCK_SHORTAGE: {storedValue: 2, description: "存量不足"},
+        TIMEOUT_CANCELLATION: {storedValue: 3, description: "超时取消"},
+        USER_CANCELLATION: {storedValue: 4, description: "用户取消"},
+        CONFIRMATION: {storedValue: 5, description: "订单确认"},
+    };
+
+    // 检查订单状态的方法
+    const checkOrderStatus = (record: API.QuantityUsageOrderVO) => {
+        if (record?.orderStatus !== QuantityUsageOrderStatusEnum.SUCCESS.storedValue) {
+            message.warning("订单状态不支持该操作");
+            return false;
+        }
+        // 如果需要，在此处处理其他逻辑
+        return true;
+    };
+
     /**
      * 确认订单提交函数
      */
@@ -279,6 +299,15 @@ const QuantityUsageOrderCard: React.FC<QuantityUsageOrderCardProps> = (props: Qu
             fieldProps: {
                 multiple: true
             },
+            tooltip: `
+            所有可能的接口计数用法订单状态类型及说明：
+    1. 订单新建：表示订单处于新建状态，等待下单成功或存量不足。
+    2. 下单成功：表示已成功下单，接口存量锁定成功。此后订单状态可能是超时取消、用户取消或订单确认。
+    3. 存量不足：表示订单因为存量不足无法下单成功。
+    4. 超时取消：表示订单因超时而被自动取消，锁定的接口存量将被释放。
+    5. 用户取消：表示订单被用户取消，锁定的接口存量将被释放。
+    6. 订单确认：表示订单已确认，锁定的接口存量已经可用。
+`,
             // 对应后端 QuantityUsageOrderStatusEnum#storedValue()
             valueEnum: {
                 0: {text: '订单新建', color: 'cyan'},
@@ -354,6 +383,9 @@ const QuantityUsageOrderCard: React.FC<QuantityUsageOrderCardProps> = (props: Qu
                 <a
                     key="CONFIRMATION"
                     onClick={() => {
+                        if (!checkOrderStatus(record)) {
+                            return false;
+                        }
                         setQuantityUsageOrderVO(record);
                         setOptionModalOnFinishType(OptionModalTypeEnum.CONFIRM);
                         setOptionModalTipMessage(orderConfirmationTipMessage);
@@ -368,6 +400,10 @@ const QuantityUsageOrderCard: React.FC<QuantityUsageOrderCardProps> = (props: Qu
                     key={"CANCELLATION"}
                     type={"link"}
                     onClick={() => {
+                        if (!checkOrderStatus(record)) {
+                            return false;
+                        }
+                        checkOrderStatus(record);
                         setQuantityUsageOrderVO(record);
                         setOptionModalOnFinishType(OptionModalTypeEnum.CANCEL);
                         setOptionModalTipMessage(orderCancellationTipMessage);

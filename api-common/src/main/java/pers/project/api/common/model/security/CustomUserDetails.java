@@ -34,7 +34,7 @@ public class CustomUserDetails implements UserDetails {
      * 与 {@link CustomUserDetails#getAuthorities()} 的返回值不同，
      * 直接以字符串形式表示。这样可以简化 JSON 序列化及权限数据使用过程。
      */
-    Set<String> authoritySet;
+    private Set<String> authoritySet;
 
     // region Same with UserAccountPO
     /**

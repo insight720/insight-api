@@ -121,7 +121,7 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
             style={{background: '#F5F7FA'}}
         >
             <ProCard>
-                <ProDescriptions bordered title={"接口信息"}
+                <ProDescriptions bordered title={"接口摘要和格式"}
                                  column={{xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1}}>
                     <ProDescriptions.Item label="接口名称" span={1}>
                         {apiDigestVO?.apiName}

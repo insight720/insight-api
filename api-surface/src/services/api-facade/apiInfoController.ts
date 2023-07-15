@@ -56,21 +56,6 @@ export async function getApiInfo(
   });
 }
 
-/** 此处后端没有提供注释 POST /invoke */
-export async function invokeApiInfo(
-  body: API.ApiInfoInvokeRequest,
-  options?: { [key: string]: any },
-) {
-  return request<API.ResultObject>(`/facade/invoke`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
 /** 此处后端没有提供注释 GET /list */
 export async function listApiInfo(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -108,18 +93,6 @@ export async function listApiInfoByPage(
 /** 此处后端没有提供注释 POST /offline */
 export async function offlineApiInfo(body: API.IdRequest, options?: { [key: string]: any }) {
   return request<API.ResultBoolean>(`/facade/offline`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 此处后端没有提供注释 POST /online */
-export async function onlineApiInfo(body: API.IdRequest, options?: { [key: string]: any }) {
-  return request<API.ResultBoolean>(`/facade/online`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

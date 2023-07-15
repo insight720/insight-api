@@ -232,50 +232,64 @@ public class SpringSecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             // 配置 Spring Security 上下文
-            http.securityContext()
-                    .securityContextRepository(securityContextRepository);
+            http.securityContext(contextConfigurer -> {
+                contextConfigurer.securityContextRepository(securityContextRepository);
+            });
             // 用户未登录时允许访问的路径
-            RequestMatcher[] permittedRequestMatchers = {
+            RequestMatcher[] allowedRequestMatchers = {
                     // 写在这里让 IDEA 可以导航到 Controller 方法
                     antMatcher(GET, "/csrf/token"),
                     antMatcher(POST, "/account/registry"),
                     antMatcher(POST, "/verification/code"),
                     antMatcher("/test"),
+                    // 查询用户请求信息的接口，用于网关确认信息
+                    antMatcher( "/request/user/info/result"),
             };
             // 配置请求授权
-            http.authorizeHttpRequests()
-                    .requestMatchers(permittedRequestMatchers)
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated();
+            http.authorizeHttpRequests(registry -> {
+                registry.requestMatchers(allowedRequestMatchers)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated();
+            });
             // 配置 CSRF 防护
-            http.csrf().csrfTokenRepository(csrfTokenRepository)
-                    .csrfTokenRequestHandler(csrfTokenRequestHandler);
+            http.csrf(configurer -> {
+                configurer.csrfTokenRepository(csrfTokenRepository)
+                        .csrfTokenRequestHandler(csrfTokenRequestHandler)
+                        .ignoringRequestMatchers(
+                                // 查询用户请求信息的接口，用于网关确认信息
+                                antMatcher( "/request/user/info/result"));
+            });
             // 配置会话管理
-            http.sessionManagement()
-                    .maximumSessions(MAXIMUM_SESSIONS)
-                    .sessionRegistry(sessionRegistry);
+            http.sessionManagement(configurer -> {
+                configurer.maximumSessions(MAXIMUM_SESSIONS)
+                        .sessionRegistry(sessionRegistry);
+            });
             // 配置账户名登录及验证码登录
-            http.formLogin()
-                    .loginProcessingUrl(LOGIN_PROCESSING_URL)
-                    .successHandler(authenticationSuccessHandler)
-                    .failureHandler(authenticationFailureHandler);
+            http.formLogin(configurer -> {
+                configurer.loginProcessingUrl(LOGIN_PROCESSING_URL)
+                        .successHandler(authenticationSuccessHandler)
+                        .failureHandler(authenticationFailureHandler);
+            });
             http.userDetailsService(userDetailsService)
                     .addFilterBefore(verificationCodeAuthenticationFilter(),
                             UsernamePasswordAuthenticationFilter.class)
                     // 此 Provider 将添加到默认 ProviderManager 中
                     .authenticationProvider(verificaionCodeAuthenticationProvider());
             // 配置记住我功能
-            http.rememberMe()
-                    .rememberMeServices(rememberMeServices);
+            http.rememberMe(configurer -> {
+                configurer.rememberMeServices(rememberMeServices);
+            });
             // 配置登出
-            http.logout()
-                    .logoutUrl(LOGOUT_URL)
-                    .logoutSuccessHandler(logoutSuccessHandler);
+            http.logout(configurer -> {
+                configurer.logoutUrl(LOGOUT_URL)
+                        .logoutSuccessHandler(logoutSuccessHandler);
+            });
             // 配置认证异常和授权异常处理
-            http.exceptionHandling()
-                    .authenticationEntryPoint(authenticationEntryPoint)
-                    .accessDeniedHandler(accessDeniedHandler);
+            http.exceptionHandling(configurer -> {
+                configurer.authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler);
+            });
             return http.build();
         }
         // endregion

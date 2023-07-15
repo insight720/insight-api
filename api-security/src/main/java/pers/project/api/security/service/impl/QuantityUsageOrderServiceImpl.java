@@ -18,6 +18,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import pers.project.api.common.enumeration.UsageTypeEnum;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockConfirmationDTO;
@@ -41,11 +42,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringPool.COLON;
+import static java.util.Objects.nonNull;
 import static org.apache.rocketmq.client.producer.LocalTransactionState.COMMIT_MESSAGE;
 import static org.apache.rocketmq.spring.core.RocketMQLocalTransactionState.COMMIT;
 import static org.apache.rocketmq.spring.core.RocketMQLocalTransactionState.ROLLBACK;
 import static org.apache.rocketmq.spring.support.RocketMQHeaders.KEYS;
-import static org.springframework.util.StringUtils.hasText;
 import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.*;
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.*;
 import static pers.project.api.common.constant.rocketmq.RocketMQTopicNameConst.FACADE_QUANTITY_USAGE_TRANSACTION_TOPIC;
@@ -112,12 +113,12 @@ public class QuantityUsageOrderServiceImpl extends ServiceImpl<QuantityUsageOrde
         // 相等条件
         queryWrapper.eq(QuantityUsageOrderPO::getAccountId, pageQuery.getAccountId());
         String quantity = pageQuery.getQuantity();
-        queryWrapper.eq(hasText(quantity), QuantityUsageOrderPO::getQuantity, quantity);
+        queryWrapper.eq(nonNull(quantity), QuantityUsageOrderPO::getQuantity, quantity);
         // 模糊查询
         String orderSn = pageQuery.getOrderSn();
-        queryWrapper.like(hasText(orderSn), QuantityUsageOrderPO::getOrderSn, orderSn);
+        queryWrapper.like(nonNull(orderSn), QuantityUsageOrderPO::getOrderSn, orderSn);
         String description = pageQuery.getDescription();
-        queryWrapper.like(hasText(description), QuantityUsageOrderPO::getDescription, description);
+        queryWrapper.like(nonNull(description), QuantityUsageOrderPO::getDescription, description);
         // 集合条件
         Set<Integer> orderStatusSet = pageQuery.getOrderStatusSet();
         queryWrapper.in(CollectionUtils.isNotEmpty(orderStatusSet),
@@ -342,13 +343,17 @@ public class QuantityUsageOrderServiceImpl extends ServiceImpl<QuantityUsageOrde
      */
     private String buildQuantityUsageOrderDescription(QuantityUsageOrderCreationDTO orderCreationDTO) {
         // 根据需求拼接订单描述信息
+        List<String> usageTypeDescriptionList = orderCreationDTO.getUsageTypeSet()
+                .stream()
+                .map(s -> UsageTypeEnum.getByStoredValue(s).description())
+                .toList();
         return """
-                接口名称：%s；接口描述：%s；请求方法：%s；接口地址：%s；接口用法类型：%s；订单锁定的调用次数：%s
+                接口名称：%s；接口描述：%s；所有请求方法：%s；接口地址：%s；所有用法类型：%s；订单锁定的调用次数：%s
                 """.formatted(orderCreationDTO.getApiName(),
                 orderCreationDTO.getDescription(),
                 orderCreationDTO.getMethodSet(),
                 orderCreationDTO.getUrl(),
-                orderCreationDTO.getUsageTypeSet(),
+                usageTypeDescriptionList,
                 orderCreationDTO.getQuantity());
     }
 

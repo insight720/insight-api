@@ -48,17 +48,17 @@ const AllApi: React.FC = () => {
             closable: false,
         },
         "format": {
-            tab: "接口信息",
+            tab: "查看接口",
             key: "format",
             closable: true,
         },
         "quantityUsage": {
-            tab: "接口计数用法",
+            tab: "查看用法",
             key: "quantityUsage",
             closable: true,
         },
         "creator": {
-            tab: "接口创建者",
+            tab: "查看创建者",
             key: "creator",
             closable: true,
         },

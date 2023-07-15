@@ -1,9 +1,11 @@
 package pers.project.api.facade.service;
 
+import pers.project.api.common.model.dto.QuantityUsageApiInfoDTO;
 import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockReleaseDTO;
 import pers.project.api.common.model.query.ApiAdminPageQuery;
+import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.ApiAdminPageVO;
@@ -71,5 +73,16 @@ public interface FacadeService {
      * @param stockReleaseDTO 接口计数用法存量释放 DTO
      */
     void updateQuantityUsageReleasedStock(QuantityUsageStockReleaseDTO stockReleaseDTO);
+
+    /**
+     * 根据提供的 {@code RequestApiInfoQuery} 对象，返回一个 {@code RequestApiInfoDTO} 对象，
+     * 该对象包含了 Gateway 请求次数统计和接口状态判断所需的数据。
+     * <p>
+     * <b>注意：此方法仅用于流程测试。</b>
+     *
+     * @param apiInfoQuery Insight API 请求的接口信息 Query
+     * @return Insight API 请求的接口信息 DTO
+     */
+    QuantityUsageApiInfoDTO getQuantityUsageApiInfoDTO(QuantityUsageApiInfoQuery apiInfoQuery);
 
 }

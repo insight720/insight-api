@@ -7,10 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.query.ApiAdminPageQuery;
-import pers.project.api.common.model.query.UserAdminPageQuery;
-import pers.project.api.common.model.query.UserApiDigestPageQuery;
-import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.dto.ClientUserInfoDTO;
+import pers.project.api.common.model.query.*;
 import pers.project.api.common.model.vo.ApiAdminPageVO;
 import pers.project.api.common.model.vo.UserAdminPageVO;
 import pers.project.api.common.model.vo.UserApiDigestPageVO;
@@ -36,6 +34,14 @@ import pers.project.api.security.service.SecurityService;
 public class SecurityController {
 
     private final SecurityService securityService;
+
+    // region OpenFeign
+    @PostMapping("/request/user/info/result")
+    public Result<ClientUserInfoDTO> getClientUserInfoResult(@Valid @RequestBody ClientUserInfoQuery userInfoQuery) {
+        ClientUserInfoDTO clientUserInfoDTO = securityService.getClientUserInfoDTO(userInfoQuery);
+        return ResultUtils.success(clientUserInfoDTO);
+    }
+    // endregion
 
     @GetMapping("/csrf/token")
     public Result<Void> getCsrfToken(HttpServletRequest request) {

@@ -1,28 +1,26 @@
 package pers.project.api.security.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dreamlu.mica.core.utils.WebUtil;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import pers.project.api.client.InsightApiClient;
+import pers.project.api.client.InsightApiRequest;
+import pers.project.api.client.InsightApiResponse;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.Result;
-import pers.project.api.common.model.query.ApiAdminPageQuery;
-import pers.project.api.common.model.query.UserAdminPageQuery;
-import pers.project.api.common.model.query.UserApiDigestPageQuery;
-import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
+import pers.project.api.common.model.dto.ClientUserInfoDTO;
+import pers.project.api.common.model.query.*;
 import pers.project.api.common.model.vo.*;
 import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.ResultUtils;
-import pers.project.api.sdk.client.TestClient;
-import pers.project.api.sdk.model.Test;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
 import pers.project.api.security.feign.FacadeFeignClient;
@@ -39,8 +37,10 @@ import pers.project.api.security.model.vo.UserApiTestVO;
 import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.verification.VerificationContext;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.springframework.util.StringUtils.commaDelimitedListToSet;
@@ -206,23 +206,69 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public UserApiTestVO getUserApiTestVO(UserApiTestDTO userApiTestDTO) {
-        // 查询 API 密钥
+        // 根据 accountId 查询 secretKey
         LambdaQueryWrapper<UserAccountPO> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(UserAccountPO::getSecretKey);
         queryWrapper.eq(UserAccountPO::getId, userApiTestDTO.getAccountId());
         UserAccountPO userAccountPO = userAccountMapper.selectOne(queryWrapper);
-        // TODO: 2023/6/9 假的模拟请求
-        // 发送远程请求（也可以用 Feign）
-        TestClient testClient = new TestClient(userApiTestDTO.getSecretId(), userAccountPO.getSecretKey());
-        Test test = new Test();
-        test.setTest(JSON.toJSONString(userApiTestDTO));
-        Cookie session = WebUtil.getRequest().getCookies()[0];
-        String resultString = testClient.post(test, session.getName(), session.getValue());
-        // 返回调用结果
+        // 创建请求对象和客户端
+        InsightApiRequest insightApiRequest = InsightApiRequest.newBuilder()
+                .method(userApiTestDTO.getMethod())
+                .url(userApiTestDTO.getUrl())
+                .pathVariable(convertJsonStringToStringMap(userApiTestDTO.getPathVariable()))
+                .requestParam(convertJsonStringToStringMap(userApiTestDTO.getRequestParam()))
+                .requestHeader(convertJsonStringToStringMap(userApiTestDTO.getRequestHeader()))
+                .requestBody(userApiTestDTO.getRequestBody())
+                .timeout(Duration.ofSeconds(2L))
+                .build();
+        InsightApiClient insightApiClient = InsightApiClient.newBuilder()
+                .secretId(userApiTestDTO.getSecretId())
+                .secretKey(userAccountPO.getSecretKey())
+                .connectTimeout(Duration.ofSeconds(2L))
+                .build();
+        // 发送请求并转换响应
         UserApiTestVO userApiTestVO = new UserApiTestVO();
-        userApiTestVO.setResponseHeader(resultString);
-        userApiTestVO.setResponseBody(resultString);
+        try {
+            InsightApiResponse<String> insightApiResponse = insightApiClient.send(insightApiRequest, String.class);
+            userApiTestVO.setStatusCode(insightApiResponse.statusCode());
+            JSONObject jsonObject = new JSONObject();
+            // HttpHeaders 的 map 方法返回的是不可变视图
+            insightApiResponse.responseHeader().map().forEach((headerName, headerValue) -> {
+                jsonObject.put(headerName, headerValue.get(0));
+            });
+            userApiTestVO.setResponseHeader(jsonObject.toString());
+        } catch (Exception e) {
+            throw new BusinessException(SERVER_ERROR, "测试调用失败");
+        }
         return userApiTestVO;
+    }
+
+    @Override
+    public ClientUserInfoDTO getClientUserInfoDTO(ClientUserInfoQuery userInfoQuery) {
+        LambdaQueryWrapper<UserAccountPO> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(UserAccountPO::getId, UserAccountPO::getSecretKey);
+        queryWrapper.eq(UserAccountPO::getSecretId, userInfoQuery.getSecretId());
+        UserAccountPO userAccountPO = userAccountMapper.selectOne(queryWrapper);
+        ClientUserInfoDTO clientUserInfoDTO = new ClientUserInfoDTO();
+        clientUserInfoDTO.setAccountId(userAccountPO.getId());
+        clientUserInfoDTO.setSecretKey(userAccountPO.getSecretKey());
+        return clientUserInfoDTO;
+    }
+
+    /**
+     * 将 JSON 字符串转换为字符串 Map
+     *
+     * @param jsonString JSON 字符串
+     * @return 字符串 Map
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Map<String, String> convertJsonStringToStringMap(String jsonString) {
+        JSONObject jsonObject = JSON.parseObject(jsonString);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject.entrySet().forEach(entry -> entry.setValue(entry.getValue().toString()));
+        return (Map) jsonObject;
     }
 
     /**

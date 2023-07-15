@@ -4,9 +4,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
 import pers.project.api.common.constant.redis.RedisScriptConst;
+import pers.project.api.common.util.RedisUtils;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -84,10 +84,7 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
                                                  String userVerificationCode) {
 
         String codeKey = keyPrefix + contextInfo;
-        Long executeResult = redisTemplate.execute
-                (IDEMPOTENCY_TOKEN_REDIS_SCRIPT, Collections.singletonList(codeKey),
-                        userVerificationCode);
-        return (executeResult != null && executeResult == 1L);
+        return RedisUtils.checkIdempotencyToken(redisTemplate, codeKey, userVerificationCode);
     }
 
 }

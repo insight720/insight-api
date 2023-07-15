@@ -3,6 +3,7 @@ package pers.project.api.security.model.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 import pers.project.api.common.validation.constraint.ContainedIn;
 import pers.project.api.common.validation.constraint.NullOrNotBlank;
 import pers.project.api.common.validation.constraint.SnowflakeId;
@@ -40,6 +41,19 @@ public class UserApiTestDTO {
     @NotNull
     @ContainedIn(values = {"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"})
     private String method;
+
+    /**
+     * 请求 URL
+     */
+    @NotBlank
+    @URL
+    private String url;
+
+    /**
+     * 路径变量
+     */
+    @NullOrNotBlank
+    private String pathVariable;
 
     /**
      * 请求参数

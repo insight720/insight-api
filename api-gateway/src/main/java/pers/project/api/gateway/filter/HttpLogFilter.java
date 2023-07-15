@@ -8,8 +8,6 @@ import org.springframework.cloud.gateway.filter.NettyWriteResponseFilter;
 import org.springframework.cloud.gateway.filter.factory.CacheRequestBodyGatewayFilterFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
@@ -46,7 +44,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
      */
     private static final String HTTP_REQUEST_LOG_FORMAT = """
             REQUEST_LOG
-            User ID: {}
             Request ID: {}
             Method: {}
             URI: {}
@@ -74,15 +71,10 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // Pre 打印 request 日志
         logHttpRequest(exchange);
-        ServerHttpRequest request = exchange.getRequest();
-        ServerHttpResponse response = exchange.getResponse();
-        if (requireHttpResponseBodyLog(exchange)) {
-            response = decorateHttpResponse(exchange);
-        } else {
-            logHttpResponse(response, request.getId(), null);
-        }
-        return chain.filter(exchange.mutate().response(response).build());
+        // Post 打印 response 日志
+        return chain.filter(exchange.mutate().response(decorateHttpResponse(exchange)).build());
     }
 
     @Override
@@ -104,7 +96,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     private Object[] extractRequestLogArgs(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         return new Object[]{
-                getUserId(exchange),
                 request.getId(),
                 request.getMethod(),
                 request.getURI(),
@@ -120,28 +111,6 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     }
 
     /**
-     * 获取用户 ID
-     *
-     * @return 用户 ID，可能为 null。
-     */
-    private Long getUserId(ServerWebExchange exchange) {
-//        CompletableFuture<WebSession> webSessionFuture = exchange.getSession().toFuture();
-//        UserEntity userEntity = null;
-//        try {
-//            userEntity = webSessionFuture.get()
-//                    .getAttribute(UserConst.USER_LOGIN_STATE);
-//        } catch (Exception e) {
-//            String requestId = exchange.getRequest().getId();
-//            log.warn("""
-//                    获取用户 ID 异常
-//                    请求 ID: {}
-//                    信息: {}
-//                    """, requestId, getMostSpecificCause(e));
-//        }
-        return null;
-    }
-
-    /**
      * 获取 HTTP 请求正文
      * <p>
      * 使用了框架自带的 {@link CacheRequestBodyGatewayFilterFactory }，
@@ -152,22 +121,7 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
      * CacheRequestBodyGatewayFilterFactory</a>
      */
     private Object getHttpRequestBody(ServerWebExchange exchange) {
-        return exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
-    }
-
-    /**
-     * 是否需要 HTTP 响应体日志
-     * <p>
-     * 可以根据需求进一步修改此方法。
-     *
-     * @return true 如果需要
-     */
-    private boolean requireHttpResponseBodyLog(ServerWebExchange exchange) {
-        HttpStatusCode httpStatusCode = exchange.getResponse().getStatusCode();
-        if (httpStatusCode == null) {
-            return false;
-        }
-        return HttpStatus.OK.isSameCodeAs(httpStatusCode);
+       return exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
     }
 
     /**
@@ -239,6 +193,7 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
                         // 使用 asReadOnlyBuffer()，否则无法返回响应
                         String responseBody = UTF_8.decode
                                 (byteBuffer.asReadOnlyBuffer()).toString();
+                        // 这里可以根据需求判断打印日志的内容
                         logHttpResponse(delegate, requestId, responseBody);
                         return delegate.bufferFactory().wrap(byteBuffer);
                     });

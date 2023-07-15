@@ -1,14 +1,11 @@
 package pers.project.api.facade.controller;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.nacos.common.utils.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import pers.project.api.common.constant.CommonConst;
 import pers.project.api.common.model.Result;
@@ -19,12 +16,9 @@ import pers.project.api.common.model.request.IdRequest;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.facade.feign.ProviderFeignService;
 import pers.project.api.facade.model.request.apiinfo.ApiInfoAddRequest;
-import pers.project.api.facade.model.request.apiinfo.ApiInfoInvokeRequest;
 import pers.project.api.facade.model.request.apiinfo.ApiInfoQueryRequest;
 import pers.project.api.facade.model.request.apiinfo.ApiInfoUpdateRequest;
 import pers.project.api.facade.service.ApiInfoService;
-import pers.project.api.sdk.client.TestClient;
-import pers.project.api.sdk.model.Test;
 
 import java.util.List;
 
@@ -43,8 +37,8 @@ public class ApiInfoController {
     @Resource
     private ApiInfoService apiInfoService;
 
-    @Resource
-    private TestClient testClient;
+//    @Resource
+//    private TestClient testClient;
 
     @Resource
     private ProviderFeignService providerFeignService;
@@ -57,36 +51,36 @@ public class ApiInfoController {
      * @param request
      * @return
      */
-    @PostMapping("/invoke")
-    public Result<Object> invokeApiInfo(@RequestBody ApiInfoInvokeRequest apiInfoInvokeRequest, HttpServletRequest request) {
-        if (apiInfoInvokeRequest == null || apiInfoInvokeRequest.getId() <= 0) {
-//            2023/03/21
-        }
-        long id = apiInfoInvokeRequest.getId();
-        // 判断是否存在
-        ApiInfoEntity oldInterfaceInfo = apiInfoService.getById(id);
-        if (oldInterfaceInfo == null) {
-//            
-        }
-        if (oldInterfaceInfo.getStatus() == 0) {
-//            (ErrorEnum.PARAMS_ERROR, "接口已关闭");
-        }
-        UserEntity loginUserEntity = getLoginUser(request);
-        String accessKey = loginUserEntity.getAccessKey();
-        String secretKey = loginUserEntity.getSecretKey();
-        TestClient tempClient = new TestClient(accessKey, secretKey);
-        String requestParams = apiInfoInvokeRequest.getRequestParams();
-        String testResult;
-        Cookie[] cookies = request.getCookies();
-        if (!requestParams.equals("get")) {
-            Test test = JSON.parseObject(requestParams, Test.class);
-            testResult = tempClient.post(test, cookies[0].getName(), cookies[0].getValue());
-        } else {
-            HttpHeaders httpHeaders = tempClient.getHeaders(requestParams);
-            testResult = providerFeignService.get("test", httpHeaders, cookies[0]);
-        }
-        return ResultUtils.success(testResult);
-    }
+//    @PostMapping("/invoke")
+//    public Result<Object> invokeApiInfo(@RequestBody ApiInfoInvokeRequest apiInfoInvokeRequest, HttpServletRequest request) {
+//        if (apiInfoInvokeRequest == null || apiInfoInvokeRequest.getId() <= 0) {
+////            2023/03/21
+//        }
+//        long id = apiInfoInvokeRequest.getId();
+//        // 判断是否存在
+//        ApiInfoEntity oldInterfaceInfo = apiInfoService.getById(id);
+//        if (oldInterfaceInfo == null) {
+////
+//        }
+//        if (oldInterfaceInfo.getStatus() == 0) {
+////            (ErrorEnum.PARAMS_ERROR, "接口已关闭");
+//        }
+//        UserEntity loginUserEntity = getLoginUser(request);
+//        String accessKey = loginUserEntity.getAccessKey();
+//        String secretKey = loginUserEntity.getSecretKey();
+//        TestClient tempClient = new TestClient(accessKey, secretKey);
+//        String requestParams = apiInfoInvokeRequest.getRequestParams();
+//        String testResult;
+//        Cookie[] cookies = request.getCookies();
+//        if (!requestParams.equals("get")) {
+//            Test test = JSON.parseObject(requestParams, Test.class);
+//            testResult = tempClient.post(test, cookies[0].getName(), cookies[0].getValue());
+//        } else {
+//            HttpHeaders httpHeaders = tempClient.getHeaders(requestParams);
+//            testResult = providerFeignService.get("test", httpHeaders, cookies[0]);
+//        }
+//        return ResultUtils.success(testResult);
+//    }
 
     // region 增删改查
 
@@ -132,11 +126,11 @@ public class ApiInfoController {
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            
+
         }
         // 仅本人或管理员可删除
         if (!oldApiInfoEntity.getUserId().equals(userEntity.getId())) {
-            
+
         }
         boolean b = apiInfoService.removeById(id);
         return ResultUtils.success(b);
@@ -163,11 +157,11 @@ public class ApiInfoController {
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            
+
         }
         // 仅本人或管理员可修改
         if (!oldApiInfoEntity.getUserId().equals(userEntity.getId())) {
-            
+
         }
         boolean result = apiInfoService.updateById(apiInfoEntity);
         return ResultUtils.success(result);
@@ -246,34 +240,34 @@ public class ApiInfoController {
      * @param request
      * @return
      */
-    @PostMapping("/online")
-    public Result<Boolean> onlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
-        // TODO: 2023/03/6 调用次数
-        if (idRequest == null || idRequest.getId() <= 0) {
-
-        }
-        long id = idRequest.getId();
-        // 判断是否存在
-        ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
-        if (oldApiInfoEntity == null) {
-            
-        }
-        // 判断该接口是否可以调用
-        Test test = new Test();
-        test.setTest("test");
-        Cookie[] cookies = request.getCookies();
-        Cookie session = cookies[0];
-        String response = testClient.post(test, session.getName(), session.getValue());
-        if (StringUtils.isBlank(response)) {
-//            (ErrorEnum.SYSTEM_ERROR, "接口验证失败");
-        }
-        // 仅本人或管理员可修改
-        ApiInfoEntity ApiInfoEntity = new ApiInfoEntity();
-        ApiInfoEntity.setId(id);
-        ApiInfoEntity.setStatus(1);
-        boolean result = apiInfoService.updateById(ApiInfoEntity);
-        return ResultUtils.success(result);
-    }
+//    @PostMapping("/online")
+//    public Result<Boolean> onlineApiInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+//        // TODO: 2023/03/6 调用次数
+//        if (idRequest == null || idRequest.getId() <= 0) {
+//
+//        }
+//        long id = idRequest.getId();
+//        // 判断是否存在
+//        ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
+//        if (oldApiInfoEntity == null) {
+//
+//        }
+//        // 判断该接口是否可以调用
+//        Test test = new Test();
+//        test.setTest("test");
+//        Cookie[] cookies = request.getCookies();
+//        Cookie session = cookies[0];
+//        String response = testClient.post(test, session.getName(), session.getValue());
+//        if (StringUtils.isBlank(response)) {
+////            (ErrorEnum.SYSTEM_ERROR, "接口验证失败");
+//        }
+//        // 仅本人或管理员可修改
+//        ApiInfoEntity ApiInfoEntity = new ApiInfoEntity();
+//        ApiInfoEntity.setId(id);
+//        ApiInfoEntity.setStatus(1);
+//        boolean result = apiInfoService.updateById(ApiInfoEntity);
+//        return ResultUtils.success(result);
+//    }
 
     /**
      * 下线
@@ -291,7 +285,7 @@ public class ApiInfoController {
         // 判断是否存在
         ApiInfoEntity oldApiInfoEntity = apiInfoService.getById(id);
         if (oldApiInfoEntity == null) {
-            
+
         }
         // 仅本人或管理员可修改
         ApiInfoEntity ApiInfoEntity = new ApiInfoEntity();
@@ -300,7 +294,6 @@ public class ApiInfoController {
         boolean result = apiInfoService.updateById(ApiInfoEntity);
         return ResultUtils.success(result);
     }
-
 
 
     // /apiInfo
