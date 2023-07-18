@@ -1,6 +1,5 @@
 package pers.project.api.gateway.filter;
 
-import com.alibaba.fastjson2.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RSemaphore;
@@ -11,14 +10,13 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 import pers.project.api.common.model.Result;
@@ -27,15 +25,14 @@ import pers.project.api.common.model.dto.QuantityUsageApiInfoDTO;
 import pers.project.api.common.model.query.ClientUserInfoQuery;
 import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
 import pers.project.api.common.util.ResultUtils;
-import pers.project.api.gateway.InsightApiGatewayException;
 import pers.project.api.gateway.enumaration.SignatureRequestHeaderEnum;
-import pers.project.api.gateway.feign.FacadeFeignService;
-import pers.project.api.gateway.feign.SecurityFeignService;
+import pers.project.api.gateway.exeception.InsightApiGatewayException;
+import pers.project.api.gateway.feign.FacadeFeignClient;
+import pers.project.api.gateway.feign.SecurityFeignClient;
 import pers.project.api.gateway.filter.factory.ProviderGatewayFilterFactory;
 import pers.project.api.gateway.util.SignatureHeaderUtils;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -47,7 +44,6 @@ import static org.springframework.http.HttpStatus.*;
 import static org.springframework.util.StringUtils.hasText;
 import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.SIGNATURE_HEADER_NONCE_KEY_PREFIX;
 import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.*;
-import static pers.project.api.common.enumeration.ErrorEnum.USER_REQUEST_ERROR;
 import static pers.project.api.gateway.constant.ExchangeAttributeNameConst.*;
 import static pers.project.api.gateway.enumaration.SignatureRequestHeaderEnum.*;
 import static pers.project.api.gateway.filter.HttpLogFilter.HTTP_LOG_FILTER_ORDER;
@@ -65,11 +61,9 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
     /**
      * 过滤器顺序
      * <p>
-     * 必须在 {@link HttpLogFilter} 打印请求日志之后。
-     * <p>
-     * 相同顺序全局过滤器在前。
+     * 必须在 {@link HttpLogFilter} 打印请求日志之前。
      */
-    public static final int PROVIDER_GATEWAY_FILTER_ORDER = HTTP_LOG_FILTER_ORDER;
+    public static final int PROVIDER_GATEWAY_FILTER_ORDER = HTTP_LOG_FILTER_ORDER - 1;
 
     /**
      * 时间戳超时时长（单位：毫秒）
@@ -82,6 +76,7 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      * 可以通过配置属性进行控制。
      */
     @Resource
+    @SuppressWarnings("unused")
     private ProviderGatewayFilterFactory.Config config;
 
     /**
@@ -93,10 +88,10 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      */
     @Lazy
     @Resource
-    private SecurityFeignService securityFeignService;
+    private SecurityFeignClient securityFeignClient;
     @Lazy
     @Resource
-    private FacadeFeignService facadeFeignService;
+    private FacadeFeignClient facadeFeignClient;
     @Lazy
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -184,7 +179,8 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      *
      * @return true 如果请求被授权
      */
-    //    @SuppressWarnings("all")
+    // Suppress warnings for null
+    @SuppressWarnings("all")
     private boolean authorizeRequest(ServerWebExchange exchange) throws ExecutionException, InterruptedException {
         // 检查请求头是否缺少或重复
         ServerHttpRequest request = exchange.getRequest();
@@ -214,25 +210,29 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
         // 以下简化 CompletableFuture 和 OpenFeign 的超时时间设置，以及 CompletableFuture 的异常处理
         // 获取请求的用户数据（暂时只获取 secretKey 和 accountId，可根据需求更改）
         String secretId = headers.getFirst(SECRET_ID.getHeaderName());
+        ClientUserInfoQuery clientUserInfoQuery = new ClientUserInfoQuery();
+        clientUserInfoQuery.setSecretId(secretId);
         CompletableFuture<ClientUserInfoDTO> userInfoFuture = CompletableFuture.supplyAsync(() -> {
-            ClientUserInfoQuery clientUserInfoQuery = new ClientUserInfoQuery();
-            clientUserInfoQuery.setSecretId(secretId);
-            Result<ClientUserInfoDTO> userInfoResult = securityFeignService.getClientUserInfoResult(clientUserInfoQuery);
+            Result<ClientUserInfoDTO> userInfoResult = securityFeignClient.getClientUserInfoResult(clientUserInfoQuery);
             if (ResultUtils.isFailure(userInfoResult)) {
                 throw new InsightApiGatewayException("Failed to get ClientUserInfoDTO, secretId: " + secretId);
             }
             return userInfoResult.getData();
         });
         ClientUserInfoDTO clientUserInfoDTO = userInfoFuture.get();
+        // 入参有 accountId 和请求中需要用于验证的参数
+        QuantityUsageApiInfoQuery apiInfoQuery = new QuantityUsageApiInfoQuery();
+        apiInfoQuery.setAccountId(clientUserInfoDTO.getAccountId());
+        apiInfoQuery.setMethod(request.getMethod().name());
+        String originalUrl = headers.getFirst(ORIGINAL_URL.getHeaderName());
+        Assert.notNull(originalUrl, () ->
+                "The originalUrl must be not null, HttpHeaders: " + headers
+        );
+        apiInfoQuery.setOriginalUrl(originalUrl);
         // 请求的接口是否存在（需要返回 usageId 来进行信号量操作）
         CompletableFuture<QuantityUsageApiInfoDTO> apiInfoFuture = CompletableFuture.supplyAsync(() -> {
-            // 入参有 accountId 和请求中需要用于验证的参数
-            QuantityUsageApiInfoQuery apiInfoQuery = new QuantityUsageApiInfoQuery();
-            apiInfoQuery.setAccountId(clientUserInfoDTO.getAccountId());
-            apiInfoQuery.setMethod(request.getMethod().name());
-            apiInfoQuery.setOriginalUrl(headers.getFirst(ORIGINAL_URL.getHeaderName()));
             Result<QuantityUsageApiInfoDTO> apiInfoResult
-                    = facadeFeignService.getQuantityUsageApiInfoResult(apiInfoQuery);
+                    = facadeFeignClient.getQuantityUsageApiInfoResult(apiInfoQuery);
             if (ResultUtils.isFailure(apiInfoResult)) {
                 throw new InsightApiGatewayException
                         ("Failed to get QuantityUsageApiInfoDTO, apiInfoQuery: " + apiInfoQuery);
@@ -240,9 +240,15 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
             return apiInfoResult.getData();
         });
         // 验证请求签名是否正确
-        String severCalculatedSign = SignatureHeaderUtils.getSign
-                (clientUserInfoDTO.getSecretKey(), exchange);
-        if (!severCalculatedSign.equals(headers.getFirst(SIGN.getHeaderName()))) {
+        String severCalculatedSign = SignatureHeaderUtils.getSign(clientUserInfoDTO.getSecretKey(), exchange);
+        String clientCalculatedSign = headers.getFirst(SIGN.getHeaderName());
+        if (!severCalculatedSign.equals(clientCalculatedSign)) {
+            if (log.isInfoEnabled()) {
+                log.info("""
+                         SeverCalculatedSign not equals clientCalculatedSign, sever sign: {}, client sign: {}
+                         """,
+                        severCalculatedSign, clientCalculatedSign);
+            }
             handleUnauthorizedRequest(exchange, FORBIDDEN, "Invalid request signature");
             return false;
         }
@@ -293,13 +299,13 @@ public class ProviderGatewayFilter implements GatewayFilter, Ordered {
      * @param httpStatus   响应状态码
      * @param errorMessage 错误信息
      */
+    @SuppressWarnings("all")
     private static void handleUnauthorizedRequest(ServerWebExchange exchange, HttpStatus httpStatus, String errorMessage) {
+        if (log.isInfoEnabled()) {
+            log.info("UnauthorizedRequestID: {}, errorMessage: {}", exchange.getRequest().getId(), errorMessage);
+        }
+        // TODO: 2023/7/18 根据错误信息返回响应体
         exchange.getResponse().setStatusCode(httpStatus);
-        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        Result<Object> failureResult = ResultUtils.failure(USER_REQUEST_ERROR, errorMessage);
-        byte[] errorBytes = JSON.toJSONString(failureResult).getBytes(StandardCharsets.UTF_8);
-        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(errorBytes);
-        exchange.getResponse().writeWith(Mono.just(buffer));
     }
 
 }

@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pers.project.api</groupId>
     <artifactId>insight-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>insight-api</name>
     <description>insight-api</description>
 
@@ -30,6 +30,7 @@
         <sensitive-word.version>0.8.0</sensitive-word.version>
         <tencentcloud-sdk-java.version>3.1.737</tencentcloud-sdk-java.version>
         <redisson.version>3.22.1</redisson.version>
+        <rocketmq-spring-boot-stater.version>2.2.3</rocketmq-spring-boot-stater.version>
     </properties>
 
     <!-- 子模块 -->
@@ -128,6 +129,13 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+
+            <!-- https://central.sonatype.com/artifact/org.apache.rocketmq/rocketmq-spring-boot-starter -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-spring-boot-stater.version}</version>
             </dependency>
         </dependencies>
 

@@ -47,7 +47,6 @@ public enum ErrorEnum {
 
     DATABASE_ERROR("C0300", "数据库服务出错");
 
-
     /**
      * 错误码
      * <p>

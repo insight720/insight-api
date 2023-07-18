@@ -1,5 +1,5 @@
 import {ProCard, ProDescriptions} from '@ant-design/pro-components';
-import {Badge, Tag} from 'antd';
+import {Badge, message, Space, Tag} from 'antd';
 import React, {useEffect, useState} from 'react';
 import {viewUserApiFormatAndQuantityUsage} from "@/services/api-security/securityController";
 import {useModel} from "@@/exports";
@@ -22,50 +22,51 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
     const {userApiDigestVO} = props;
 
     /**
-     *
      * HTTP 方法的映射
      */
-    const HttpMethodMap: Record<number, { value: number, name: string, color: string }> = {
-        [0]: {
-            value: 0,
-            name: 'GET',
+    const HttpMethodMap: Record<string, { value: string, color: string }> = {
+        ['GET']: {
+            value: 'GET',
             color: 'green'
         },
-        [1]: {
-            value: 1,
-            name: 'HEAD',
+        ['HEAD']: {
+            value: 'HEAD',
             color: 'blue'
         },
-        [2]: {
-            value: 2,
-            name: 'POST',
+        ['POST']: {
+            value: 'POST',
             color: 'magenta'
         },
-        [3]: {
-            value: 3,
-            name: 'PUT',
+        ['PUT']: {
+            value: 'PUT',
             color: 'geekblue'
         },
-        [4]: {
-            value: 4,
-            name: 'DELETE',
+        ['DELETE']: {
+            value: 'DELETE',
             color: 'red'
         },
-        [5]: {
-            value: 5,
-            name: 'OPTIONS',
+        ['OPTIONS']: {
+            value: 'OPTIONS',
             color: 'cyan'
         },
-        [6]: {
-            value: 6,
-            name: 'TRACE',
+        ['TRACE']: {
+            value: 'TRACE',
             color: 'purple'
         },
-        [7]: {
-            value: 7,
-            name: 'PATCH',
+        ['PATCH']: {
+            value: 'PATCH',
             color: 'orange'
         }
+    };
+
+    /**
+     * 使用方法映射
+     */
+    const UsageTypeMap: Record<string, { value: string, color: string }> = {
+        ['QUANTITY']: {
+            value: '计数用法',
+            color: 'green'
+        },
     };
 
     /**
@@ -96,13 +97,22 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
     const {currentUser} = initialState || {};
 
     const loadData = async () => {
-        const result = await viewUserApiFormatAndQuantityUsage(
-            {
-                accountId: currentUser?.accountId,
-                digestId: record?.digestId
-            }
-        )
-        setFormatAndQuantityUsageVO(result.data);
+        message.loading("加载中");
+        try {
+            const result = await viewUserApiFormatAndQuantityUsage(
+                {
+                    accountId: currentUser?.accountId,
+                    digestId: record?.digestId
+                }
+            )
+            setFormatAndQuantityUsageVO(result.data);
+            message.destroy();
+            return true;
+        } catch (error: any) {
+            message.destroy();
+            message.error(error.message || '加载失败，请重试！');
+            return false;
+        }
     };
 
     useEffect(() => {
@@ -118,9 +128,15 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
                     <ProDescriptions.Item label="接口名称">{record?.apiName}</ProDescriptions.Item>
                     <ProDescriptions.Item label="接口描述">{record?.description}</ProDescriptions.Item>
                     <ProDescriptions.Item label="请求方法">{
-                        <Tag color={HttpMethodMap[record?.method || 0].color}>
-                            {HttpMethodMap[record?.method || 0].name}
-                        </Tag>
+                        <>
+                            {record?.methodSet?.map((value) => (
+                                <Space key={value}>
+                                    <Tag color={HttpMethodMap[value || "GET"].color}>
+                                        {HttpMethodMap[value || "GET"].value}
+                                    </Tag>
+                                </Space>
+                            ))}
+                        </>
                     }</ProDescriptions.Item>
                     <ProDescriptions.Item label="接口地址">
                         {record?.url}
@@ -149,10 +165,18 @@ const ApiFormatAndUsageCard: React.FC<ApiFormatAndUsageCardProps> = (props: ApiF
                         {formatAndQuantityUsageVO?.requestHeader}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应体" valueType={"jsonCode"}>
-                        {formatAndQuantityUsageVO?.requestBody}
+                        {formatAndQuantityUsageVO?.responseBody}
                     </ProDescriptions.Item>
-                    <ProDescriptions.Item label="用法名">
-                        按调用次数统计
+                    <ProDescriptions.Item label="用法类型">
+                        <>
+                            {record?.usageTypeSet?.map((type) => (
+                                <Space key={type}>
+                                    <Tag color={UsageTypeMap[type || "QUANTITY"].color}>
+                                        {UsageTypeMap[type || "QUANTITY"].value}
+                                    </Tag>
+                                </Space>
+                            ))}
+                        </>
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="用法状态">
                         {formatAndQuantityUsageVO?.usageStatus}

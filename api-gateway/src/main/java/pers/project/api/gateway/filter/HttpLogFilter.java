@@ -13,6 +13,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import pers.project.api.gateway.util.GatewayHttpUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +21,7 @@ import java.nio.ByteBuffer;
 
 import static io.netty.util.CharsetUtil.UTF_8;
 import static org.springframework.cloud.gateway.filter.NettyWriteResponseFilter.WRITE_RESPONSE_FILTER_ORDER;
-import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CACHED_REQUEST_BODY_ATTR;
+import static pers.project.api.gateway.constant.ExchangeAttributeNameConst.CLIENT_ACCOUNT_ID;
 
 /**
  * HTTP 日志过滤器
@@ -45,11 +46,12 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     private static final String HTTP_REQUEST_LOG_FORMAT = """
             REQUEST_LOG
             Request ID: {}
+            Account ID: {}
             Method: {}
             URI: {}
             Path: {}
             Params: {}
-            Body: {}
+            RequestBody: {}
             Headers: {}
             Cookies: {}
             LocalAddress: {}
@@ -97,6 +99,7 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         return new Object[]{
                 request.getId(),
+                exchange.getAttributes().get(CLIENT_ACCOUNT_ID),
                 request.getMethod(),
                 request.getURI(),
                 request.getPath(),
@@ -113,15 +116,14 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
     /**
      * 获取 HTTP 请求正文
      * <p>
-     * 使用了框架自带的 {@link CacheRequestBodyGatewayFilterFactory }，
-     * 如果有缓存限制或特殊需求可以仿照源码自定义过滤器。
+     * 框架自带的 {@link CacheRequestBodyGatewayFilterFactory } 无效，暂无解决办法。
      *
-     * @return 缓存的请求体，可能为 null。一般是 String 类型，可以通过配置文件指定。
+     * @return 缓存的请求体，可能为 null。一般是 String 类型。
      * @see <a href="https://springdoc.cn/spring-cloud-gateway/#cacherequestbody">
      * CacheRequestBodyGatewayFilterFactory</a>
      */
-    private Object getHttpRequestBody(ServerWebExchange exchange) {
-       return exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
+    private String getHttpRequestBody(ServerWebExchange exchange) {
+        return GatewayHttpUtils.getCachedRequestBody(exchange);
     }
 
     /**
@@ -189,10 +191,10 @@ public class HttpLogFilter implements GlobalFilter, Ordered {
                         ByteBuffer byteBuffer = ByteBuffer.allocate
                                 (dataBuffer.readableByteCount());
                         dataBuffer.toByteBuffer(byteBuffer);
-                        ServerHttpResponse delegate = getDelegate();
                         // 使用 asReadOnlyBuffer()，否则无法返回响应
                         String responseBody = UTF_8.decode
                                 (byteBuffer.asReadOnlyBuffer()).toString();
+                        ServerHttpResponse delegate = getDelegate();
                         // 这里可以根据需求判断打印日志的内容
                         logHttpResponse(delegate, requestId, responseBody);
                         return delegate.bufferFactory().wrap(byteBuffer);

@@ -1,11 +1,12 @@
 package pers.project.api.gateway.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
-import pers.project.api.gateway.InsightApiGatewayException;
+import pers.project.api.gateway.exeception.InsightApiGatewayException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
 
-import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CACHED_REQUEST_BODY_ATTR;
 import static pers.project.api.gateway.enumaration.SignatureRequestHeaderEnum.ORIGINAL_URL;
 import static pers.project.api.gateway.enumaration.SignatureRequestHeaderEnum.USAGE_TYPE;
 
@@ -28,9 +28,12 @@ import static pers.project.api.gateway.enumaration.SignatureRequestHeaderEnum.US
  * @author Luo Fei
  * @date 2023/07/13
  */
+@Slf4j
 public abstract class SignatureHeaderUtils {
 
     private static final String HMAC_SHA_256 = "HmacSHA256";
+
+    private static final String HTTPS_SCHEMA = "https:";
 
     private static final Mac MAC;
 
@@ -64,28 +67,43 @@ public abstract class SignatureHeaderUtils {
         // 拼接 method 和 url（带带路径变量和请求参数的 URL）
         ServerHttpRequest request = exchange.getRequest();
         StringBuilder inputStringBuilder = new StringBuilder();
+        // https -> nginx -> http -> gateway  raw -> encoded (maybe) -> decoded
+        // https + //insightapi.cn/gateway/provider/ip/searcher
+        String urlWithVariablesAndParams = HTTPS_SCHEMA +
+                // getSchemeSpecificPart()'s result is never null, and it's decoded
+                exchange.getRequest().getURI().getSchemeSpecificPart();
+        // 这部分仅在测试环境有用
+        if (log.isDebugEnabled()) {
+            // localhost:80 会被改写为 localhost
+            log.debug("Original urlWithVariablesAndParams: {}", urlWithVariablesAndParams);
+            urlWithVariablesAndParams = urlWithVariablesAndParams
+                    .replaceFirst("https://localhost", "http://localhost:80");
+            log.debug("Replaced urlWithVariablesAndParams: {}", urlWithVariablesAndParams);
+        }
         inputStringBuilder.append(request.getMethod())
-                .append(request.getURI());
+                .append(urlWithVariablesAndParams);
         // 拼接 requestHeader
         HttpHeaders headers = request.getHeaders();
         appendHeader(inputStringBuilder, headers,
                 USAGE_TYPE.getHeaderName(), ORIGINAL_URL.getHeaderName());
         // 拼接 requestBody 的 sha256Hex 摘要
-        Object cachedRequestBody = exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
-        Assert.isTrue(cachedRequestBody == null || cachedRequestBody instanceof String,
-                "The cachedRequestBody must be null or instance of String");
+        String cachedRequestBody = GatewayHttpUtils.getCachedRequestBody(exchange);
         if (cachedRequestBody != null) {
             // 请求体有三种类型 InputStream，byte[] 和 String，但数据都被缓存为 String
-            inputStringBuilder.append(DigestUtils.sha256Hex(cachedRequestBody.toString()));
-            // 获取 SIGN 值
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA_256);
-            try {
-                MAC.init(secretKeySpec);
-            } catch (InvalidKeyException e) {
-                throw new InsightApiGatewayException(e);
-            }
+            inputStringBuilder.append(DigestUtils.sha256Hex(cachedRequestBody));
         }
-        byte[] hmacBytes = MAC.doFinal(inputStringBuilder.toString().getBytes(StandardCharsets.UTF_8));
+        // 获取 SIGN 值
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HMAC_SHA_256);
+        try {
+            MAC.init(secretKeySpec);
+        } catch (InvalidKeyException e) {
+            throw new InsightApiGatewayException(e);
+        }
+        String inputString = inputStringBuilder.toString();
+        if (log.isInfoEnabled()) {
+            log.info("Calculate sever sign, inputString: {}", inputString);
+        }
+        byte[] hmacBytes = MAC.doFinal(inputString.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(hmacBytes);
     }
 

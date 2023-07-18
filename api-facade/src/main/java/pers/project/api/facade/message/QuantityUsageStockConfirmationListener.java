@@ -57,9 +57,9 @@ public class QuantityUsageStockConfirmationListener implements RocketMQListener<
         String orderSn = stockConfirmationMessageKeys;
         // 检查作用于消费过程幂等的令牌
         String stockConfirmationMessageKeysKey = QUANTITY_USAGE_STOCK_CONFIRMATION_MESSAGE_KEYS_KEY_PREFIX + orderSn;
-        boolean isDuplicate = RedisUtils.checkIdempotencyToken
+        boolean isIdempotent = RedisUtils.checkIdempotencyToken
                 (redisTemplate, stockConfirmationMessageKeysKey, stockConfirmationMessageKeys);
-        if (isDuplicate) {
+        if (!isIdempotent) {
             log.info("Duplicate stock confirmation message, orderSn: {}", orderSn);
             return;
         }

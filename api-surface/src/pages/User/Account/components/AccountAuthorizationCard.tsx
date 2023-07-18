@@ -662,7 +662,7 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
                     </Button>
 
                     <Typography.Text>
-                        状态：
+                        状态（暂未生效）：
                         <Typography.Text strong>
                             {currentUser?.accountStatus === ApiKeyStatusEnum.NORMAL_KEY_UNAVAILABLE ? "已禁用" : "已启用"}
                         </Typography.Text>
@@ -674,10 +674,9 @@ const AccountAuthorizationCard: React.FC<AccountAuthorizationCardProps> = (props
 
             <br/>
             {}
-            <ProForm.Group title={"账户权限"} tooltip={"指用户账户在后台管理系统中具备的操作权限。"}/>
+            <ProForm.Group title={"账户权限（暂未生效）"} tooltip={"指用户账户在后台管理系统中具备的操作权限。"}/>
 
             <ProForm.Group align={"start"} size={"large"}>
-
                 <ProFormText tooltip="包括用户、测试、管理员。普通用户仅支持同时拥有用户和测试两种权限。"
                              label="权限">
                     <Typography.Text strong>

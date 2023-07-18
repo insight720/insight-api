@@ -26,15 +26,12 @@ import pers.project.api.security.feign.fallback.FacadeFeignFallbackFactory;
 public interface FacadeFeignClient {
 
     @PostMapping("/user/api/digest/page/result")
-    Result<UserApiDigestPageVO> getUserApiDigestPageResult
-            (@Valid @RequestBody UserApiDigestPageQuery pageQuery);
+    Result<UserApiDigestPageVO> getUserApiDigestPageResult(@Valid @RequestBody UserApiDigestPageQuery pageQuery);
 
     @PostMapping("/user/api/format/and/quantity/usage/result")
-    Result<UserApiFormatAndQuantityUsageVO> getUserApiFormatAndQuantityUsageResult
-            (@Valid @RequestBody UserApiFormatAndQuantityUsageQuery query);
+    Result<UserApiFormatAndQuantityUsageVO> getUserApiFormatAndQuantityUsageResult(@Valid @RequestBody UserApiFormatAndQuantityUsageQuery query);
 
     @PostMapping("/api/admin/page/result")
-    Result<ApiAdminPageVO> getApiAdminPageResult
-            (@Valid @RequestBody ApiAdminPageQuery pageQuery);
+    Result<ApiAdminPageVO> getApiAdminPageResult(@Valid @RequestBody ApiAdminPageQuery pageQuery);
 
 }

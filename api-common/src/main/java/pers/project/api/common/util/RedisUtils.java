@@ -42,7 +42,7 @@ public abstract class RedisUtils {
     public static <K, V> boolean checkIdempotencyToken(RedisTemplate<K, V> redisTemplate, K key, V value) {
         Long executeResult = redisTemplate.execute(IDEMPOTENCY_TOKEN_CHECK_REDIS_SCRIPT,
                 Collections.singletonList(key), value);
-        return (executeResult == null || executeResult == 0L);
+        return (executeResult != null) && executeResult.equals(1L);
     }
 
 }

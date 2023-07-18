@@ -62,11 +62,13 @@ export default [
         component: './404',
       },
     */
-    // 欢迎页
+    // 登录页
     {
         path: '/',
-        redirect: '/welcome',
+        layout: false,
+        component: './Login',
     },
+    // 欢迎页
     {
         path: '/welcome',
         name: 'welcome',
@@ -84,12 +86,6 @@ export default [
         path: '*',
         layout: false,
         component: './404',
-    },
-    // 登录页
-    {
-        path: '/login',
-        layout: false,
-        component: './Login',
     },
     // 用户页面
     {
@@ -146,24 +142,24 @@ export default [
             //     path: '/admin/api_analysis',
             //     component: './Admin/ApiAnalysis',
             // },
-            {
-                name: '用户管理',
-                icon: 'table',
-                path: '/admin/user',
-                component: './Admin/UserAdmin',
-            },
-            {
-                name: '接口管理',
-                icon: 'table',
-                path: '/admin/api',
-                component: './Admin/ApiAdmin',
-            },
-            {
-                name: '订单管理',
-                icon: 'table',
-                path: '/admin/order',
-                component: './Admin/OrderAdmin',
-            },
+            // {
+            //     name: '用户管理',
+            //     icon: 'table',
+            //     path: '/admin/user',
+            //     component: './Admin/UserAdmin',
+            // },
+            // {
+            //     name: '接口管理',
+            //     icon: 'table',
+            //     path: '/admin/api',
+            //     component: './Admin/ApiAdmin',
+            // },
+            // {
+            //     name: '订单管理',
+            //     icon: 'table',
+            //     path: '/admin/order',
+            //     component: './Admin/OrderAdmin',
+            // },
         ],
     },
 ];

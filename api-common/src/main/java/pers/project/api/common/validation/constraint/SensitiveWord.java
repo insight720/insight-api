@@ -54,7 +54,7 @@ public @interface SensitiveWord {
      * 设置允许的词汇
      * <p>
      * 如果 {@link SensitiveWord#useSystemWordAllows()} 设置为 true，
-     * 还会允许 {@link WordAllows#system()} 添加的默认词汇。
+     * 还会允许 {@link WordAllows#defaults()} 添加的默认词汇。
      *
      * @return 允许的词汇
      */
@@ -64,7 +64,7 @@ public @interface SensitiveWord {
      * 设置禁止的词汇
      * <p>
      * 如果 {@link SensitiveWord#useSystemWordDenys()} 设置为 true，
-     * 还会禁止 {@link WordDenys#system()} 添加的默认词汇。
+     * 还会禁止 {@link WordDenys#defaults()} 添加的默认词汇。
      *
      * @return 禁止的词汇
      */
@@ -73,7 +73,7 @@ public @interface SensitiveWord {
     /**
      * 是否使用系统默认允许的词汇
      * <p>
-     * 即允许 {@link WordAllows#system()} 添加的默认词汇。
+     * 即允许 {@link WordAllows#defaults()} 添加的默认词汇。
      *
      * @return 如果使用，则设置为 {@code true}。
      */
@@ -82,7 +82,7 @@ public @interface SensitiveWord {
     /**
      * 是否使用系统默认禁止的词汇
      * <p>
-     * 即禁止 {@link WordDenys#system()} 添加的默认词汇。
+     * 即禁止 {@link WordDenys#defaults()} 添加的默认词汇。
      *
      * @return 如果使用，则设置为 {@code true}。
      */

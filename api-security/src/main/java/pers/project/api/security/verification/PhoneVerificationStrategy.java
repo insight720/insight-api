@@ -54,11 +54,13 @@ public class PhoneVerificationStrategy extends AbstractVerificationStrategy {
         String[] phoneNumberSet = {phoneNumber};
         smsRequest.setPhoneNumberSet(phoneNumberSet);
         // 保存短信验证码到 Redis 并发送给用户
+        saveVerificationCodeInRedis
+                (PHONE.keyPrefix(), phoneNumber, verificationCode, validityPeriod);
         try {
-            saveVerificationCodeInRedis
-                    (PHONE.keyPrefix(), phoneNumber, verificationCode, validityPeriod);
             smsClient.SendSms(smsRequest);
         } catch (Exception e) {
+            // 发送失败时回滚
+            rollbackVerificationCodeInRedis(PHONE.keyPrefix(), phoneNumber);
             throw new VerificationContextException(e);
         }
     }

@@ -1,6 +1,8 @@
 package pers.project.api.client.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import pers.project.api.client.InsightApiRequest;
 import pers.project.api.client.exeception.InsightApiClientException;
 
@@ -26,6 +28,8 @@ import static pers.project.api.client.enumaration.SignatureRequestHeaderEnum.USA
  * @date 2023/07/13
  */
 public abstract class SignatureHeaderUtils {
+    // TODO: 2023/7/18 不打印日志
+    private static final Log log = LogFactory.getLog(SignatureHeaderUtils.class);
 
     private static final String HMAC_SHA_256 = "HmacSHA256";
 
@@ -104,7 +108,11 @@ public abstract class SignatureHeaderUtils {
         } catch (InvalidKeyException e) {
             throw new InsightApiClientException(e);
         }
-        byte[] hmacBytes = MAC.doFinal(inputStringBuilder.toString().getBytes(StandardCharsets.UTF_8));
+        String inputString = inputStringBuilder.toString();
+        if (log.isInfoEnabled()) {
+            log.info("Calculate client sign, inputString:" + inputString);
+        }
+        byte[] hmacBytes = MAC.doFinal(inputString.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(hmacBytes);
     }
 

@@ -3,8 +3,8 @@ package pers.project.api.facade.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.ApiDigestMapper;
 import pers.project.api.facade.model.po.ApiDigestPO;
 import pers.project.api.facade.model.query.ApiDigestPageQuery;
@@ -31,7 +31,10 @@ import static org.springframework.util.StringUtils.commaDelimitedListToSet;
 public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigestPO> implements ApiDigestService {
 
     @Override
+    // Suppress warnings for duplicated code lines
+    @SuppressWarnings("all")
     public ApiDigestPageVO getApiDigestPageVO(ApiDigestPageQuery pageQuery) {
+        // TODO: 2023/7/16 优化查询
         // 按 Query 条件组装 QueryWrapper
         LambdaQueryWrapper<ApiDigestPO> queryWrapper = new LambdaQueryWrapper<>();
         // 模糊查询
@@ -46,7 +49,7 @@ public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigest
         queryWrapper.like(nonNull(url), ApiDigestPO::getUrl, url);
         // 集合条件
         Set<String> usageTypeSet = pageQuery.getUsageTypeSet();
-        queryWrapper.in(nonNull(usageTypeSet), ApiDigestPO::getUsageType,
+        queryWrapper.like(nonNull(usageTypeSet), ApiDigestPO::getUsageType,
                 collectionToCommaDelimitedString(usageTypeSet));
         Set<Integer> apiStatusSet = pageQuery.getApiStatusSet();
         queryWrapper.in(nonNull(apiStatusSet), ApiDigestPO::getApiStatus, apiStatusSet);
@@ -68,7 +71,7 @@ public class ApiDigestServiceImpl extends ServiceImpl<ApiDigestMapper, ApiDigest
         List<ApiDigestVO> apiDigestVOList = page.getRecords().stream()
                 .map(apiDigestPO -> {
                     ApiDigestVO apiDigestVO = new ApiDigestVO();
-                    BeanCopierUtils.copy(apiDigestPO, apiDigestVO);
+                    BeanUtils.copyProperties(apiDigestPO, apiDigestVO);
                     apiDigestVO.setDigestId(apiDigestPO.getId());
                     apiDigestVO.setUsageTypeSet
                             (commaDelimitedListToSet(apiDigestPO.getUsageType()));

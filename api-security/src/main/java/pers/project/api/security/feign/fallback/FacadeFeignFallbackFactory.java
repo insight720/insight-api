@@ -24,8 +24,6 @@ public class FacadeFeignFallbackFactory implements FallbackFactory<FacadeFeignCl
 
     @Override
     public FacadeFeignClient create(Throwable cause) {
-        log.error("Feign 降级：", cause);
-
         return new FacadeFeignClient() {
 
             @Override

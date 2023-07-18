@@ -21,6 +21,7 @@ import pers.project.api.common.util.TransactionUtils;
  * @see AbstractDelegatedTransactionSynchronization
  * @see TransactionUtils
  */
+@SuppressWarnings("unused")
 @FunctionalInterface
 public interface TxSyncDelegate {
 

@@ -288,10 +288,20 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
         {
             title: '接口状态',
             dataIndex: 'apiStatus',
+            hideInSearch: true,
+            valueEnum: {
+                0: {text: '正常', status: "success"},
+                1: {text: '错误', status: "error"},
+            },
+        },
+        {
+            title: '接口状态',
+            dataIndex: 'apiStatusSet',
             valueType: 'treeSelect',
             fieldProps: {
                 multiple: true
             },
+            hideInTable: true,
             valueEnum: {
                 0: {text: '正常', status: "success"},
                 1: {text: '错误', status: "error"},
@@ -633,7 +643,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                                     <Typography.Text strong> 我的订单 </Typography.Text>
                                     进行订单确认，
                                     <Typography.Text strong>
-                                        若 30 分钟未确认，订单将自动取消
+                                        若 1 分钟未确认，订单将自动取消
                                     </Typography.Text>。
                                 </Typography.Text>
                             </Typography.Text>

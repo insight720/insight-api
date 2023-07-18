@@ -33,7 +33,7 @@ const fetchUserInfo = async () => {
         const result = await getLoginUserInfo();
         return result.data;
     } catch (error: any) {
-        message.error(error.message || '用户未登录！');
+        message.warning(error.message || '您没有开启自动登录！');
         return undefined;
     }
 };
@@ -41,7 +41,7 @@ const fetchUserInfo = async () => {
 const isDev = process.env.NODE_ENV === 'development';
 
 // 登录路径
-const loginPath = "/login";
+const loginPath = "/";
 
 /**
  * 页面初始状态
@@ -49,8 +49,6 @@ const loginPath = "/login";
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  */
 export async function getInitialState(): Promise<InitialState> {
-    const {location} = history;
-
     if (location.pathname !== loginPath) {
         // 如果不是登录页面，获取登录用户信息
         const currentUser = await fetchUserInfo();

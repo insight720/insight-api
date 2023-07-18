@@ -88,61 +88,6 @@ declare namespace API {
     updateTime?: string;
   };
 
-  type ApiInfoAddRequest = {
-    name?: string;
-    description?: string;
-    url?: string;
-    requestParams?: string;
-    requestHeader?: string;
-    responseHeader?: string;
-    method?: string;
-  };
-
-  type ApiInfoEntity = {
-    id?: number;
-    name?: string;
-    description?: string;
-    url?: string;
-    requestParams?: string;
-    requestHeader?: string;
-    responseHeader?: string;
-    status?: number;
-    method?: string;
-    userId?: number;
-    createTime?: string;
-    updateTime?: string;
-    isDelete?: number;
-  };
-
-  type ApiInfoQueryRequest = {
-    current?: number;
-    pageSize?: number;
-    sortField?: string;
-    sortOrder?: string;
-    id?: number;
-    name?: string;
-    description?: string;
-    url?: string;
-    requestParams?: string;
-    requestHeader?: string;
-    responseHeader?: string;
-    status?: number;
-    method?: string;
-    userId?: number;
-  };
-
-  type ApiInfoUpdateRequest = {
-    id?: number;
-    name?: string;
-    description?: string;
-    url?: string;
-    requestParams?: string;
-    requestHeader?: string;
-    responseHeader?: string;
-    status?: number;
-    method?: string;
-  };
-
   type ApiQuantityUsageVO = {
     total?: number;
     failure?: number;
@@ -168,53 +113,15 @@ declare namespace API {
     responseBody?: string;
   };
 
-  type DeleteRequest = {
-    id?: number;
+  type QuantityUsageApiInfoDTO = {
+    digestId?: string;
+    usageId?: string;
   };
 
-  type getApiInfoByIdParams = {
-    id: number;
-  };
-
-  type getApiInfoParams = {
-    url: string;
+  type QuantityUsageApiInfoQuery = {
+    accountId?: string;
     method: string;
-  };
-
-  type IdRequest = {
-    id?: number;
-  };
-
-  type invokeCountParams = {
-    apiInfoId: number;
-    userId: number;
-  };
-
-  type listApiInfoByPageParams = {
-    apiInfoQueryRequest: ApiInfoQueryRequest;
-  };
-
-  type listApiInfoParams = {
-    apiInfoQueryRequest: ApiInfoQueryRequest;
-  };
-
-  type OrderItem = {
-    column?: string;
-    asc?: boolean;
-  };
-
-  type PageApiInfoEntity = {
-    records?: ApiInfoEntity[];
-    total?: number;
-    size?: number;
-    current?: number;
-    orders?: OrderItem[];
-    optimizeCountSql?: boolean;
-    searchCount?: boolean;
-    optimizeJoinOfCountSql?: boolean;
-    maxLimit?: number;
-    countId?: string;
-    pages?: number;
+    originalUrl: string;
   };
 
   type ResultApiAdminPageVO = {
@@ -235,12 +142,6 @@ declare namespace API {
     data?: ApiFormatVO;
   };
 
-  type ResultApiInfoEntity = {
-    code?: string;
-    message?: string;
-    data?: ApiInfoEntity;
-  };
-
   type ResultApiQuantityUsageVO = {
     code?: string;
     message?: string;
@@ -259,28 +160,10 @@ declare namespace API {
     data?: ApiTestFormatVO;
   };
 
-  type ResultBoolean = {
+  type ResultQuantityUsageApiInfoDTO = {
     code?: string;
     message?: string;
-    data?: boolean;
-  };
-
-  type ResultListApiInfoEntity = {
-    code?: string;
-    message?: string;
-    data?: ApiInfoEntity[];
-  };
-
-  type ResultLong = {
-    code?: string;
-    message?: string;
-    data?: number;
-  };
-
-  type ResultPageApiInfoEntity = {
-    code?: string;
-    message?: string;
-    data?: PageApiInfoEntity;
+    data?: QuantityUsageApiInfoDTO;
   };
 
   type ResultUserApiDigestPageVO = {
@@ -303,16 +186,16 @@ declare namespace API {
 
   type UserApiDigestPageQuery = {
     accountId?: string;
+    size: number;
+    current: number;
     apiName?: string;
     description?: string;
-    method?: number[];
+    methodSet?: string[];
     url?: string;
-    usageType?: string[];
-    apiStatus?: number[];
-    createTime?: string[];
-    updateTime?: string[];
-    size?: number;
-    current?: number;
+    usageTypeSet?: string[];
+    apiStatusSet?: number[];
+    createTimeRange?: string[];
+    updateTimeRange?: string[];
   };
 
   type UserApiDigestPageVO = {
@@ -321,12 +204,13 @@ declare namespace API {
   };
 
   type UserApiDigestVO = {
+    methodSet?: string[];
+    usageTypeSet?: string[];
     digestId?: string;
+    accountId?: string;
     apiName?: string;
     description?: string;
-    method?: number;
     url?: string;
-    usageType?: string;
     apiStatus?: number;
     createTime?: string;
     updateTime?: string;

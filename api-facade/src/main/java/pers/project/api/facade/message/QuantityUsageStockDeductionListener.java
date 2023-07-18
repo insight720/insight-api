@@ -77,9 +77,9 @@ public class QuantityUsageStockDeductionListener implements RocketMQListener<Mes
         String stockDeductionMessageKeys = stockDeductionMessageExt.getKeys();
         Assert.notNull(stockDeductionMessageKeys, "The stockDeductionMessageKeys must be not null");
         String stockDeductionMessageKeysKey = QUANTITY_USAGE_STOCK_DEDUCTION_MESSAGE_KEYS_KEY_PREFIX + orderSn;
-        boolean isDuplicate = RedisUtils.checkIdempotencyToken
+        boolean isIdempotent = RedisUtils.checkIdempotencyToken
                 (redisTemplate, stockDeductionMessageKeysKey, stockDeductionMessageKeys);
-        if (isDuplicate) {
+        if (!isIdempotent) {
             log.info("Duplicate stock deduction message, orderSn: {}", orderSn);
             return;
         }

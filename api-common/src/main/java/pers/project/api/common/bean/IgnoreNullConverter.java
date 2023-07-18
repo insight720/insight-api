@@ -12,7 +12,10 @@ import static org.springframework.util.StringUtils.uncapitalize;
  * 不复制源 Bean 中 null 属性的转换器
  * <p>
  * 通常用于更新目标 Bean 的部分属性值。
+ *
+ * @deprecated JDK 8 以上会报模块化错误。
  */
+@Deprecated
 public class IgnoreNullConverter implements Converter {
 
     private static final int SETTER_NAME_PREFIX_LENGTH = 3;

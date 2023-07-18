@@ -50,7 +50,8 @@ public class ExceptionHandlerAutoConfig {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> constraintViolationException(HttpServletRequest request,
                                                      ConstraintViolationException exception) {
-        // 参数验证异常: methodName.fieldName: message, methodName.fieldName: message
+        // 参数验证异常: methodName.fiel
+        // dName: message, methodName.fieldName: message
         String message = exception.getMessage();
         log.warn("参数验证异常: {}", message);
         log.warn("参数验证异常 URI: {}", request.getRequestURI());
@@ -58,7 +59,7 @@ public class ExceptionHandlerAutoConfig {
         String content = Arrays.stream(message.split(","))
                 .map(s -> s.trim().substring(s.indexOf('.') + 1))
                 .collect(Collectors.joining(", "));
-        return ResultUtils.failure(PARAM_ERROR, message);
+        return ResultUtils.failure(PARAM_ERROR, content);
     }
 
     @ExceptionHandler(value = BindException.class)

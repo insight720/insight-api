@@ -1,7 +1,9 @@
 package pers.project.api.gateway.feign;
 
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import pers.project.api.common.model.Result;
 import pers.project.api.common.model.dto.QuantityUsageApiInfoDTO;
 import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
@@ -14,9 +16,9 @@ import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
  * @date 2023/03/09
  */
 @FeignClient(name = "gateway", contextId = "facade", path = "/gateway/facade")
-public interface FacadeFeignService {
+public interface FacadeFeignClient {
 
-    @GetMapping("/quantity/usage/api/info/result")
-    Result<QuantityUsageApiInfoDTO> getQuantityUsageApiInfoResult(QuantityUsageApiInfoQuery apiInfoQuery);
+    @PostMapping("/quantity/usage/api/info/result")
+    Result<QuantityUsageApiInfoDTO> getQuantityUsageApiInfoResult(@Valid @RequestBody QuantityUsageApiInfoQuery apiInfoQuery);
 
 }

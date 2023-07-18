@@ -18,11 +18,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @EnableFeignClients(basePackages = "pers.project.api")
 public class FeignAutoConfig {
 
-    /**
-     * 远程调用拦截器，解决 feign 远程调用
-     *
-     * @return
-     */
     @Bean
     public RequestInterceptor requestInterceptor() {
         RequestInterceptor requestInterceptor = requestTemplate ->

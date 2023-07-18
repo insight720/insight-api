@@ -13,6 +13,7 @@ import net.dreamlu.mica.ip2region.core.IpInfo;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,6 @@ import org.springframework.util.Assert;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.dto.LoginUserDTO;
 import pers.project.api.common.model.security.CustomUserDetails;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.validation.validator.SensitiveWordValidator;
 import pers.project.api.security.authentication.VerificationCodeAuthenticationToken;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
@@ -82,7 +82,7 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
     public LoginUserDTO getLoginUserDTO() {
         CustomUserDetails userDetails = getLoginUserDetails();
         LoginUserDTO loginUserDTO = new LoginUserDTO();
-        BeanCopierUtils.copy(userDetails, loginUserDTO);
+        BeanUtils.copyProperties(userDetails, loginUserDTO);
         return loginUserDTO;
     }
 
@@ -277,8 +277,8 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
      */
     private CustomUserDetails copyLoginUserProperties(UserAccountPO userAccountPO, UserProfilePO userProfilePO) {
         CustomUserDetails customUserDetails = new CustomUserDetails();
-        BeanCopierUtils.copy(userAccountPO, customUserDetails);
-        BeanCopierUtils.copy(userProfilePO, customUserDetails);
+        BeanUtils.copyProperties(userAccountPO, customUserDetails);
+        BeanUtils.copyProperties(userProfilePO, customUserDetails);
         customUserDetails.setAccountId(userAccountPO.getId());
         customUserDetails.setProfileId(userProfilePO.getId());
         // 将账户权限转为权限集合

@@ -24,11 +24,16 @@ import java.util.List;
 
 /**
  * WebFlux 配置类
+ * <p>
+ * 这个类的部分内容之前被用于测试开发目的，可能会被弃用，暂未测试删除后是否有影响。。
  *
  * @author Luo Fei
- * @date 2023/03/09
+ * @date 2023/07/17
+ * @deprecated 可能会在之后删除。
  */
 @Slf4j
+@SuppressWarnings("all") // Suppress all warnings
+@Deprecated(forRemoval = true)
 @Configuration
 public class WebFluxConfig implements WebFluxConfigurer {
 
@@ -84,9 +89,6 @@ public class WebFluxConfig implements WebFluxConfigurer {
             }).toList();
         }
 
-        /**
-         * @see DefaultCookieSerializer#base64Decode(String)
-         */
         private String base64Decode(String base64Value) {
             try {
                 byte[] decodedCookieBytes = Base64.getDecoder().decode(base64Value);

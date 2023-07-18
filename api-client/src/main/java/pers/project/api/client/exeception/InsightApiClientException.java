@@ -8,6 +8,7 @@ package pers.project.api.client.exeception;
  * @author Luo Fei
  * @date 2023/07/11
  */
+@SuppressWarnings("unused")
 public class InsightApiClientException extends RuntimeException {
 
     public InsightApiClientException() {

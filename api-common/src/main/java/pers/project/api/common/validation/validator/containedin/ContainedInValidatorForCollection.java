@@ -18,7 +18,7 @@ import java.util.Collection;
  * @date 2023/04/28
  */
 // 根据 JLS，Collection<?> 是 Collection 的子类型，因此我们需要在此处显式引用 Collection，以支持将属性定义为 Collection（请参阅 HV-1551）
-@SuppressWarnings("rawtypes")
+@SuppressWarnings("all")
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 public class ContainedInValidatorForCollection extends AbstractContainedInValidator<Collection> {
 

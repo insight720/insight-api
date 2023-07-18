@@ -126,7 +126,7 @@ const Login: React.FC = () => {
                 await setLoginUserInfo(result.data);
                 // 登录后 CSRF Cookie 会被清除
                 await getCsrfToken();
-                history.push('/');
+                history.push('/welcome');
                 message.success(defaultLoginSuccessMessage);
                 return;
             }
@@ -197,15 +197,15 @@ const Login: React.FC = () => {
                     }}
                     logo={<img alt="logo" src="/logo.svg"/>}
                     title="Insight API"
-                    subTitle={locale.formatMessage({id: 'pages.layouts.userLayout.title'})}
+                    subTitle={"Insight API 是一个分布式接口开放平台"}
                     initialValues={{
                         autoLogin: false,
                     }}
                     actions={[
                         <FormattedMessage
                             key="loginWith"
-                            id="pages.login.loginWith"
-                            defaultMessage="其他登录方式"
+                            id="loginWith"
+                            defaultMessage="其他登录方式（暂未实现）:"
                         />,
                         <ActionIcons key="icons"/>,
                     ]}

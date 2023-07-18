@@ -20,7 +20,9 @@ export const AvatarName = () => {
     return <span className="anticon">{currentUser?.username}</span>;
 };
 
-export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children}) => {
+export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({children}) => {
+
+    const {initialState, setInitialState} = useModel('@@initialState');
 
     /**
      * 退出登录
@@ -56,7 +58,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
             },
         };
     });
-    const {initialState, setInitialState} = useModel('@@initialState');
 
     const onMenuClick = useCallback(
         (event: MenuInfo) => {

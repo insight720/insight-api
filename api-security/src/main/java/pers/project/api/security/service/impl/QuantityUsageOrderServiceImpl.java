@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.spring.core.RocketMQLocalTransactionState;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -24,7 +25,6 @@ import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockConfirmationDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockDeductionDTO;
 import pers.project.api.common.model.dto.QuantityUsageStockReleaseDTO;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.TransactionUtils;
 import pers.project.api.security.mapper.QuantityUsageOrderMapper;
 import pers.project.api.security.model.dto.*;
@@ -139,7 +139,7 @@ public class QuantityUsageOrderServiceImpl extends ServiceImpl<QuantityUsageOrde
         List<QuantityUsageOrderVO> quantityUsageOrderVOList
                 = page.getRecords().stream().map(quantityUsageOrderPO -> {
             QuantityUsageOrderVO quantityUsageOrderVO = new QuantityUsageOrderVO();
-            BeanCopierUtils.copy(quantityUsageOrderPO, quantityUsageOrderVO);
+            BeanUtils.copyProperties(quantityUsageOrderPO, quantityUsageOrderVO);
             quantityUsageOrderVO.setOrderId(quantityUsageOrderPO.getId());
             return quantityUsageOrderVO;
         }).collect(Collectors.toList());
@@ -317,7 +317,7 @@ public class QuantityUsageOrderServiceImpl extends ServiceImpl<QuantityUsageOrde
         });
         // 发送存量确认事务消息
         QuantityUsageStockConfirmationDTO stockConfirmationDTO = new QuantityUsageStockConfirmationDTO();
-        BeanCopierUtils.copy(orderConfirmationDTO, stockConfirmationDTO);
+        BeanUtils.copyProperties(orderConfirmationDTO, stockConfirmationDTO);
         // 事务消息发送结果（其父类 SendResult 包含更多信息）
         Message<QuantityUsageStockConfirmationDTO> stockConfirmationMessage = MessageBuilder
                 .withPayload(stockConfirmationDTO)

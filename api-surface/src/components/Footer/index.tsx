@@ -1,14 +1,8 @@
 import {GithubOutlined} from '@ant-design/icons';
 import {DefaultFooter} from '@ant-design/pro-components';
-import {useIntl} from '@umijs/max';
 import React from 'react';
 
 const Footer: React.FC = () => {
-    const intl = useIntl();
-    const defaultMessage = intl.formatMessage({
-        id: 'app.copyright.produced',
-        defaultMessage: '蚂蚁集团体验技术部出品',
-    });
 
     const currentYear = new Date().getFullYear();
 
@@ -17,24 +11,24 @@ const Footer: React.FC = () => {
             style={{
                 background: 'none',
             }}
-            copyright={`${currentYear} ${defaultMessage}`}
+            copyright={`2023 - ${currentYear} By Luo Fei`}
             links={[
-                {
-                    key: 'Ant Design Pro',
-                    title: 'Ant Design Pro',
-                    href: 'https://pro.ant.design',
-                    blankTarget: true,
-                },
                 {
                     key: 'github',
                     title: <GithubOutlined/>,
-                    href: 'https://github.com/ant-design/ant-design-pro',
+                    href: 'https://github.com/insight720',
                     blankTarget: true,
                 },
                 {
                     key: 'Ant Design',
-                    title: 'Ant Design',
-                    href: 'https://ant.design',
+                    title: 'Insight API',
+                    href: 'https://github.com/insight720/insight-api',
+                    blankTarget: true,
+                },
+                {
+                    key: '备案号',
+                    title: '滇ICP备2023000814号-2',
+                    href: 'https://beian.miit.gov.cn/#/Integrated/index',
                     blankTarget: true,
                 },
             ]}

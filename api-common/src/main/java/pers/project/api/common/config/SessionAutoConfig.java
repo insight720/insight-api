@@ -38,19 +38,12 @@ public class SessionAutoConfig {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = Type.SERVLET)
     public static class HttpSessionConfig {
-        {
-
-            System.out.println("HttpSessionConfig.实例初始值设定项");
-        }
     }
 
     @EnableRedisWebSession
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = Type.REACTIVE)
     public static class WebSessionConfig {
-        {
-            System.out.println("WebSessionConfig.实例初始值设定项");
-        }
     }
 
 }

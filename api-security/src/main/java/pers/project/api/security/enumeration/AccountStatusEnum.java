@@ -17,6 +17,7 @@ import java.util.Map;
 @Getter
 @Accessors(fluent = true)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public enum AccountStatusEnum {
 
     NORMAL_KEY_AVAILABLE(0, "正常 - 密钥可用"),

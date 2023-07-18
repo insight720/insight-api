@@ -181,10 +181,10 @@ const ApiViewCard: React.FC<ApiViewCardProps> = (props: ApiViewCardProps) => {
                         {apiFormatVO?.requestBody}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应头" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestHeader}
+                        {apiFormatVO?.responseHeader}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应体" valueType={"jsonCode"}>
-                        {apiFormatVO?.requestBody}
+                        {apiFormatVO?.responseBody}
                     </ProDescriptions.Item>
                 </ProDescriptions>
             </ProCard>

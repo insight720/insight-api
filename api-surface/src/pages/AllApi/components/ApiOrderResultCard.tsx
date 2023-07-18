@@ -36,7 +36,7 @@ const ApiOrderResultCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardPr
             <Typography.Text strong> 我的订单 </Typography.Text>
             进行订单确认，
             <Typography.Text strong>
-                若 30 分钟未确认，订单将自动取消
+                若 1 分钟未确认，订单将自动取消
             </Typography.Text>。
         </Typography.Text>;
 

@@ -1,4 +1,4 @@
-package pers.project.api.gateway;
+package pers.project.api.gateway.exeception;
 
 import lombok.experimental.StandardException;
 

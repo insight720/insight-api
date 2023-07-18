@@ -39,6 +39,21 @@ export async function getCsrfToken(options?: { [key: string]: any }) {
   });
 }
 
+/** 此处后端没有提供注释 POST /request/user/info/result */
+export async function getClientUserInfoResult(
+  body: API.ClientUserInfoQuery,
+  options?: { [key: string]: any },
+) {
+  return request<API.ResultClientUserInfoDTO>(`/security/request/user/info/result`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 此处后端没有提供注释 POST /user/admin/page */
 export async function viewUserAdminPage(
   body: API.UserAdminPageQuery,

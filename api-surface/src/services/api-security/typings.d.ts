@@ -76,6 +76,15 @@ declare namespace API {
     codeCheckDTO: VerificationCodeCheckDTO;
   };
 
+  type ClientUserInfoDTO = {
+    accountId?: string;
+    secretKey?: string;
+  };
+
+  type ClientUserInfoQuery = {
+    secretId: string;
+  };
+
   type LoginUserDTO = {
     accountStatus?: string;
     authoritySet?: string[];
@@ -173,6 +182,12 @@ declare namespace API {
     code?: string;
     message?: string;
     data?: ApiCreatorVO;
+  };
+
+  type ResultClientUserInfoDTO = {
+    code?: string;
+    message?: string;
+    data?: ClientUserInfoDTO;
   };
 
   type ResultLoginUserDTO = {
@@ -286,16 +301,16 @@ declare namespace API {
 
   type UserApiDigestPageQuery = {
     accountId?: string;
+    size: number;
+    current: number;
     apiName?: string;
     description?: string;
-    method?: number[];
+    methodSet?: string[];
     url?: string;
-    usageType?: string[];
-    apiStatus?: number[];
-    createTime?: string[];
-    updateTime?: string[];
-    size?: number;
-    current?: number;
+    usageTypeSet?: string[];
+    apiStatusSet?: number[];
+    createTimeRange?: string[];
+    updateTimeRange?: string[];
   };
 
   type UserApiDigestPageVO = {
@@ -304,12 +319,13 @@ declare namespace API {
   };
 
   type UserApiDigestVO = {
+    methodSet?: string[];
+    usageTypeSet?: string[];
     digestId?: string;
+    accountId?: string;
     apiName?: string;
     description?: string;
-    method?: number;
     url?: string;
-    usageType?: string;
     apiStatus?: number;
     createTime?: string;
     updateTime?: string;

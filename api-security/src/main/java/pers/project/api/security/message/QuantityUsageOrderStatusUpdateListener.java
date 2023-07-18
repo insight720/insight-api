@@ -1,5 +1,6 @@
 package pers.project.api.security.message;
 
+import com.alibaba.fastjson2.JSON;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -13,13 +14,18 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum;
+import pers.project.api.common.model.dto.QuantityUsageOrderStatusUpdateDTO;
+import pers.project.api.common.util.RedisUtils;
 import pers.project.api.common.util.TransactionUtils;
 import pers.project.api.security.model.dto.QuantityUsageOrderScheduledCloseDTO;
 import pers.project.api.security.service.QuantityUsageOrderService;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringPool.COLON;
 import static org.apache.rocketmq.spring.support.RocketMQHeaders.KEYS;
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_MESSAGE_KEYS_KEY_PREFIX;
+import static pers.project.api.common.constant.redis.RedisKeyPrefixConst.QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX;
 import static pers.project.api.common.constant.rocketmq.RocketMQConsumerGroupNameConst.SECURITY_QUANTITY_USAGE_ORDER_STATUS_UPDATE_GROUP;
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_TAG;
 import static pers.project.api.common.constant.rocketmq.RocketMQTagNameConst.QUANTITY_USAGE_ORDER_STATUS_UPDATE_TAG;
@@ -72,32 +78,31 @@ public class QuantityUsageOrderStatusUpdateListener implements RocketMQListener<
     @Override
     public void onMessage(MessageExt orderStatusUpdateMessageExt) {
         // 获取消息体内容
-//        QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO
-//                = JSON.parseObject(orderStatusUpdateMessageExt.getBody(), QuantityUsageOrderStatusUpdateDTO.class);
-//        String orderSn = orderStatusUpdateDTO.getOrderSn();
-//        // 检查作用于消费过程幂等的令牌
-//        String orderStatusUpdateMessageKeys = orderStatusUpdateMessageExt.getKeys();
-//        Assert.notNull(orderStatusUpdateMessageKeys, "The orderStatusUpdateMessageKeys must be not null");
-//        String orderStatusUpdateKeysKey = QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
-//        boolean isDuplicate = RedisUtils.checkIdempotencyToken
-//                (redisTemplate, orderStatusUpdateKeysKey, orderStatusUpdateMessageKeys);
-//        if (isDuplicate) {
-//            log.info("Duplicate order status update message, orderSn: {}", orderSn);
-//            return;
-//        }
-//        // 执行接口计数用法订单状态更新本地事务，并发送接口计数用法订单定时关闭延时消息
-//        QuantityUsageOrderScheduledCloseDTO orderScheduledCloseDTO = new QuantityUsageOrderScheduledCloseDTO();
-//        orderScheduledCloseDTO.setOrderSn(orderSn);
-//        transactionTemplate.executeWithoutResult(ignored -> {
-//            registerTransactionSynchronization(orderScheduledCloseDTO, orderStatusUpdateDTO.getOrderStatus(),
-//                    orderStatusUpdateKeysKey, orderStatusUpdateMessageKeys);
-//            // 改变订单状态
-//            userOrderService.updateQuantityUsageOrderPlacementStatus(orderStatusUpdateDTO);
-//            // 设置作用于接口计数用法订单定时关闭延时消息消费过程幂等的订单号（Spring 管理的 Redis 事务）
-//            String orderScheduledCloseMessageKeysKey
-//                    = QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
-//            redisTransactionTemplate.opsForValue().set(orderScheduledCloseMessageKeysKey, orderSn);
-//        });
+        QuantityUsageOrderStatusUpdateDTO orderStatusUpdateDTO
+                = JSON.parseObject(orderStatusUpdateMessageExt.getBody(), QuantityUsageOrderStatusUpdateDTO.class);
+        String orderSn = orderStatusUpdateDTO.getOrderSn();
+        // 检查作用于消费过程幂等的令牌
+        String orderStatusUpdateMessageKeys = orderStatusUpdateMessageExt.getKeys();
+        Assert.notNull(orderStatusUpdateMessageKeys, "The orderStatusUpdateMessageKeys must be not null");
+        String orderStatusUpdateKeysKey = QUANTITY_USAGE_ORDER_STATUS_UPDATE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
+        boolean isIdempotent = RedisUtils.checkIdempotencyToken
+                (redisTemplate, orderStatusUpdateKeysKey, orderStatusUpdateMessageKeys);
+        if (!isIdempotent) {
+            log.info("Duplicate order status update message, orderSn: {}", orderSn);
+            return;
+        }
+        // 执行接口计数用法订单状态更新本地事务，并发送接口计数用法订单定时关闭延时消息
+        QuantityUsageOrderScheduledCloseDTO orderScheduledCloseDTO = new QuantityUsageOrderScheduledCloseDTO();
+        orderScheduledCloseDTO.setOrderSn(orderSn);
+        transactionTemplate.executeWithoutResult(ignored -> {
+            registerTransactionSynchronization(orderScheduledCloseDTO, orderStatusUpdateDTO.getOrderStatus(),
+                    orderStatusUpdateKeysKey, orderStatusUpdateMessageKeys);
+            // 改变订单状态
+            userOrderService.updateQuantityUsageOrderPlacementStatus(orderStatusUpdateDTO);
+            // 设置作用于接口计数用法订单定时关闭延时消息消费过程幂等的订单号（Spring 管理的 Redis 事务）
+            String orderScheduledCloseMessageKeysKey = QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
+            redisTransactionTemplate.opsForValue().set(orderScheduledCloseMessageKeysKey, orderSn);
+        });
     }
 
     /**

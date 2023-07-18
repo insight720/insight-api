@@ -4,13 +4,13 @@ import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import pers.project.api.common.model.dto.LoginUserDTO;
 import pers.project.api.common.model.security.CustomUserDetails;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.service.CustomUserDetailsService;
 
@@ -39,7 +39,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         userDetailsService.updateLoginUserIpInfo(userDetails);
         // 返回登录用户信息
         LoginUserDTO loginUserDTO = new LoginUserDTO();
-        BeanCopierUtils.copy(userDetails, loginUserDTO);
+        BeanUtils.copyProperties(userDetails, loginUserDTO);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         String jsonString = JSON.toJSONString(ResultUtils.success(loginUserDTO));

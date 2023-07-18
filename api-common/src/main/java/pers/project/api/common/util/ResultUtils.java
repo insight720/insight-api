@@ -12,6 +12,7 @@ import static pers.project.api.common.enumeration.ErrorEnum.NO_ERROR;
  * @author Luo Fei
  * @date 2023/03/14
  */
+@SuppressWarnings("unused")
 public abstract class ResultUtils {
 
     /**

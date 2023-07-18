@@ -3,12 +3,12 @@ package pers.project.api.security.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pers.project.api.common.exception.BusinessException;
 import pers.project.api.common.model.security.CustomUserDetails;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.TransactionUtils;
 import pers.project.api.security.execption.UploadContextException;
 import pers.project.api.security.mapper.UserProfileMapper;
@@ -51,7 +51,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         }
         // 更新数据库用户资料
         UserProfilePO userProfilePO = new UserProfilePO();
-        BeanCopierUtils.copy(profileSettingVO, userProfilePO);
+        BeanUtils.copyProperties(profileSettingVO, userProfilePO);
         userProfilePO.setId(profileId);
         if (setNewAvatar) {
             userProfilePO.setAvatar(newAvatar);
@@ -67,11 +67,35 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         // 更新 Spring Security 上下文中的用户资料
         CustomUserDetails userDetails = userDetailsService.getLoginUserDetails();
         // 不复制 null 值
-        BeanCopierUtils.copyIgnoreNull(profileSettingVO, userDetails);
+//        BeanCopierUtils.copyIgnoreNull(profileSettingVO, userDetails);
+        copyIgnoreNull(profileSettingVO, userDetails);
         if (setNewAvatar) {
             userDetails.setAvatar(newAvatar);
         }
         userDetailsService.updateLoginUserDetails(userDetails);
+    }
+
+    private void copyIgnoreNull(UserProfileSettingDTO profileSettingVO, CustomUserDetails userDetails) {
+        String nickname = profileSettingVO.getNickname();
+        if (nickname != null) {
+            userDetails.setNickname(nickname);
+        }
+        String website = profileSettingVO.getWebsite();
+        if (website != null) {
+            userDetails.setWebsite(website);
+        }
+        String github = profileSettingVO.getGithub();
+        if (github != null) {
+            userDetails.setGithub(github);
+        }
+        String gitee = profileSettingVO.getGitee();
+        if (gitee != null) {
+            userDetails.setGitee(gitee);
+        }
+        String biography = profileSettingVO.getBiography();
+        if (biography != null) {
+            userDetails.setBiography(biography);
+        }
     }
 
     /**

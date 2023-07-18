@@ -14,6 +14,7 @@ import pers.project.api.common.model.Result;
  * @date 2023/03/14
  */
 @Getter
+@SuppressWarnings("unused")
 public class BusinessException extends RuntimeException {
 
     private final String code;

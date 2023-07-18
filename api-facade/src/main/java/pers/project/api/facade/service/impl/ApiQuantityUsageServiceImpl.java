@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.ApiQuantityUsageMapper;
 import pers.project.api.facade.model.po.ApiQuantityUsagePO;
 import pers.project.api.facade.model.vo.ApiQuantityUsageVO;
@@ -59,7 +59,7 @@ public class ApiQuantityUsageServiceImpl extends ServiceImpl<ApiQuantityUsageMap
         queryWrapper.eq(ApiQuantityUsagePO::getDigestId, digestId);
         ApiQuantityUsagePO apiQuantityUsagePO = getOne(queryWrapper);
         ApiQuantityUsageVO apiQuantityUsageVO = new ApiQuantityUsageVO();
-        BeanCopierUtils.copy(apiQuantityUsagePO, apiQuantityUsageVO);
+        BeanUtils.copyProperties(apiQuantityUsagePO, apiQuantityUsageVO);
         apiQuantityUsageVO.setTotal((long) total);
         apiQuantityUsageVO.setFailure((long) failure);
         return apiQuantityUsageVO;
@@ -73,7 +73,7 @@ public class ApiQuantityUsageServiceImpl extends ServiceImpl<ApiQuantityUsageMap
         queryWrapper.eq(ApiQuantityUsagePO::getDigestId, digestId);
         ApiQuantityUsagePO apiQuantityUsagePO = getOne(queryWrapper);
         ApiStockInfoVO apiStockInfoVO = new ApiStockInfoVO();
-        BeanCopierUtils.copy(apiQuantityUsagePO, apiStockInfoVO);
+        BeanUtils.copyProperties(apiQuantityUsagePO, apiStockInfoVO);
         return apiStockInfoVO;
     }
 

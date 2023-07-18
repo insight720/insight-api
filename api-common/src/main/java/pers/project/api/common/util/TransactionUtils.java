@@ -20,6 +20,7 @@ import static org.springframework.transaction.support.TransactionSynchronization
  * @see TxSyncDelegate
  * @see AbstractDelegatedTransactionSynchronization
  */
+@SuppressWarnings("unused")
 public abstract class TransactionUtils {
 
     /**

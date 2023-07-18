@@ -541,8 +541,8 @@ const QuantityUsageOrderCard: React.FC<QuantityUsageOrderCardProps> = (props: Qu
                         // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
                         // 如果需要转化参数可以在这里进行修改
                         const result = await viewQuantityUsageOrderPage({
-                            size: params.pageSize,
-                            current: params.current,
+                            size: params.pageSize || 5,
+                            current: params.current || 1,
                             orderSn: params.orderSn,
                             accountId: currentUser?.accountId,
                             quantity: params.quantity,

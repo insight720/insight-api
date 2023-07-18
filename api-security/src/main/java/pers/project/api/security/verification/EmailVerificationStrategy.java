@@ -61,11 +61,13 @@ public class EmailVerificationStrategy extends AbstractVerificationStrategy {
         emailRequest.setSubject(properties.getSubject());
         emailRequest.setTemplate(template);
         // 保存邮件验证码到 Redis 并发送给用户
+        saveVerificationCodeInRedis
+                (EMAIL.keyPrefix(), email, verificationCode, validityPeriod);
         try {
-            saveVerificationCodeInRedis
-                    (EMAIL.keyPrefix(), email, verificationCode, validityPeriod);
             sesClient.SendEmail(emailRequest);
         } catch (Exception e) {
+            // 发送失败时回滚
+            rollbackVerificationCodeInRedis(EMAIL.keyPrefix(), email);
             throw new VerificationContextException(e);
         }
     }

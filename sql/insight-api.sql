@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS `api-security`.`user_account`
     `update_time`    DATETIME DEFAULT NOW() NOT NULL ON UPDATE NOW() COMMENT '更新时间'
 ) COMMENT '用户帐户';
 
-DROP TABLE `api-security`.`user_profile`;
 CREATE TABLE IF NOT EXISTS `api-security`.`user_profile`
 (
     `id`              BIGINT UNSIGNED        NOT NULL COMMENT '主键' PRIMARY KEY,
@@ -118,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `api-security`.`quantity_usage_order`
     `account_id`   BIGINT UNSIGNED               NOT NULL COMMENT '账户主键',
     `digest_id`    BIGINT UNSIGNED               NOT NULL COMMENT '接口摘要主键',
     `usage_id`     BIGINT UNSIGNED               NULL COMMENT '用户接口用法主键',
-    'quantity'     BIGINT UNSIGNED DEFAULT 0     NOT NULL COMMENT '下单的调用次数',
+    `quantity`     BIGINT UNSIGNED DEFAULT 0     NOT NULL COMMENT '调用次数',
     `order_status` TINYINT         DEFAULT 0     NOT NULL COMMENT '订单状态',
     `is_deleted`   TINYINT         DEFAULT 0     NOT NULL COMMENT '是否删除（1 表示删除，0 表示未删除）',
     `create_time`  DATETIME        DEFAULT NOW() NOT NULL COMMENT '创建时间',

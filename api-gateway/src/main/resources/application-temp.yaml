@@ -5,10 +5,31 @@ spring:
   codec:
     # 此属性限制缓存的请求体大小，默认为 256K
     max-in-memory-size: 10MB
+  # session 失效时间（分钟）
+  session:
+    timeout: 86400
+  data:
+    redis:
+      password:
+      port:
+      host:
   application:
     name: gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowCredentials: true
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders: "*"
       routes:
         - id: security_route
           uri: lb://security
@@ -28,10 +49,7 @@ spring:
             - Path=/gateway/provider/**
           filters:
             - RewritePath=/gateway/?(?<segment>.*), /$\{segment}
-      default-filters:
-        - name: CacheRequestBody
-          args:
-            bodyClass: java.lang.String
+            - Provider
     nacos:
       discovery:
         server-addr:
@@ -39,6 +57,13 @@ spring:
         password:
   main:
     web-application-type: reactive
+
 logging:
   level:
     org.springframework.cloud.gateway: info
+    pers.project.api.gateway: info
+#  file:
+#    path: /docker/project/gateway/log
+#  logback:
+#    rollingpolicy:
+#      max-history: 15

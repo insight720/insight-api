@@ -170,7 +170,7 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
         return (
             <Drawer title={<Typography.Text strong>测试调用结果</Typography.Text>}
                     visible closable onClose={onClose}
-                    width={700}>
+                    width={1000}>
                 <ProDescriptions column={1}>
                     <ProDescriptions.Item title={"响应状态码"} valueType={"text"}>
                         {result.data.statusCode}
@@ -220,7 +220,7 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                         {apiTestFormatVO?.requestBody}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应头" valueType={"jsonCode"} span={3}>
-                        {apiTestFormatVO?.requestHeader}
+                        {apiTestFormatVO?.responseHeader}
                     </ProDescriptions.Item>
                     <ProDescriptions.Item label="响应体" valueType={"jsonCode"} span={3}>
                         {apiTestFormatVO?.responseBody}
@@ -240,7 +240,8 @@ const ApiTestCard: React.FC<ApiTestCardProps> = (props: ApiTestCardProps) => {
                     使用 JSON 格式的好处是它可以方便地序列化和反序列化数据，而且通常比其他格式更加易读
                     、易于解析和传输。
                     <br/><br/>
-                    请注意，当前测试调用的请求体仅支持 JSON 字符串。
+                    <Typography.Text strong>请注意，测试调用需要接口有状态为 订单确认 的订单，以确保接口可用。
+                    </Typography.Text>
                 </Typography.Text>
                 <br/>
                 <br/>

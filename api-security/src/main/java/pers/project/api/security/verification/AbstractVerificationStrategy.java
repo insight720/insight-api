@@ -2,8 +2,6 @@ package pers.project.api.security.verification;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.script.RedisScript;
-import pers.project.api.common.constant.redis.RedisScriptConst;
 import pers.project.api.common.util.RedisUtils;
 
 import java.time.Duration;
@@ -32,14 +30,6 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
      * @see #generateVerificationCode()
      */
     private static final int VERIFICATION_CODE_UPPER_BOUND = 1_000_000;
-
-    /**
-     * 作用于确保幂等性的令牌验证 Redis 脚本
-     *
-     * @see RedisScriptConst#IDEMPOTENCY_TOKEN_LUA_SCRIPT
-     */
-    private static final RedisScript<Long> IDEMPOTENCY_TOKEN_REDIS_SCRIPT = RedisScript.of
-            (RedisScriptConst.IDEMPOTENCY_TOKEN_LUA_SCRIPT, Long.class);
 
     protected AbstractVerificationStrategy(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -70,6 +60,17 @@ public abstract class AbstractVerificationStrategy implements VerificationStrate
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         String codeKey = keyPrefix + contextInfo;
         valueOperations.set(codeKey, code, Duration.ofMinutes(validityPeriod));
+    }
+
+    /**
+     * 回滚 Redis 中的上下文信息和验证码。
+     *
+     * @param keyPrefix   存储键前缀
+     * @param contextInfo 上下文信息（如邮箱号、手机号等）
+     */
+    protected void rollbackVerificationCodeInRedis(String keyPrefix, String contextInfo) {
+        String codeKey = keyPrefix + contextInfo;
+        redisTemplate.delete(codeKey);
     }
 
     /**

@@ -11,7 +11,8 @@ interface Result {
 
 export const requestConfig: RequestConfig = {
     // 后端地址
-    baseURL: 'http://localhost:80/gateway',
+    // baseURL: 'http://localhost:80/gateway',
+    baseURL: 'https://insightapi.cn/gateway',
     // 请求带上 Cookie
     withCredentials: true,
 

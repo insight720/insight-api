@@ -2,8 +2,8 @@ package pers.project.api.facade.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.ApiFormatMapper;
 import pers.project.api.facade.model.po.ApiFormatPO;
 import pers.project.api.facade.model.vo.ApiFormatVO;
@@ -34,7 +34,7 @@ public class ApiFormatServiceImpl extends ServiceImpl<ApiFormatMapper, ApiFormat
         // 复制属性
         ApiFormatVO apiFormatVO = new ApiFormatVO();
         if (nonNull(apiFormatPO)) {
-            BeanCopierUtils.copy(apiFormatPO, apiFormatVO);
+            BeanUtils.copyProperties(apiFormatPO, apiFormatVO);
         }
         return apiFormatVO;
     }
@@ -51,7 +51,7 @@ public class ApiFormatServiceImpl extends ServiceImpl<ApiFormatMapper, ApiFormat
         // 复制属性
         ApiTestFormatVO apiTestFormatVO = new ApiTestFormatVO();
         if (nonNull(apiFormatPO)) {
-            BeanCopierUtils.copy(apiFormatPO, apiTestFormatVO);
+            BeanUtils.copyProperties(apiFormatPO, apiTestFormatVO);
         }
         return apiTestFormatVO;
     }

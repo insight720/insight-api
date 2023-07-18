@@ -1,11 +1,24 @@
+server:
+  port: 8123
+  servlet:
+    context-path: /facade
+
 spring:
+  session:
+    redis:
+      repository-type: indexed
   application:
-    name: security
-  # DataSource Config
+    name: facade
+  cloud:
+    nacos:
+      discovery:
+        server-addr:
+        username:
+        password:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://IP 地址:端口号/api?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://:/api-facade?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowMultiQueries=true&rewriteBatchedStatements=true
     username:
     password:
     hikari:
@@ -23,76 +36,29 @@ spring:
       max-lifetime: 900000
       # 数据库连接超时时间，默认 30 秒，即 30000
       connection-timeout: 30000
-  # redis 配置
-  mvc:
-    path-match:
-      matching-strategy: ANT_PATH_MATCHER
-  # session 失效时间（分钟）
-  session:
-    timeout: 86400
   data:
     redis:
       password:
       port:
       host:
-  cloud:
-    nacos:
-      discovery:
-        server-addr:
-        username:
-        password:
-server:
-  port: 7529
-  servlet:
-    context-path: /security
-mybatis-plus:
-  global-config:
-    db-config:
-      logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
-      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
-      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+
+rocketmq:
+  name-server:
+  producer:
+    group: facade-group
 
 logging:
   level:
-    pers.project.api: debug
-    org.apache.ibatis: debug
+    pers.project.api: info
+    org.apache.ibatis: info
+#  file:
+#    path: /docker/project/facade/log
+#  logback:
+#    rollingpolicy:
+#      max-history: 15
 
-api:
-  client:
-    access-key: default
-    secret-key: default
-
-# springdoc-openapi 项目配置
 springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: pers.project.api.security.controller
-
-insight-api:
-  upload:
-    cos:
-      secret-id:
-      secret-key:
-      region:
-      bucket-name:
-      domain-name:
-  verification:
-    phone:
-      secret-id:
-      secret-key:
-      region:
-      sms-sdk-app-id:
-      sign-name:
-      template-id:
-      validity-period: 5
-    email:
-      secret-id:
-      secret-key:
-      region: ap-hongkong
-      from:
-      subject:
-      template-id:
-      variable-names: [ verificationCode, validityPeriod ]
-      trigger-type: 1
-      validity-period: 5
+      packages-to-scan: pers.project.api.facade.controller

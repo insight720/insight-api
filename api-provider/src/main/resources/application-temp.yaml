@@ -4,6 +4,9 @@ server:
     context-path: /provider
 
 spring:
+  session:
+    redis:
+      repository-type: indexed
   application:
     name: provider
   cloud:
@@ -17,3 +20,13 @@ spring:
       password:
       port:
       host:
+
+logging:
+  level:
+    pers.project.api: info
+    org.apache.ibatis: info
+  file:
+    path: /docker/project/provider/log
+  logback:
+    rollingpolicy:
+      max-history: 15

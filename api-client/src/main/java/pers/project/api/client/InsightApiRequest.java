@@ -13,6 +13,7 @@ import java.util.Optional;
  * @author Luo Fei
  * @date 2023/07/11
  */
+@SuppressWarnings("unused")
 public interface InsightApiRequest {
 
     /**

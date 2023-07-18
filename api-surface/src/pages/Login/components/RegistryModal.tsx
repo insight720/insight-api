@@ -45,9 +45,9 @@ const RegistryModal: React.FC<RegistryModalProps> = (props: RegistryModalProps) 
                 password: fields.password,
                 codeCheckDTO: {
                     emailAddress: isUsingEmail ? fields.email : undefined,
-                    phoneNumber: !isUsingEmail ? phoneOption + fields.mobile : undefined,
+                    phoneNumber: !isUsingEmail ? phoneOption + fields.phone : undefined,
                     strategy: isUsingEmail ? "EMAIL" : "PHONE",
-                    verificationCode: fields.captcha
+                    verificationCode: fields.verificationCode
                 }
             });
             message.destroy();

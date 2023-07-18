@@ -6,11 +6,11 @@
     <parent>
         <groupId>pers.project.api</groupId>
         <artifactId>insight-api</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>api-client</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>api-client</name>
     <description>api-client</description>
 
@@ -50,6 +50,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
+                <configuration>
+                    <!-- 解决 Unable to find main class 的问题 -->
+                    <mainClass>none</mainClass>
+                    <!-- 解决依赖模块找不到此模块中的类或属性 -->
+                    <classifier>execute</classifier>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

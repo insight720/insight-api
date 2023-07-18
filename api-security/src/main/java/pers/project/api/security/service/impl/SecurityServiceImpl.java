@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -19,7 +20,6 @@ import pers.project.api.common.model.Result;
 import pers.project.api.common.model.dto.ClientUserInfoDTO;
 import pers.project.api.common.model.query.*;
 import pers.project.api.common.model.vo.*;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.common.util.ResultUtils;
 import pers.project.api.security.enumeration.VerificationStrategyEnum;
 import pers.project.api.security.execption.VerificationContextException;
@@ -37,7 +37,6 @@ import pers.project.api.security.model.vo.UserApiTestVO;
 import pers.project.api.security.service.SecurityService;
 import pers.project.api.security.verification.VerificationContext;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -198,8 +197,8 @@ public class SecurityServiceImpl implements SecurityService {
         profileQueryWrapper.eq(UserProfilePO::getAccountId, accountId);
         UserProfilePO userProfilePO = userProfileMapper.selectOne(profileQueryWrapper);
         ApiCreatorVO apiCreatorVO = new ApiCreatorVO();
-        BeanCopierUtils.copy(userAccountPO, apiCreatorVO);
-        BeanCopierUtils.copy(userProfilePO, apiCreatorVO);
+        BeanUtils.copyProperties(userAccountPO, apiCreatorVO);
+        BeanUtils.copyProperties(userProfilePO, apiCreatorVO);
         apiCreatorVO.setAuthoritySet(commaDelimitedListToSet(userAccountPO.getAuthority()));
         return apiCreatorVO;
     }
@@ -219,12 +218,10 @@ public class SecurityServiceImpl implements SecurityService {
                 .requestParam(convertJsonStringToStringMap(userApiTestDTO.getRequestParam()))
                 .requestHeader(convertJsonStringToStringMap(userApiTestDTO.getRequestHeader()))
                 .requestBody(userApiTestDTO.getRequestBody())
-                .timeout(Duration.ofSeconds(2L))
                 .build();
         InsightApiClient insightApiClient = InsightApiClient.newBuilder()
                 .secretId(userApiTestDTO.getSecretId())
                 .secretKey(userAccountPO.getSecretKey())
-                .connectTimeout(Duration.ofSeconds(2L))
                 .build();
         // 发送请求并转换响应
         UserApiTestVO userApiTestVO = new UserApiTestVO();
@@ -233,10 +230,10 @@ public class SecurityServiceImpl implements SecurityService {
             userApiTestVO.setStatusCode(insightApiResponse.statusCode());
             JSONObject jsonObject = new JSONObject();
             // HttpHeaders 的 map 方法返回的是不可变视图
-            insightApiResponse.responseHeader().map().forEach((headerName, headerValue) -> {
-                jsonObject.put(headerName, headerValue.get(0));
-            });
+            insightApiResponse.responseHeader().map().forEach((headerName, headerValue) ->
+                    jsonObject.put(headerName, headerValue.get(0)));
             userApiTestVO.setResponseHeader(jsonObject.toString());
+            userApiTestVO.setResponseBody(insightApiResponse.body());
         } catch (Exception e) {
             throw new BusinessException(SERVER_ERROR, "测试调用失败");
         }

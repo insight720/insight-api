@@ -11,34 +11,11 @@ import java.net.http.HttpHeaders;
  * @author Luo Fei
  * @date 2023/07/12
  */
-public class InsightApiResponseImpl<T> implements InsightApiResponse<T> {
+public record InsightApiResponseImpl<T>(int statusCode, HttpHeaders responseHeader,
+                                        T body) implements InsightApiResponse<T> {
 
-    private final int statusCode;
-
-    private final HttpHeaders responseHeader;
-
-    private final T body;
-
-    public InsightApiResponseImpl(int statusCode, HttpHeaders responseHeader, T body) {
+    public InsightApiResponseImpl {
         Assert.notNull(responseHeader, "The responseHeader must be not null");
-        this.statusCode = statusCode;
-        this.responseHeader = responseHeader;
-        this.body = body;
-    }
-
-    @Override
-    public int statusCode() {
-        return this.statusCode;
-    }
-
-    @Override
-    public HttpHeaders responseHeader() {
-        return this.responseHeader;
-    }
-
-    @Override
-    public T body() {
-        return this.body;
     }
 
 }

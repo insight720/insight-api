@@ -1,7 +1,6 @@
-import {PlusOutlined} from '@ant-design/icons';
-import {ActionType, ProCard, ProColumns, ProTable, TableDropdown} from '@ant-design/pro-components';
+import {ProCard, ProColumns, ProTable} from '@ant-design/pro-components';
 import {Button, Space, Tag} from 'antd';
-import React, {useRef} from 'react';
+import React from 'react';
 import {viewUserApiDigestPage} from "@/services/api-security/securityController";
 
 /**
@@ -20,10 +19,6 @@ export type ApiDigestCardProps = {
  */
 const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) => {
 
-    const actionRef = useRef<ActionType>();
-
-    // 当前登录用户
-    const {currentUser} = props;
 
     // 设置当前查看的 API 摘要
     const {setUserApiDigestVO} = props;
@@ -34,49 +29,54 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
     /**
      * HTTP 方法的映射
      */
-    const HttpMethodMap: Record<number, { value: number, name: string, color: string }> = {
-        [0]: {
-            value: 0,
-            name: 'GET',
+    const HttpMethodMap: Record<string, { value: string, color: string }> = {
+        ['GET']: {
+            value: 'GET',
             color: 'green'
         },
-        [1]: {
-            value: 1,
-            name: 'HEAD',
+        ['HEAD']: {
+            value: 'HEAD',
             color: 'blue'
         },
-        [2]: {
-            value: 2,
-            name: 'POST',
+        ['POST']: {
+            value: 'POST',
             color: 'magenta'
         },
-        [3]: {
-            value: 3,
-            name: 'PUT',
+        ['PUT']: {
+            value: 'PUT',
             color: 'geekblue'
         },
-        [4]: {
-            value: 4,
-            name: 'DELETE',
+        ['DELETE']: {
+            value: 'DELETE',
             color: 'red'
         },
-        [5]: {
-            value: 5,
-            name: 'OPTIONS',
+        ['OPTIONS']: {
+            value: 'OPTIONS',
             color: 'cyan'
         },
-        [6]: {
-            value: 6,
-            name: 'TRACE',
+        ['TRACE']: {
+            value: 'TRACE',
             color: 'purple'
         },
-        [7]: {
-            value: 7,
-            name: 'PATCH',
+        ['PATCH']: {
+            value: 'PATCH',
             color: 'orange'
         }
     };
 
+    /**
+     * 使用方法映射
+     */
+    const UsageTypeMap: Record<string, { value: string, color: string }> = {
+        ['QUANTITY']: {
+            value: '计数用法',
+            color: 'green'
+        },
+    };
+
+    /**
+     * ProTable 的列
+     */
     /**
      * ProTable 的列
      */
@@ -89,57 +89,63 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
         {
             title: '接口名称',
             dataIndex: 'apiName',
-            valueType: "text",
-            copyable: true
+            valueType: "textarea",
+            copyable: true,
         },
         {
             title: '接口描述',
             dataIndex: 'description',
-            valueType: "textarea"
+            valueType: "textarea",
         },
         {
             title: '请求方法',
-            dataIndex: 'method',
+            dataIndex: 'methodSet',
             valueType: 'treeSelect',
             fieldProps: {
                 multiple: true
             },
             valueEnum: {
-                0: {
+                'GET': {
                     text: 'GET',
                 },
-                1: {
+                'HEAD': {
                     text: 'HEAD',
                 },
-                2: {
+                'POST': {
                     text: 'POST',
                 },
-                3: {
+                'PUT': {
                     text: 'PUT',
                 },
-                4: {
+                'DELETE': {
                     text: 'DELETE',
                 },
-                5: {
+                'OPTIONS': {
                     text: 'OPTIONS',
                 },
-                6: {
+                'TRACE': {
                     text: 'TRACE',
                 },
-                7: {
+                'PATCH': {
                     text: 'PATCH',
                 }
             },
             renderFormItem: (_, {defaultRender}) => {
                 return defaultRender(_);
             },
-            render: (_, record) => (
-                <Space>
-                    <Tag color={HttpMethodMap[record?.method || 0].color}>
-                        {HttpMethodMap[record?.method || 0].name}
-                    </Tag>
-                </Space>
-            ),
+            render: (text, record) => {
+                return (
+                    <>
+                        {record.methodSet?.map((value) => (
+                            <Space key={value}>
+                                <Tag color={HttpMethodMap[value || "GET"].color}>
+                                    {HttpMethodMap[value || "GET"].value}
+                                </Tag>
+                            </Space>
+                        ))}
+                    </>
+                );
+            },
         },
         {
             title: 'URL',
@@ -148,15 +154,52 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
             copyable: true
         },
         {
-            title: '状态',
+            title: '接口状态',
             dataIndex: 'apiStatus',
+            hideInSearch: true,
+            valueEnum: {
+                0: {text: '正常', status: "success"},
+                1: {text: '错误', status: "error"},
+            },
+        },
+        {
+            title: '接口状态',
+            dataIndex: 'apiStatusSet',
+            valueType: 'treeSelect',
+            fieldProps: {
+                multiple: true
+            },
+            hideInTable: true,
+            valueEnum: {
+                0: {text: '正常', status: "success"},
+                1: {text: '错误', status: "error"},
+            },
+        },
+        {
+            title: '用法类型',
+            dataIndex: 'usageTypeSet',
             valueType: 'treeSelect',
             fieldProps: {
                 multiple: true
             },
             valueEnum: {
-                0: {text: '正常', status: "success"},
-                1: {text: '错误', status: "error"},
+                "QUANTITY": {text: '计数用法', status: "success"},
+            },
+            renderFormItem: (_, {defaultRender}) => {
+                return defaultRender(_);
+            },
+            render: (text, record) => {
+                return (
+                    <>
+                        {record.usageTypeSet?.map((type) => (
+                            <Space key={type}>
+                                <Tag color={UsageTypeMap[type || "QUANTITY"].color}>
+                                    {UsageTypeMap[type || "QUANTITY"].value}
+                                </Tag>
+                            </Space>
+                        ))}
+                    </>
+                );
             },
         },
         {
@@ -209,7 +252,7 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
             title: '操作',
             valueType: 'option',
             key: 'option',
-            render: (text, record, _, action) => [
+            render: (text, record) => [
                 <Button
                     key="view"
                     type={"link"}
@@ -220,27 +263,12 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                 >
                     查看
                 </Button>
-                ,
-                <a
-                    key="editable"
-                    onClick={() => {
-                        // action?.startEditable?.(record.id);
-                        action?.startEditable?.(record.digestId || "");
-                    }}
-                >
-                    编辑
-                </a>,
-                <TableDropdown
-                    key="actionGroup"
-                    onSelect={() => action?.reload()}
-                    menus={[
-                        {key: 'copy', name: '复制'},
-                        {key: 'delete', name: '删除'},
-                    ]}
-                />,
             ],
         },
     ];
+
+    // 当前登录的用户
+    const {currentUser} = props
 
     return (
         <div
@@ -267,16 +295,10 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                         // 如果需要转化参数可以在这里进行修改
                         const result = await viewUserApiDigestPage({
                             accountId: currentUser?.accountId,
-                            apiName: params.apiName,
-                            description: params.description,
-                            method: params.method,
-                            url: params.url,
-                            apiStatus: params.apiStatus,
-                            createTime: params.createTime,
-                            updateTime: params.updateTime,
-                            current: params.current,
                             size: params.pageSize,
-                        });
+                            current: params.current,
+                            ...params
+                        } as API.UserApiDigestPageQuery);
                         return {
                             data: result?.data?.digestVOList,
                             // success 请返回 true，
@@ -312,18 +334,6 @@ const ApiDigestCard: React.FC<ApiDigestCardProps> = (props: ApiDigestCardProps) 
                     }}
                     dateFormatter="string"
                     headerTitle="摘要列表"
-                    toolBarRender={() => [
-                        <Button
-                            key="button"
-                            icon={<PlusOutlined/>}
-                            onClick={() => {
-                                actionRef.current?.reload();
-                            }}
-                            type="primary"
-                        >
-                            新建
-                        </Button>,
-                    ]}
                 />
             </ProCard>
         </div>

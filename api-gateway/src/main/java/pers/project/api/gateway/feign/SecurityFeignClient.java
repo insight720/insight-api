@@ -16,7 +16,7 @@ import pers.project.api.common.model.query.ClientUserInfoQuery;
  * @date 2023/03/05
  */
 @FeignClient(name = "gateway", contextId = "security", path = "/gateway/security")
-public interface SecurityFeignService {
+public interface SecurityFeignClient {
 
     @PostMapping("/request/user/info/result")
     Result<ClientUserInfoDTO> getClientUserInfoResult(@Valid @RequestBody ClientUserInfoQuery userInfoQuery);

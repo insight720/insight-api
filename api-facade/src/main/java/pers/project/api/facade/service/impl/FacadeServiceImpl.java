@@ -2,13 +2,12 @@ package pers.project.api.facade.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import pers.project.api.common.enumeration.UserQuantityUsageStatusEnum;
 import pers.project.api.common.exception.DataInconsistencyException;
@@ -21,7 +20,6 @@ import pers.project.api.common.model.query.QuantityUsageApiInfoQuery;
 import pers.project.api.common.model.query.UserApiDigestPageQuery;
 import pers.project.api.common.model.query.UserApiFormatAndQuantityUsageQuery;
 import pers.project.api.common.model.vo.*;
-import pers.project.api.common.util.BeanCopierUtils;
 import pers.project.api.facade.mapper.*;
 import pers.project.api.facade.model.po.ApiDigestPO;
 import pers.project.api.facade.model.po.ApiFormatPO;
@@ -30,12 +28,14 @@ import pers.project.api.facade.service.FacadeService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static org.springframework.util.StringUtils.hasText;
-import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.USER_QUANTITY_USAGE_FAILURE_SEMAPHORE_NAME_PREFIX;
-import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.USER_QUANTITY_USAGE_TOTAL_SEMAPHORE_NAME_PREFIX;
+import static java.util.Objects.nonNull;
+import static org.springframework.util.StringUtils.collectionToCommaDelimitedString;
+import static org.springframework.util.StringUtils.commaDelimitedListToSet;
+import static pers.project.api.common.constant.redis.RedissonNamePrefixConst.*;
 import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.STOCK_SHORTAGE;
 import static pers.project.api.common.enumeration.QuantityUsageOrderStatusEnum.SUCCESS;
 
@@ -54,6 +54,7 @@ public class FacadeServiceImpl implements FacadeService {
 
     private final ApiDigestMapper apiDigestMapper;
 
+
     private final ApiFormatMapper apiFormatMapper;
 
     private final ApiQuantityUsageMapper apiQuantityUsageMapper;
@@ -62,46 +63,67 @@ public class FacadeServiceImpl implements FacadeService {
 
     private final RedissonClient redissonClient;
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private final UserQuantityUsageServiceImpl userQuantityUsageService;
 
     @Override
+    // Suppress warnings for duplicated code lines
+    @SuppressWarnings("all")
     public UserApiDigestPageVO getUserApiDigestPageDTO(UserApiDigestPageQuery pageQuery) {
         // 按 Query 条件进行分页查询
+        // TODO: 2023/7/16 优化查询
+        LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
+        usageQueryWrapper.select(UserQuantityUsagePO::getDigestId);
+        usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, pageQuery.getAccountId());
+        List<UserQuantityUsagePO> userQuantityUsagePOList = userQuantityUsageService.list(usageQueryWrapper);
+        if (CollectionUtils.isEmpty(userQuantityUsagePOList)) {
+            return new UserApiDigestPageVO();
+        }
+        List<String> digestIdList = userQuantityUsagePOList.stream()
+                .map(UserQuantityUsagePO::getDigestId)
+                .collect(Collectors.toList());
+        // 按 Query 条件组装 QueryWrapper
         LambdaQueryWrapper<ApiDigestPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(ApiDigestPO::getId, ApiDigestPO::getApiName, ApiDigestPO::getDescription,
-                ApiDigestPO::getMethod, ApiDigestPO::getUrl, ApiDigestPO::getUsageType,
-                ApiDigestPO::getApiStatus, ApiDigestPO::getCreateTime, ApiDigestPO::getUpdateTime);
-        queryWrapper.eq(ApiDigestPO::getAccountId, pageQuery.getAccountId());
-        queryWrapper.like(hasText(pageQuery.getApiName()),
-                ApiDigestPO::getApiName, pageQuery.getApiName());
-        queryWrapper.like(hasText(pageQuery.getDescription()),
-                ApiDigestPO::getDescription, pageQuery.getDescription());
-        queryWrapper.in((CollectionUtils.isNotEmpty(pageQuery.getMethod())),
-                ApiDigestPO::getApiStatus, pageQuery.getMethod());
-        queryWrapper.like(hasText(pageQuery.getUrl()),
-                ApiDigestPO::getUrl, pageQuery.getUrl());
-        queryWrapper.in(CollectionUtils.isNotEmpty(pageQuery.getUsageType()),
-                ApiDigestPO::getApiStatus, pageQuery.getUsageType());
-        queryWrapper.in(CollectionUtils.isNotEmpty(pageQuery.getApiStatus()),
-                ApiDigestPO::getApiStatus, pageQuery.getApiStatus());
-        LocalDateTime[] createTime = pageQuery.getCreateTime();
-        queryWrapper.and(ArrayUtils.isNotEmpty(createTime),
-                wrapper -> wrapper.ge(ApiDigestPO::getCreateTime, createTime[0])
-                        .le(ApiDigestPO::getCreateTime, createTime[1]));
-        LocalDateTime[] updateTime = pageQuery.getUpdateTime();
-        queryWrapper.and(ArrayUtils.isNotEmpty(updateTime),
-                wrapper -> wrapper.ge(ApiDigestPO::getUpdateTime, updateTime[0])
-                        .le(ApiDigestPO::getUpdateTime, updateTime[1]));
+        // 用户使用接口的 ID 列表
+        // TODO: 2023/7/18 和 ApiDigestServiceImpl.getApiDigestPageVO 唯一不同的地方
+        queryWrapper.in(ApiDigestPO::getId, digestIdList);
+        // 模糊查询
+        String apiName = pageQuery.getApiName();
+        queryWrapper.like(nonNull(apiName), ApiDigestPO::getApiName, apiName);
+        String description = pageQuery.getDescription();
+        queryWrapper.like(nonNull(description), ApiDigestPO::getDescription, description);
+        Set<String> methodSet = pageQuery.getMethodSet();
+        queryWrapper.like(nonNull(methodSet), ApiDigestPO::getMethod,
+                collectionToCommaDelimitedString(methodSet));
+        String url = pageQuery.getUrl();
+        queryWrapper.like(nonNull(url), ApiDigestPO::getUrl, url);
+        // 集合条件
+        Set<String> usageTypeSet = pageQuery.getUsageTypeSet();
+        queryWrapper.like(nonNull(usageTypeSet), ApiDigestPO::getUsageType,
+                collectionToCommaDelimitedString(usageTypeSet));
+        Set<Integer> apiStatusSet = pageQuery.getApiStatusSet();
+        queryWrapper.in(nonNull(apiStatusSet), ApiDigestPO::getApiStatus, apiStatusSet);
+        // 时间范围条件
+        LocalDateTime[] createTimeRange = pageQuery.getCreateTimeRange();
+        queryWrapper.and(nonNull(createTimeRange),
+                wrapper -> wrapper.ge(ApiDigestPO::getCreateTime, createTimeRange[0])
+                        .le(ApiDigestPO::getCreateTime, createTimeRange[1]));
+        LocalDateTime[] updateTimeRange = pageQuery.getUpdateTimeRange();
+        queryWrapper.and(nonNull(updateTimeRange),
+                wrapper -> wrapper.ge(ApiDigestPO::getUpdateTime, updateTimeRange[0])
+                        .le(ApiDigestPO::getUpdateTime, updateTimeRange[1]));
+        // 用 QueryWrapper 分页查询
         Page<ApiDigestPO> page = apiDigestMapper.selectPage
                 (Page.of(pageQuery.getCurrent(), pageQuery.getSize()), queryWrapper);
         // 转换查询到的分页数据
         List<UserApiDigestVO> userApiDigestVOList
                 = page.getRecords().stream().map(apiDigestPO -> {
             UserApiDigestVO userApiDigestVO = new UserApiDigestVO();
-            BeanCopierUtils.copy(apiDigestPO, userApiDigestVO);
+            BeanUtils.copyProperties(apiDigestPO, userApiDigestVO);
             userApiDigestVO.setDigestId(apiDigestPO.getId());
+            userApiDigestVO.setUsageTypeSet
+                    (commaDelimitedListToSet(apiDigestPO.getUsageType()));
+            userApiDigestVO.setMethodSet
+                    (commaDelimitedListToSet(apiDigestPO.getMethod()));
             return userApiDigestVO;
         }).collect(Collectors.toList());
         UserApiDigestPageVO pageDTO = new UserApiDigestPageVO();
@@ -119,28 +141,32 @@ public class FacadeServiceImpl implements FacadeService {
                 ApiFormatPO::getRequestBody, ApiFormatPO::getResponseHeader, ApiFormatPO::getResponseBody);
         formatQueryWrapper.eq(ApiFormatPO::getDigestId, query.getDigestId());
         ApiFormatPO apiFormatPO = apiFormatMapper.selectOne(formatQueryWrapper);
-        BeanCopierUtils.copy(apiFormatPO, formatAndQuantityUsageVO);
+        BeanUtils.copyProperties(apiFormatPO, formatAndQuantityUsageVO);
         // 查询 API 计数用法信息
         LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
         usageQueryWrapper.select(UserQuantityUsagePO::getId, UserQuantityUsagePO::getStock, UserQuantityUsagePO::getUsageStatus);
         usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, query.getAccountId());
         usageQueryWrapper.eq(UserQuantityUsagePO::getDigestId, query.getDigestId());
         UserQuantityUsagePO userQuantityUsagePo = userQuantityUsageMapper.selectOne(usageQueryWrapper);
-        BeanCopierUtils.copy(userQuantityUsagePo, formatAndQuantityUsageVO);
+        BeanUtils.copyProperties(userQuantityUsagePo, formatAndQuantityUsageVO);
         String usageId = userQuantityUsagePo.getId();
         // 查询接口调用次数统计量和失败调用次数统计量
         String userTotalSemaphoreName = USER_QUANTITY_USAGE_TOTAL_SEMAPHORE_NAME_PREFIX + usageId;
         int total = redissonClient.getSemaphore(userTotalSemaphoreName).availablePermits();
         String userFailureSemaphoreName = USER_QUANTITY_USAGE_FAILURE_SEMAPHORE_NAME_PREFIX + usageId;
         int failure = redissonClient.getSemaphore(userFailureSemaphoreName).availablePermits();
+        String userStockSemaphoreName = USER_QUANTITY_USAGE_STOCK_SEMAPHORE_NAME_PREFIX + usageId;
+        int stock = redissonClient.getSemaphore(userStockSemaphoreName).availablePermits();
         formatAndQuantityUsageVO.setTotal((long) total);
         formatAndQuantityUsageVO.setFailure((long) failure);
+        formatAndQuantityUsageVO.setStock((long) stock);
         // 查询后更新数据库（临时写法）
         // TODO: 2023/7/16 临时写法
         CompletableFuture.runAsync(() -> {
             LambdaUpdateWrapper<UserQuantityUsagePO> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.set(UserQuantityUsagePO::getTotal, total);
             updateWrapper.set(UserQuantityUsagePO::getFailure, failure);
+            updateWrapper.set(UserQuantityUsagePO::getStock, stock);
             updateWrapper.eq(UserQuantityUsagePO::getId, usageId);
             userQuantityUsageService.update(updateWrapper);
         }).exceptionally(throwable -> {
@@ -227,7 +253,7 @@ public class FacadeServiceImpl implements FacadeService {
         ApiDigestPO apiDigestPO = apiDigestMapper.selectOne(digestQueryWrapper);
         if (apiDigestPO == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Failed to find API, apiInfoQuery: " + apiInfoQuery);
+                log.debug("Failed to find ApiDigestPO, apiInfoQuery: " + apiInfoQuery);
             }
             return new QuantityUsageApiInfoDTO();
         }
@@ -235,8 +261,15 @@ public class FacadeServiceImpl implements FacadeService {
         LambdaQueryWrapper<UserQuantityUsagePO> usageQueryWrapper = new LambdaQueryWrapper<>();
         usageQueryWrapper.select(UserQuantityUsagePO::getId);
         usageQueryWrapper.eq(UserQuantityUsagePO::getDigestId, apiDigestPO.getId());
-        usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, apiDigestPO.getAccountId());
+        usageQueryWrapper.eq(UserQuantityUsagePO::getAccountId, apiInfoQuery.getAccountId());
         UserQuantityUsagePO userQuantityUsagePO = userQuantityUsageMapper.selectOne(usageQueryWrapper);
+        if (userQuantityUsagePO == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to find UserQuantityUsagePO, digestId: {}, accountId: {}",
+                        apiDigestPO.getId(), apiInfoQuery.getAccountId());
+            }
+            return new QuantityUsageApiInfoDTO();
+        }
         QuantityUsageApiInfoDTO quantityUsageApiInfoDTO = new QuantityUsageApiInfoDTO();
         quantityUsageApiInfoDTO.setDigestId(apiDigestPO.getId());
         quantityUsageApiInfoDTO.setUsageId(userQuantityUsagePO.getId());

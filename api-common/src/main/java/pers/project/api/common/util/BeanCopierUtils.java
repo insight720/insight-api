@@ -7,13 +7,15 @@ import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.cglib.core.Converter;
 import pers.project.api.common.bean.IgnoreNullConverter;
 
-
 /**
  * BeanCopier 工具类
+ * <p>
  *
  * @author Luo Fei
  * @date 2023/03/15
+ * @deprecated JDK 8 以上会报模块化错误。
  */
+@Deprecated
 public abstract class BeanCopierUtils {
 
     private static final LoadingCache<BeanCopierId, BeanCopier>

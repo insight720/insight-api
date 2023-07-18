@@ -58,9 +58,9 @@ public class QuantityUsageOrderScheduledCloseListener implements RocketMQListene
         String orderScheduledCloseMessageKeys = orderScheduledCloseMessageExt.getKeys();
         Assert.notNull(orderScheduledCloseMessageKeys, "The orderScheduledCloseMessageKeys must be not null");
         String orderScheduledCloseMessageKeysKey = QUANTITY_USAGE_ORDER_SCHEDULED_CLOSE_MESSAGE_KEYS_KEY_PREFIX + orderSn;
-        boolean isDuplicate = RedisUtils.checkIdempotencyToken
+        boolean isIdempotent = RedisUtils.checkIdempotencyToken
                 (redisTemplate, orderScheduledCloseMessageKeysKey, orderScheduledCloseMessageKeys);
-        if (isDuplicate) {
+        if (!isIdempotent) {
             log.info("Duplicate order scheduled close message, orderSn: {}", orderSn);
             return;
         }

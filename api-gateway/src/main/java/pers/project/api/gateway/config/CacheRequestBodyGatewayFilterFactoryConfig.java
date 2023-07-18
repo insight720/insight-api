@@ -15,10 +15,18 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Field;
 
 /**
+ * 请求体缓存设置
+ * <p>
+ * 这个类先前被用于解决 Gateway 框架的请求体缓存问题，
+ * 更换请求体缓存方式后没有删除，暂未测试删除后是否有影响。
+ *
  * @author Luo Fei
- * @date 2023/03/29
+ * @date 2023/07/17
+ * @deprecated 可能会在之后测试并删除。
  */
+@Deprecated(forRemoval = true)
 @Configuration
+@SuppressWarnings("all") // Suppress all warnings
 @AutoConfigureAfter({GatewayAutoConfiguration.class})
 public class CacheRequestBodyGatewayFilterFactoryConfig {
 
